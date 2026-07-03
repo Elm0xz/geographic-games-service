@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 
 public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
 
+    //TODO cleanup
+
     /**
      * should return list of weekly positions ordered in descending order starting from the winner
      * the winner is the person with most daily wins throughout the week
