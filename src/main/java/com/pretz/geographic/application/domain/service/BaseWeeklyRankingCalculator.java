@@ -34,7 +34,7 @@ public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
         var wins = dailyRankings.stream()
                 .filter(dailyRanking -> week.equals(dailyRanking.getWeek()))
                 .filter(dailyRanking -> game.equals(dailyRanking.game()))
-                .map(DailyRanking::getWinner)
+                .flatMap(it -> it.getWinner().stream())
                 .reduce(new HashMap<>(), this::addWinForPlayer,
                         (a, b) ->
                                 Stream.concat(a.entrySet().stream(), b.entrySet().stream())
