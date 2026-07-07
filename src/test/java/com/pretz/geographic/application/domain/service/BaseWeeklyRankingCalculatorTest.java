@@ -205,31 +205,7 @@ class BaseWeeklyRankingCalculatorTest {
                         new DailyRanking(game2, monday, List.of(
                                 new DailyEntry(game2, monday, player3, 960),
                                 new DailyEntry(game2, monday, player1, 900),
-                                new DailyEntry(game2, monday, player2, 820))),
-                        new DailyRanking(game2, monday.plusDays(1), List.of(
-                                new DailyEntry(game2, monday.plusDays(1), player1, 930),
-                                new DailyEntry(game2, monday.plusDays(1), player3, 910),
-                                new DailyEntry(game2, monday.plusDays(1), player2, 870))),
-                        new DailyRanking(game2, monday.plusDays(2), List.of(
-                                new DailyEntry(game2, monday.plusDays(2), player2, 940),
-                                new DailyEntry(game2, monday.plusDays(2), player3, 900),
-                                new DailyEntry(game2, monday.plusDays(2), player1, 880))),
-                        new DailyRanking(game2, monday.plusDays(3), List.of(
-                                new DailyEntry(game2, monday.plusDays(3), player1, 970),
-                                new DailyEntry(game2, monday.plusDays(3), player3, 920),
-                                new DailyEntry(game2, monday.plusDays(3), player2, 860))),
-                        new DailyRanking(game2, monday.plusDays(4), List.of(
-                                new DailyEntry(game2, monday.plusDays(4), player2, 950),
-                                new DailyEntry(game2, monday.plusDays(4), player3, 930),
-                                new DailyEntry(game2, monday.plusDays(4), player1, 910))),
-                        new DailyRanking(game2, monday.plusDays(5), List.of(
-                                new DailyEntry(game2, monday.plusDays(5), player3, 970),
-                                new DailyEntry(game2, monday.plusDays(5), player1, 890),
-                                new DailyEntry(game2, monday.plusDays(5), player2, 880))),
-                        new DailyRanking(game2, monday.plusDays(6), List.of(
-                                new DailyEntry(game2, monday.plusDays(6), player1, 940),
-                                new DailyEntry(game2, monday.plusDays(6), player2, 920),
-                                new DailyEntry(game2, monday.plusDays(6), player3, 900)))),
+                                new DailyEntry(game2, monday, player2, 820)))),
                 game1, week);
 
         Assertions.assertThat(numberOfEntriesCheckedForWinner(result)).isEqualTo(7);
