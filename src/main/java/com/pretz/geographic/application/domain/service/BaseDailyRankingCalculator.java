@@ -10,7 +10,7 @@ import java.util.List;
 public class BaseDailyRankingCalculator implements DailyRankingCalculator {
 
     @Override
-    public DailyRanking calculateDailyRanking(List<DailyEntry> entries, LocalDate requestedDate, Game game) {
+    public DailyRanking calculateDailyRanking(List<DailyEntry> entries, Game game, LocalDate requestedDate) {
 
         return new DailyRanking(game, requestedDate, entries.stream()
                 .filter(ent -> requestedDate.equals(ent.date()))

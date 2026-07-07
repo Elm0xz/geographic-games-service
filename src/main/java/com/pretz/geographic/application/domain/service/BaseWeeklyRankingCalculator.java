@@ -3,71 +3,61 @@ package com.pretz.geographic.application.domain.service;
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyRanking;
 import com.pretz.geographic.application.domain.model.Game;
-import com.pretz.geographic.application.domain.model.Player;
+import com.pretz.geographic.application.domain.model.Week;
 import com.pretz.geographic.application.domain.model.WeeklyPosition;
 import com.pretz.geographic.application.domain.model.WeeklyRanking;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
 
-    //TODO cleanup
+    private static final int BEST_DAYS_TO_COUNT = 5;
 
     /**
-     * should return list of weekly positions ordered in descending order starting from the winner
-     * the winner is the person with most daily wins throughout the week
-     * tiebreaker is the sum(mean?) of points won during the week, skipping two weakest days
-     *
-     * @param dailyRankings
-     * @param week
-     * @param game
-     * @return
+     * Returns weekly positions ordered from winner to lowest-ranked player.
+     * <p>
+     * The winner is the player with the most daily wins during the week.
+     * The tie-breaker is the sum of points from the week, excluding the two weakest days.
      */
     @Override
-    public WeeklyRanking calculateWeeklyRanking(List<DailyRanking> dailyRankings, Integer week, Game game) {
+    public WeeklyRanking calculateWeeklyRanking(List<DailyRanking> dailyRankings, Game game, Week week) {
 
-        var wins = dailyRankings.stream()
-                .filter(dailyRanking -> week.equals(dailyRanking.getWeek()))
-                .filter(dailyRanking -> game.equals(dailyRanking.game()))
-                .flatMap(it -> it.getWinner().stream())
-                .reduce(new HashMap<>(), this::addWinForPlayer,
-                        (a, b) ->
-                                Stream.concat(a.entrySet().stream(), b.entrySet().stream())
-                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-        var points = dailyRankings.stream()
-                .filter(dailyRanking -> week.equals(dailyRanking.getWeek()))
-                .filter(dailyRanking -> game.equals(dailyRanking.game()))
-                .flatMap(it -> it.entries().stream())
-                .collect(Collectors.groupingBy(DailyEntry::player));
-
-        var pointsSum = points.entrySet().stream()
-                .map(it -> new WeeklyPosition(it.getKey(), wins.get(it.getKey()), calculatePoints(it.getValue())))
-                .sorted(Comparator.comparingInt(WeeklyPosition::wins).thenComparing(WeeklyPosition::points).reversed())
+        var filteredDailyRankings = dailyRankings.stream()
+                .filter(dRank -> week.equals(dRank.getWeek()))
+                .filter(dRank -> game.equals(dRank.game()))
                 .toList();
 
-        return new WeeklyRanking(game, pointsSum);
+        var winsByPlayer = filteredDailyRankings.stream()
+                .flatMap(dRank -> dRank.getWinner().stream())
+                .collect(Collectors.groupingBy(
+                        player -> player,
+                        Collectors.summingInt(_ -> 1)
+                ));
 
-    }
+        var entriesByPlayer = filteredDailyRankings.stream()
+                .flatMap(dRank -> dRank.entries().stream())
+                .collect(Collectors.groupingBy(DailyEntry::player));
 
-    private Map<Player, Integer> addWinForPlayer(Map<Player, Integer> weeklyWins, Player dailyWinner) {
+        var weeklyPositions = entriesByPlayer.entrySet().stream()
+                .map(entry -> new WeeklyPosition(game, week,
+                        entry.getKey(),
+                        winsByPlayer.getOrDefault(entry.getKey(), 0),
+                        calculatePoints(entry.getValue())))
+                .toList();
 
-        if (!weeklyWins.containsKey(dailyWinner)) {
-            weeklyWins.put(dailyWinner, 1);
-        } else weeklyWins.compute(dailyWinner, (_, wins) -> wins + 1);
-
-        return weeklyWins;
+        return new WeeklyRanking(game, week, weeklyPositions);
     }
 
     private Integer calculatePoints(List<DailyEntry> playerEntries) {
 
         return playerEntries.stream()
-                .sorted(Comparator.comparingInt(DailyEntry::points)).skip(2)
-                .mapToInt(DailyEntry::points).sum();
+                .mapToInt(DailyEntry::points)
+                .boxed()
+                .sorted(Comparator.reverseOrder())
+                .limit(BEST_DAYS_TO_COUNT)
+                .mapToInt(Integer::intValue)
+                .sum();
     }
 }
