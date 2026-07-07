@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface DailyRankingCalculator {
 
-    DailyRanking calculateDailyRanking(List<DailyEntry> entries, LocalDate requestedDate, Game game);
+    DailyRanking calculateDailyRanking(List<DailyEntry> entries, Game game, LocalDate requestedDate);
 }

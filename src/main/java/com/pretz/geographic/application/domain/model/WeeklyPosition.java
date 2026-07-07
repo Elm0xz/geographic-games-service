@@ -1,4 +1,4 @@
 package com.pretz.geographic.application.domain.model;
 
-public record WeeklyPosition(Player player, Integer wins, Integer points) {
+public record WeeklyPosition(Game game, Week week, Player player, Integer wins, Integer points) {
 }

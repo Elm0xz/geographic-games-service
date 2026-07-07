@@ -1,4 +1,4 @@
 package com.pretz.geographic.application.domain.model;
 
-public record DailyWinner(Game game, Player winner) {
+public record Week(int year, int number) {
 }

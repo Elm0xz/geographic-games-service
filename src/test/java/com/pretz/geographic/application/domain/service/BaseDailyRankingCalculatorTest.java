@@ -33,7 +33,7 @@ class BaseDailyRankingCalculatorTest {
                         new DailyEntry(game2, entryDate, new Player("Player1"), 430),
                         new DailyEntry(game2, entryDate, new Player("Player2"), 525),
                         new DailyEntry(game2, entryDate, new Player("Player3"), 990)),
-                requestedDate, game1);
+                game1, requestedDate);
 
         //then
         Assertions.assertThat(result).isEqualTo(
@@ -71,7 +71,7 @@ class BaseDailyRankingCalculatorTest {
                         new DailyEntry(otherGame, entryDateIncorrect, new Player("Player1"), 770),
                         new DailyEntry(otherGame, entryDateIncorrect, new Player("Player2"), 725),
                         new DailyEntry(otherGame, entryDateIncorrect, new Player("Player3"), 765)),
-                requestedDate, game);
+                game, requestedDate);
 
         Assertions.assertThat(result).isEqualTo(
                 new DailyRanking(game, requestedDate, List.of(
