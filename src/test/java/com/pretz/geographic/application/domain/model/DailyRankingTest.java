@@ -2,9 +2,13 @@ package com.pretz.geographic.application.domain.model;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 class DailyRankingTest {
 
@@ -121,5 +125,27 @@ class DailyRankingTest {
         Assertions.assertThatThrownBy(() -> new DailyRanking(game, date, List.of(player1Entry, player2Entry)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(RANKING_ENTRY_VALIDATION_ERROR);
+    }
+
+    @ParameterizedTest
+    @MethodSource("dateAndWeek")
+    public void shouldReturnIsoWeekForDateAtCalendarYearBoundary(LocalDate inputDate, Week expectedWeek) {
+
+        //given
+        Game game = new Game("game1", ScoringSystem.STANDARD);
+
+        var dailyRanking = new DailyRanking(game, inputDate, List.of());
+
+        //when
+        Week result = dailyRanking.getWeek();
+
+        //then
+        Assertions.assertThat(result).isEqualTo(expectedWeek);
+    }
+
+    public static Stream<Arguments> dateAndWeek() {
+        return Stream.of(Arguments.of(LocalDate.of(2029, 12, 31), new Week(2030, 1)),
+                Arguments.of(LocalDate.of(2027, 1, 1), new Week(2026, 53))
+        );
     }
 }
