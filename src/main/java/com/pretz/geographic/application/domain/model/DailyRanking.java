@@ -25,7 +25,8 @@ public record DailyRanking(Game game, LocalDate date, List<DailyEntry> entries) 
     }
 
     public Week getWeek() {
-        return new Week(date.getYear(), date.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        return new Week(date.get(WeekFields.ISO.weekBasedYear()),
+                date.get(WeekFields.ISO.weekOfWeekBasedYear()));
     }
 
     public List<Player> getWinner() {
