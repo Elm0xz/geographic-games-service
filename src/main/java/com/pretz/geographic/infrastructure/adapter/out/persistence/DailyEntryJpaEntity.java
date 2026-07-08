@@ -1,4 +1,4 @@
-package com.pretz.geographic.adapter.out.persistence;
+package com.pretz.geographic.infrastructure.adapter.out.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
