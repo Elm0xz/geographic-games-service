@@ -10,9 +10,9 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.LocalDate;
 
@@ -26,7 +26,7 @@ class DailyEntryPersistenceAdapterTest {
 
     @Container
     @ServiceConnection
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17");
+    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
 
     @Autowired
     private DailyEntryPersistenceAdapter adapter;
@@ -37,12 +37,12 @@ class DailyEntryPersistenceAdapterTest {
     @Autowired
     private PlayerJpaRepository playerRepository;
 
-    private final Game game = new Game("Worldle", ScoringSystem.STANDARD);
+    private final Game game = new Game("Mapster", ScoringSystem.STANDARD);
     private final Player player = new Player("Player1");
     private final LocalDate date = LocalDate.of(2026, 6, 30);
 
     @Test
-    void shouldSaveAndLoadEntryWithinDateRange() {
+    void shouldSaveAndLoadEntryOnRequestedDate() {
 
         //given
         var entry = new DailyEntry(game, date, player, 900);
