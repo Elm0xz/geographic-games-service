@@ -31,8 +31,8 @@ class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveDailyEnt
 
     @Override
     @Transactional(readOnly = true)
-    public List<DailyEntry> loadEntries(Game game, LocalDate from, LocalDate to) {
-        return dailyEntryRepository.findByGame_NameAndEntryDateBetween(game.name(), from, to).stream()
+    public List<DailyEntry> loadEntries(Game game, LocalDate date) {
+        return dailyEntryRepository.findByGame_NameAndEntryDate(game.name(), date).stream()
                 .map(mapper::toDomain)
                 .toList();
     }
@@ -52,7 +52,7 @@ class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveDailyEnt
     private GameJpaEntity findOrCreateGame(Game game) {
         return gameRepository.findByName(game.name())
                 .orElseGet(() -> gameRepository.save(
-                        new GameJpaEntity(game.name(), game.scoringSystem().name())));
+                        new GameJpaEntity(game.name(), game.scoringSystem())));
     }
 
     private PlayerJpaEntity findOrCreatePlayer(Player player) {

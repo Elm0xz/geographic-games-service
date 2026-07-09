@@ -7,5 +7,5 @@ import java.util.List;
 
 interface DailyEntryJpaRepository extends JpaRepository<DailyEntryJpaEntity, Long> {
 
-    List<DailyEntryJpaEntity> findByGame_NameAndEntryDateBetween(String gameName, LocalDate from, LocalDate to);
+    List<DailyEntryJpaEntity> findByGame_NameAndEntryDate(String gameName, LocalDate date);
 }

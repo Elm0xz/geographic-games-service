@@ -49,7 +49,7 @@ class DailyEntryPersistenceAdapterTest {
 
         //when
         var saved = adapter.save(entry);
-        var loaded = adapter.loadEntries(game, date, date);
+        var loaded = adapter.loadEntries(game, date);
 
         //then
         assertThat(saved).isEqualTo(entry);
@@ -63,7 +63,7 @@ class DailyEntryPersistenceAdapterTest {
         adapter.save(new DailyEntry(game, date, player, 900));
 
         //when
-        var loaded = adapter.loadEntries(game, date.plusDays(1), date.plusDays(7));
+        var loaded = adapter.loadEntries(game, date.plusDays(1));
 
         //then
         assertThat(loaded).isEmpty();

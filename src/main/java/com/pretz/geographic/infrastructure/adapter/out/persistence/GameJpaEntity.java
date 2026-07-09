@@ -1,7 +1,10 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence;
 
+import com.pretz.geographic.application.domain.model.ScoringSystem;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,13 +21,14 @@ class GameJpaEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "scoring_system", nullable = false)
-    private String scoringSystem;
+    private ScoringSystem scoringSystem;
 
     protected GameJpaEntity() {
     }
 
-    GameJpaEntity(String name, String scoringSystem) {
+    GameJpaEntity(String name, ScoringSystem scoringSystem) {
         this.name = name;
         this.scoringSystem = scoringSystem;
     }
@@ -37,7 +41,7 @@ class GameJpaEntity {
         return name;
     }
 
-    String getScoringSystem() {
+    ScoringSystem getScoringSystem() {
         return scoringSystem;
     }
 }

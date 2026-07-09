@@ -13,11 +13,15 @@ class DailyEntryPersistenceMapper {
         return new DailyEntry(
                 toDomain(entity.getGame()),
                 entity.getEntryDate(),
-                new Player(entity.getPlayer().getName()),
+                toDomain(entity.getPlayer()),
                 entity.getPoints());
     }
 
-    Game toDomain(GameJpaEntity entity) {
-        return new Game(entity.getName(), ScoringSystem.valueOf(entity.getScoringSystem()));
+    private Player toDomain(PlayerJpaEntity entity) {
+        return new Player(entity.getName());
+    }
+
+    private Game toDomain(GameJpaEntity entity) {
+        return new Game(entity.getName(), entity.getScoringSystem());
     }
 }
