@@ -1,6 +1,7 @@
 package com.pretz.geographic.infrastructure.adapter.in.api;
 
-import com.pretz.geographic.infrastructure.adapter.in.api.dto.DailyEntryDto;
+import com.pretz.geographic.infrastructure.adapter.in.api.dto.CreateDailyEntryRequestDto;
+import com.pretz.geographic.infrastructure.adapter.in.api.dto.DailyEntryResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,8 +13,8 @@ import java.util.List;
 public interface DailyEntriesApi {
 
     @PostMapping
-    ResponseEntity<DailyEntryDto> createDailyEntry(@RequestBody DailyEntryDto dailyEntryDto);
+    ResponseEntity<DailyEntryResponseDto> createDailyEntry(@RequestBody CreateDailyEntryRequestDto createDailyEntryRequestDto);
 
     @PostMapping("/batch")
-    ResponseEntity<List<DailyEntryDto>> createDailyEntries(@RequestBody List<DailyEntryDto> dailyEntryDtos);
+    ResponseEntity<List<DailyEntryResponseDto>> createDailyEntries(@RequestBody List<CreateDailyEntryRequestDto> createDailyEntryRequestDtos);
 }
