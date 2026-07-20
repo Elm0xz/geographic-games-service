@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface AddDailyEntriesUseCase {
 
-    DailyEntry addDailyEntry(DailyEntry dailyEntry);
+    DailyEntry addDailyEntry(AddDailyEntryCommand addDailyEntryCommand);
 
-    List<DailyEntry> addDailyEntries(List<DailyEntry> dailyEntries);
+    List<DailyEntry> addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands);
 }

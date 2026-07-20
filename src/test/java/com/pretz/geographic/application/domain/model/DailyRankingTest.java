@@ -18,12 +18,12 @@ class DailyRankingTest {
     public void shouldReturnWinnerWhenOneExists() {
 
         //given
-        Game game = new Game("game1", ScoringSystem.STANDARD);
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(game, date, new Player("Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(game, date, new Player("Player2"), 970);
-        DailyEntry player3Entry = new DailyEntry(game, date, new Player("Player3"), 900);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Player2"), 970);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Player3"), 900);
 
         var dailyRanking = new DailyRanking(game, date, List.of(player1Entry, player2Entry, player3Entry));
 
@@ -40,15 +40,15 @@ class DailyRankingTest {
     public void shouldReturnAllPlayedTiedForFirstAsWinners() {
 
         //given
-        Game game = new Game("game1", ScoringSystem.STANDARD);
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(game, date, new Player("Mark"), 990);
-        DailyEntry player2Entry = new DailyEntry(game, date, new Player("Anne"), 990);
-        DailyEntry player5Entry = new DailyEntry(game, date, new Player("Andrew"), 990);
-        DailyEntry player4Entry = new DailyEntry(game, date, new Player("Zheng"), 900);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Mark"), 990);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Anne"), 990);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Andrew"), 990);
+        DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Zheng"), 900);
 
-        var dailyRanking = new DailyRanking(game, date, List.of(player1Entry, player2Entry, player4Entry, player5Entry));
+        var dailyRanking = new DailyRanking(game, date, List.of(player1Entry, player2Entry, player4Entry, player3Entry));
 
         //when
         List<Player> result = dailyRanking.getWinner();
@@ -56,14 +56,14 @@ class DailyRankingTest {
         //then
         Assertions.assertThat(result).isNotEmpty();
         Assertions.assertThat(result).hasSize(3);
-        Assertions.assertThat(result).isEqualTo(List.of(player1Entry.player(), player2Entry.player(), player5Entry.player()));
+        Assertions.assertThat(result).isEqualTo(List.of(player1Entry.player(), player2Entry.player(), player3Entry.player()));
     }
 
     @Test
     public void shouldReturnEmptyListOfWinnersIfNoEntries() {
 
         //given
-        Game game = new Game("game1", ScoringSystem.STANDARD);
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
         var dailyRanking = new DailyRanking(game, date, List.of());
@@ -79,12 +79,12 @@ class DailyRankingTest {
     public void shouldThrowExceptionWhenEntryHasDifferentGameThanRanking() {
 
         //given
-        Game game = new Game("game1", ScoringSystem.STANDARD);
-        Game otherGame = new Game("game2", ScoringSystem.STANDARD);
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
+        Game otherGame = new Game(new GameId(2L), "game2", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(game, date, new Player("Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(otherGame, date, new Player("Player2"), 970);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, date, new Player(new PlayerId(2L), "Player2"), 970);
 
         //when //then
         Assertions.assertThatThrownBy(() -> new DailyRanking(game, date, List.of(player1Entry, player2Entry)))
@@ -96,12 +96,12 @@ class DailyRankingTest {
     public void shouldThrowExceptionWhenEntryHasDifferentDateThanRanking() {
 
         //given
-        Game game = new Game("game1", ScoringSystem.STANDARD);
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
         LocalDate otherDate = date.minusDays(1);
 
-        DailyEntry player1Entry = new DailyEntry(game, date, new Player("Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(game, otherDate, new Player("Player2"), 970);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, otherDate, new Player(new PlayerId(2L), "Player2"), 970);
 
         //when //then
         Assertions.assertThatThrownBy(() -> new DailyRanking(game, date, List.of(player1Entry, player2Entry)))
@@ -113,13 +113,13 @@ class DailyRankingTest {
     public void shouldThrowExceptionWhenEntryHasDifferentGameAndDateThanRanking() {
 
         //given
-        Game game = new Game("game1", ScoringSystem.STANDARD);
-        Game otherGame = new Game("game2", ScoringSystem.STANDARD);
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
+        Game otherGame = new Game(new GameId(2L), "game2", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
         LocalDate otherDate = date.minusDays(1);
 
-        DailyEntry player1Entry = new DailyEntry(game, date, new Player("Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(otherGame, otherDate, new Player("Player2"), 970);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, otherDate, new Player(new PlayerId(2L), "Player2"), 970);
 
         //when //then
         Assertions.assertThatThrownBy(() -> new DailyRanking(game, date, List.of(player1Entry, player2Entry)))
@@ -132,7 +132,7 @@ class DailyRankingTest {
     public void shouldReturnIsoWeekForDateAtCalendarYearBoundary(LocalDate inputDate, Week expectedWeek) {
 
         //given
-        Game game = new Game("game1", ScoringSystem.STANDARD);
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
 
         var dailyRanking = new DailyRanking(game, inputDate, List.of());
 

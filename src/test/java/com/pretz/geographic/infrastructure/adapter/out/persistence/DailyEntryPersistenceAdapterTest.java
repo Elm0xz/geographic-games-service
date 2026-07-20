@@ -1,8 +1,11 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
+import com.pretz.geographic.application.domain.model.DailyEntryId;
 import com.pretz.geographic.application.domain.model.Game;
+import com.pretz.geographic.application.domain.model.GameId;
 import com.pretz.geographic.application.domain.model.Player;
+import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +40,15 @@ class DailyEntryPersistenceAdapterTest {
     @Autowired
     private PlayerJpaRepository playerRepository;
 
-    private final Game game = new Game("Mapster", ScoringSystem.STANDARD);
-    private final Player player = new Player("Player1");
+    private final Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+    private final Player player = new Player(new PlayerId(1L), "Player1");
     private final LocalDate date = LocalDate.of(2026, 6, 30);
 
     @Test
     void shouldSaveAndLoadEntryOnRequestedDate() {
 
         //given
-        var entry = new DailyEntry(game, date, player, 900);
+        var entry = new DailyEntry(new DailyEntryId(1L), game, date, player, 900);
 
         //when
         var saved = adapter.save(entry);
@@ -60,7 +63,7 @@ class DailyEntryPersistenceAdapterTest {
     void shouldNotLoadEntriesOutsideDateRange() {
 
         //given
-        adapter.save(new DailyEntry(game, date, player, 900));
+        adapter.save(new DailyEntry(new DailyEntryId(1L), game, date, player, 900));
 
         //when
         var loaded = adapter.loadEntries(game, date.plusDays(1));
@@ -73,8 +76,8 @@ class DailyEntryPersistenceAdapterTest {
     void shouldReuseGameAndPlayerRowsAcrossSaves() {
 
         //when
-        adapter.save(new DailyEntry(game, date, player, 900));
-        adapter.save(new DailyEntry(game, date.plusDays(1), player, 820));
+        adapter.save(new DailyEntry(new DailyEntryId(1L), game, date, player, 900));
+        adapter.save(new DailyEntry(new DailyEntryId(2L), game, date.plusDays(1), player, 820));
 
         //then
         assertThat(gameRepository.count()).isEqualTo(1);
