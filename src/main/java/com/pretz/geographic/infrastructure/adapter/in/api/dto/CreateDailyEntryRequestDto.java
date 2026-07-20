@@ -2,10 +2,18 @@ package com.pretz.geographic.infrastructure.adapter.in.api.dto;
 
 import com.pretz.geographic.application.port.in.AddDailyEntryCommand;
 
-//TODO implement
-public record CreateDailyEntryRequestDto() {
+import java.time.LocalDate;
 
-    public AddDailyEntryCommand toAddDailyEntryCommand() {
-        return null;
+public record CreateDailyEntryRequestDto(GameRefDto game, PlayerRefDto player, LocalDate date, int points) {
+
+    public AddDailyEntryCommand toCommand() {
+        return new AddDailyEntryCommand(
+                game.id(),
+                game.name(),
+                player.id(),
+                player.name(),
+                date,
+                points
+        );
     }
 }

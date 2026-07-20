@@ -1,5 +1,8 @@
 package com.pretz.geographic.application.port.in;
 
-//TODO implement
-public record AddDailyEntryCommand() {
+import java.time.LocalDate;
+
+public record AddDailyEntryCommand(Long gameId, String gameName,
+                                   Long playerId, String playerName,
+                                   LocalDate date, int points) {
 }
