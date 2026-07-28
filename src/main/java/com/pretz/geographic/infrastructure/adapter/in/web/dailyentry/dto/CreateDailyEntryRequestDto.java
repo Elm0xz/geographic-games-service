@@ -16,10 +16,8 @@ public record CreateDailyEntryRequestDto(
 
     public AddDailyEntryCommand toCommand() {
         return new AddDailyEntryCommand(
-                game.id(),
-                game.name(),
-                player.id(),
-                player.name(),
+                new AddDailyEntryCommand.GameRef(game.id(), game.name()),
+                new AddDailyEntryCommand.PlayerRef(player.id(), player.name()),
                 date,
                 points
         );
