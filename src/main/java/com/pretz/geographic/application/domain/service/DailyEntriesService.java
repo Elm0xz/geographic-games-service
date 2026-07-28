@@ -1,35 +1,51 @@
 package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
+import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.port.in.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.AddDailyEntryCommand;
+import com.pretz.geographic.application.port.out.LoadGamePort;
+import com.pretz.geographic.application.port.out.LoadPlayerPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 
 import java.util.List;
 
+//TODO [GEOG-8] refactor/cleanup + tests
+
 public class DailyEntriesService implements AddDailyEntriesUseCase {
 
     private final SaveDailyEntryPort saveDailyEntryPort;
+    private final LoadGamePort loadGamePort;
+    private final LoadPlayerPort loadPlayerPort;
+    private final GameNameValidator gameNameValidator;
+    private final PlayerNameValidator playerNameValidator;
 
-    public DailyEntriesService(SaveDailyEntryPort saveDailyEntryPort) {
+    public DailyEntriesService(SaveDailyEntryPort saveDailyEntryPort,
+                               LoadGamePort loadGamePort,
+                               LoadPlayerPort loadPlayerPort,
+                               GameNameValidator gameNameValidator,
+                               PlayerNameValidator playerNameValidator) {
         this.saveDailyEntryPort = saveDailyEntryPort;
+        this.loadGamePort = loadGamePort;
+        this.loadPlayerPort = loadPlayerPort;
+        this.gameNameValidator = gameNameValidator;
+        this.playerNameValidator = playerNameValidator;
     }
 
     @Override
-    public DailyEntry addDailyEntry(AddDailyEntryCommand addDailyEntryCommand) {
+    public DailyEntry addDailyEntry(AddDailyEntryCommand command) {
 
+        var game = loadGamePort.loadGame(command.gameId());
+        gameNameValidator.validate(command.gameName(), game.name());
+        Player player;
+        if (command.playerId() != null && command.playerId() > 0) {
+            player = loadPlayerPort.loadPlayer(command.playerId());
+            playerNameValidator.validate(command.playerName(), player.name());
+        } else {
+            player = loadPlayerPort.loadPlayer(command.playerName());
+        }
 
-        /*
-        TODO 1. load game by id
-        TODO 2. validate if input game name is consistent with game name in database
-        TODO 3. load player by id if present; if not, load by name;
-        TODO 4. if loaded by id, validate if input player name is consistent with database player name
-        TODO 5. create DailyEntry domain object
-        TODO 6. save DailyEntry in database
-        TODO 7. return DailyEntry to controller
-         */
-
-        return null;
+        return saveDailyEntryPort.save(new DailyEntry(null, game, command.date(), player, command.points()));
     }
 
     @Override
