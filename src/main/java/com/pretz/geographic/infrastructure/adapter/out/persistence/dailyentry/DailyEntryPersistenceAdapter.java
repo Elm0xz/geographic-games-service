@@ -2,9 +2,10 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.Game;
-import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
+import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaRepository;
+import com.pretz.geographic.infrastructure.adapter.out.persistence.player.PlayerJpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveDailyEntryPort {
+public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveDailyEntryPort {
 
     private final DailyEntryJpaRepository dailyEntryRepository;
     private final GameJpaRepository gameRepository;
@@ -40,23 +41,13 @@ class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveDailyEnt
     @Override
     @Transactional
     public DailyEntry save(DailyEntry entry) {
-        var game = findOrCreateGame(entry.game());
-        var player = findOrCreatePlayer(entry.player());
+
+        var game = gameRepository.getReferenceById(entry.game().gameId().id());
+        var player = playerRepository.getReferenceById(entry.player().playerId().id());
 
         var saved = dailyEntryRepository.save(
                 new DailyEntryJpaEntity(game, player, entry.date(), entry.points()));
 
         return mapper.toDomain(saved);
-    }
-
-    private GameJpaEntity findOrCreateGame(Game game) {
-        return gameRepository.findByName(game.name())
-                .orElseGet(() -> gameRepository.save(
-                        new GameJpaEntity(game.name(), game.scoringSystem())));
-    }
-
-    private PlayerJpaEntity findOrCreatePlayer(Player player) {
-        return playerRepository.findByName(player.name())
-                .orElseGet(() -> playerRepository.save(new PlayerJpaEntity(player.name())));
     }
 }

@@ -17,6 +17,8 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
 
     @Override
     public DailyEntry addDailyEntry(AddDailyEntryCommand addDailyEntryCommand) {
+
+
         /*
         TODO 1. load game by id
         TODO 2. validate if input game name is consistent with game name in database

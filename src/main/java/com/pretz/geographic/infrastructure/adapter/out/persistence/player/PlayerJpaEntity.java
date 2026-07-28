@@ -1,4 +1,4 @@
-package com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry;
+package com.pretz.geographic.infrastructure.adapter.out.persistence.player;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "player")
-class PlayerJpaEntity {
+public class PlayerJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,15 +21,15 @@ class PlayerJpaEntity {
     protected PlayerJpaEntity() {
     }
 
-    PlayerJpaEntity(String name) {
+    public PlayerJpaEntity(String name) {
         this.name = name;
     }
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 }

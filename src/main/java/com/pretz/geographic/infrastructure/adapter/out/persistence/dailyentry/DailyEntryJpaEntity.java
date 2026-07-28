@@ -1,5 +1,7 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry;
 
+import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaEntity;
+import com.pretz.geographic.infrastructure.adapter.out.persistence.player.PlayerJpaEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +18,7 @@ import java.time.LocalDate;
 @Table(name = "daily_entry", uniqueConstraints = @UniqueConstraint(
         name = "uq_daily_entry_game_player_date",
         columnNames = {"game_id", "player_id", "entry_date"}))
-class DailyEntryJpaEntity {
+public class DailyEntryJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,30 +41,30 @@ class DailyEntryJpaEntity {
     protected DailyEntryJpaEntity() {
     }
 
-    DailyEntryJpaEntity(GameJpaEntity game, PlayerJpaEntity player, LocalDate entryDate, int points) {
+    public DailyEntryJpaEntity(GameJpaEntity game, PlayerJpaEntity player, LocalDate entryDate, int points) {
         this.game = game;
         this.player = player;
         this.entryDate = entryDate;
         this.points = points;
     }
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    GameJpaEntity getGame() {
+    public GameJpaEntity getGame() {
         return game;
     }
 
-    PlayerJpaEntity getPlayer() {
+    public PlayerJpaEntity getPlayer() {
         return player;
     }
 
-    LocalDate getEntryDate() {
+    public LocalDate getEntryDate() {
         return entryDate;
     }
 
-    int getPoints() {
+    public int getPoints() {
         return points;
     }
 }
