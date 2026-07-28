@@ -5,4 +5,6 @@ import com.pretz.geographic.application.domain.model.Player;
 public interface LoadPlayerPort {
 
     Player loadPlayer(Long id);
+
+    Player loadPlayer(String name);
 }
