@@ -1,4 +1,4 @@
-package com.pretz.geographic.infrastructure.adapter.in.api.dto;
+package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 

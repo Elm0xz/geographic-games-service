@@ -1,7 +1,7 @@
-package com.pretz.geographic.infrastructure.adapter.in.api;
+package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry;
 
-import com.pretz.geographic.infrastructure.adapter.in.api.dto.CreateDailyEntryRequestDto;
-import com.pretz.geographic.infrastructure.adapter.in.api.dto.DailyEntryResponseDto;
+import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntryRequestDto;
+import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.DailyEntryResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -1,4 +1,4 @@
-package com.pretz.geographic.infrastructure.adapter.out.persistence;
+package com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry;
 
 import com.pretz.geographic.application.domain.model.ScoringSystem;
 import jakarta.persistence.Column;
