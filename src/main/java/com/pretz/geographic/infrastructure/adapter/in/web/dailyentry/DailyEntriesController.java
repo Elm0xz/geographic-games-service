@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+//TODO integration tests: happy path, validations? (semantic + business), business logic
 @RestController
 public class DailyEntriesController implements DailyEntriesApi {
 
