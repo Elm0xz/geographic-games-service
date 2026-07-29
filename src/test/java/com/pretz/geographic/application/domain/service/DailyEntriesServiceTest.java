@@ -1,5 +1,6 @@
 package com.pretz.geographic.application.domain.service;
 
+import com.pretz.geographic.application.domain.DailyEntriesService;
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyEntryId;
 import com.pretz.geographic.application.domain.model.Game;
@@ -7,6 +8,10 @@ import com.pretz.geographic.application.domain.model.GameId;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
+import com.pretz.geographic.application.domain.validation.GameNameValidator;
+import com.pretz.geographic.application.domain.validation.InvalidGameNameException;
+import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
+import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.port.in.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 import com.pretz.geographic.application.port.out.LoadPlayerPort;

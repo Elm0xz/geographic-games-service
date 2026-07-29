@@ -1,4 +1,4 @@
-package com.pretz.geographic.application.domain.service;
+package com.pretz.geographic.application.domain.validation;
 
 public class PlayerNameValidator {
 
