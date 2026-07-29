@@ -6,6 +6,7 @@ import com.pretz.geographic.application.domain.model.GameId;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
+import com.pretz.geographic.infrastructure.adapter.out.persistence.AbstractPostgresDataJpaTest;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaEntity;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaRepository;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GamePersistenceMapper;
@@ -17,12 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.LocalDate;
 
@@ -32,12 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({DailyEntryPersistenceAdapter.class, DailyEntryPersistenceMapper.class, GamePersistenceMapper.class, PlayerPersistenceMapper.class})
-@Testcontainers
-class DailyEntryPersistenceAdapterTest {
-
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
+class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
 
     @Autowired
     private DailyEntryPersistenceAdapter adapter;
@@ -54,9 +46,6 @@ class DailyEntryPersistenceAdapterTest {
     @Autowired
     private PlayerJpaRepository playerRepository;
 
-    @Autowired
-    private DailyEntryJpaRepository dailyEntryJpaRepository;
-
     private final Game game = new Game(null, "Mapster", ScoringSystem.STANDARD);
     private final Player player = new Player(null, "Player1");
     private final LocalDate date = LocalDate.of(2026, 6, 30);
@@ -65,7 +54,6 @@ class DailyEntryPersistenceAdapterTest {
 
     @BeforeEach
     void saveGameAndPlayer() {
-        cleanup();
         savedGame = gamePersistenceMapper.toDomain(gameRepository.save(new GameJpaEntity(game.name(), game.scoringSystem())));
         savedPlayer = playerPersistenceMapper.toDomain(playerRepository.save(new PlayerJpaEntity(player.name())));
     }
@@ -131,11 +119,5 @@ class DailyEntryPersistenceAdapterTest {
                 .usingRecursiveComparison()
                 .ignoringFields("dailyEntryId")
                 .isEqualTo(inputEntry);
-    }
-
-    private void cleanup() {
-        dailyEntryJpaRepository.deleteAll();
-        gameRepository.deleteAll();
-        playerRepository.deleteAll();
     }
 }
