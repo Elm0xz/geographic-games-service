@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-//TODO integration tests: happy path, validations? (semantic + business), business logic
+import static org.springframework.http.HttpStatus.CREATED;
+
 @RestController
 public class DailyEntriesController implements DailyEntriesApi {
 
@@ -21,7 +22,7 @@ public class DailyEntriesController implements DailyEntriesApi {
     @Override
     public ResponseEntity<DailyEntryResponseDto> createDailyEntry(CreateDailyEntryRequestDto createDailyEntryRequestDto) {
         var result = addDailyEntriesUseCase.addDailyEntry(createDailyEntryRequestDto.toCommand());
-        return ResponseEntity.ok(new DailyEntryResponseDto(result));
+        return ResponseEntity.status(CREATED).body(new DailyEntryResponseDto(result));
     }
 
     @Override
