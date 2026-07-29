@@ -1,14 +1,15 @@
-package com.pretz.geographic.application.domain.service;
+package com.pretz.geographic.application.domain;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.Player;
+import com.pretz.geographic.application.domain.validation.GameNameValidator;
+import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.port.in.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 import com.pretz.geographic.application.port.out.LoadPlayerPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
-import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return saveDailyEntryPort.save(new DailyEntry(null, game, command.date(), player, command.points()));
     }
 
+    //TODO [GEOG-8] implement
     @Override
     public List<DailyEntry> addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
         return List.of();
