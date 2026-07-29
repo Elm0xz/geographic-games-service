@@ -1,6 +1,5 @@
-package com.pretz.geographic.application.domain.service;
+package com.pretz.geographic.application.domain;
 
-import com.pretz.geographic.application.domain.DailyEntriesService;
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyEntryId;
 import com.pretz.geographic.application.domain.model.Game;
