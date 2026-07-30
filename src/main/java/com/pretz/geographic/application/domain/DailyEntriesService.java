@@ -13,8 +13,6 @@ import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 
 import java.util.List;
 
-//TODO [GEOG-8] refactor/cleanup + tests
-
 public class DailyEntriesService implements AddDailyEntriesUseCase {
 
     private final SaveDailyEntryPort saveDailyEntryPort;
@@ -44,7 +42,7 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return saveDailyEntryPort.save(new DailyEntry(null, game, command.date(), player, command.points()));
     }
 
-    //TODO [GEOG-8] implement
+    //TODO [GEOG-11] implement
     @Override
     public List<DailyEntry> addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
         return List.of();

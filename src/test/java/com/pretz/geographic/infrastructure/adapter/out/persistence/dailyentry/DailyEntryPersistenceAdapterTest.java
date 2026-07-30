@@ -88,6 +88,17 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
+    void shouldFailWhenSavingTheSameEntryTwice() {
+        // given
+        var entry = new DailyEntry(null, savedGame, date, savedPlayer, 900);
+        adapter.save(entry);
+
+        // when / then
+        assertThatThrownBy(() -> adapter.save(entry))
+                .isInstanceOf(DataAccessException.class);
+    }
+
+    @Test
     void shouldFailWhenSavingEntryWithUnknownGameId() {
         // given
         var unknownGame = new Game(new GameId(999L), "Unknown", ScoringSystem.STANDARD);
