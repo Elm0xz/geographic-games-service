@@ -24,10 +24,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-import java.time.LocalDate;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -56,10 +57,6 @@ class DailyEntriesIntegrationTest {
 
     private final Game game = new Game(null, "Mapster", ScoringSystem.STANDARD);
     private final Player player = new Player(null, "Player1");
-    private final LocalDate date = LocalDate.of(2026, 6, 30);
-    private Game savedGame;
-    private Player savedPlayer;
-
 
     @BeforeEach
     void initEntities() {
@@ -92,22 +89,26 @@ class DailyEntriesIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("structurallyInvalidRequests")
-    void shouldReturnBadRequestForStructurallyInvalidRequest(String invalidRequest) throws Exception {
+    void shouldReturnBadRequestForStructurallyInvalidRequest(String invalidRequest, String errorCode) throws Exception {
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.code").value(errorCode));
     }
 
     @ParameterizedTest
     @MethodSource("semanticallyIncorrectRequests")
-    void shouldReturnBadRequestForSemanticAndBusinessValidationFailure(String incorrectRequest) throws Exception {
+    void shouldReturnBadRequestForSemanticAndBusinessValidationFailure(String incorrectRequest, String errorCode) throws Exception {
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(incorrectRequest))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.code").value(errorCode));
     }
 
     private static Stream<Arguments> structurallyInvalidRequests() {
@@ -121,7 +122,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """),
+                        """, "VALIDATION_ERROR"),
                 Arguments.of("""
                         {
                           "game": {
@@ -131,7 +132,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """),
+                        """, "VALIDATION_ERROR"),
                 Arguments.of("""
                         {
                           "game": {
@@ -144,7 +145,7 @@ class DailyEntriesIntegrationTest {
                           },
                           "points": 990
                         }
-                        """),
+                        """, "VALIDATION_ERROR"),
                 Arguments.of("""
                         {
                           "game": {
@@ -158,7 +159,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """),
+                        """, "MALFORMED_REQUEST"),
                 Arguments.of("""
                         {
                           "game": {
@@ -172,7 +173,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """),
+                        """, "MALFORMED_REQUEST"),
                 Arguments.of("""
                         {
                           "game": {
@@ -186,7 +187,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """),
+                        """, "VALIDATION_ERROR"),
                 Arguments.of("""
                         {
                           "game": {
@@ -200,7 +201,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """)
+                        """, "VALIDATION_ERROR")
         );
     }
 
@@ -219,7 +220,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2056-07-29",
                           "points": 990
                         }
-                        """),
+                        """, "VALIDATION_ERROR"),
                 Arguments.of("""
                         {
                           "game": {
@@ -233,7 +234,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """),
+                        """, "INVALID_GAME_NAME"),
                 Arguments.of("""
                         {
                           "game": {
@@ -247,8 +248,8 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """),
-                Arguments.of(("""
+                        """, "INVALID_PLAYER_NAME"),
+                Arguments.of("""
                         {
                           "game": {
                             "id": 999,
@@ -261,8 +262,8 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """)),
-                Arguments.of(("""
+                        """, "GAME_NOT_FOUND"),
+                Arguments.of("""
                         {
                           "game": {
                             "id": 1,
@@ -275,8 +276,8 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """)),
-                Arguments.of(("""
+                        """, "PLAYER_NOT_FOUND"),
+                Arguments.of("""
                         {
                           "game": {
                             "id": 1,
@@ -288,7 +289,7 @@ class DailyEntriesIntegrationTest {
                           "date": "2026-07-29",
                           "points": 990
                         }
-                        """)
-                ));
+                        """, "PLAYER_NOT_FOUND")
+                );
     }
 }

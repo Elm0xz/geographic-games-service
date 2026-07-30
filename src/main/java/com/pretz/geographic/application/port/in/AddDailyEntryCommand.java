@@ -15,6 +15,7 @@ public record AddDailyEntryCommand(
         Objects.requireNonNull(player, "Player reference must not be null");
         Objects.requireNonNull(date, "Date must not be null");
 
+        //might need a slight refactor if we expect different time zones on the servers
         if (date.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Date must not be in the future");
         }
