@@ -9,25 +9,29 @@ import com.pretz.geographic.infrastructure.adapter.out.persistence.player.Player
 import com.pretz.geographic.infrastructure.adapter.out.persistence.player.PlayerJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.LocalDate;
+import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 class DailyEntriesIntegrationTest {
@@ -47,14 +51,19 @@ class DailyEntriesIntegrationTest {
     @Autowired
     private PlayerJpaRepository playerJpaRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private final Game game = new Game(null, "Mapster", ScoringSystem.STANDARD);
     private final Player player = new Player(null, "Player1");
     private final LocalDate date = LocalDate.of(2026, 6, 30);
     private Game savedGame;
     private Player savedPlayer;
 
+
     @BeforeEach
     void initEntities() {
+        jdbcTemplate.execute("TRUNCATE TABLE daily_entry, game, player RESTART IDENTITY CASCADE");
         gameJpaRepository.save(new GameJpaEntity(game.name(), game.scoringSystem()));
         playerJpaRepository.save(new PlayerJpaEntity(player.name()));
     }
@@ -81,22 +90,205 @@ class DailyEntriesIntegrationTest {
                 .andExpect(status().isCreated());
     }
 
-    /*
-    TODO happy path
-        TODO Should create daily entries
-    TODO validations - syntax
-        TODO Should return bad request for structurally invalid request
-        TODO missing game
-        TODO missing player
-        TODO missing date
-        TODO malformed IDs
-        TODO batch failures?
-    TODO validations - business
-        TODO Should return bad request for semantic/business validation failure
-        TODO future date
-        TODO game name mismatch
-        TODO player name mismatch
-        TODO game/player not found if applicable
-        TODO batch failures?
-     */
+    @ParameterizedTest
+    @MethodSource("structurallyInvalidRequests")
+    void shouldReturnBadRequestForStructurallyInvalidRequest(String invalidRequest) throws Exception {
+
+        mockMvc.perform(post(ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @MethodSource("semanticallyIncorrectRequests")
+    void shouldReturnBadRequestForSemanticAndBusinessValidationFailure(String incorrectRequest) throws Exception {
+
+        mockMvc.perform(post(ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(incorrectRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<Arguments> structurallyInvalidRequests() {
+        return Stream.of(
+                Arguments.of("""
+                        {
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": "not-a-number",
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": "not-a-number",
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": -1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": -1,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """)
+        );
+    }
+
+    private static Stream<Arguments> semanticallyIncorrectRequests() {
+        return Stream.of(
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "date": "2056-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Wrong Name"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Wrong Name"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """),
+                Arguments.of(("""
+                        {
+                          "game": {
+                            "id": 999,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """)),
+                Arguments.of(("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 999,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """)),
+                Arguments.of(("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "name": "Unknown"
+                          },
+                          "date": "2026-07-29",
+                          "points": 990
+                        }
+                        """)
+                ));
+    }
 }
