@@ -1,0 +1,16 @@
+### Send create daily entry POST request
+POST http://localhost:8080/api/daily-entries
+Content-Type: application/json
+
+{
+  "game": {
+    "id" : 1,
+    "name": "Test"
+  },
+  "player": {
+    "id" : 1,
+    "name": "Testplayer"
+  },
+  "date": "2026-08-17",
+  "points" : 933
+}
