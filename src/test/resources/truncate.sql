@@ -1,0 +1,1 @@
+TRUNCATE table player, game, daily_entry RESTART IDENTITY;
