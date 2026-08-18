@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: geographic-games-service
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:geographic}
+    username: ${DB_USER:geographic}
+    password: ${DB_PASSWORD:geographic}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
