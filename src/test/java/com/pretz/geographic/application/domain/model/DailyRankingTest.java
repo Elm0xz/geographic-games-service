@@ -48,7 +48,7 @@ class DailyRankingTest {
         DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Andrew"), 990);
         DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Zheng"), 900);
 
-        var dailyRanking = new DailyRanking(game, date, List.of(player1Entry, player2Entry, player4Entry, player3Entry));
+        var dailyRanking = new DailyRanking(game, date, List.of(player1Entry, player2Entry, player3Entry, player4Entry));
 
         //when
         List<Player> result = dailyRanking.getWinner();
