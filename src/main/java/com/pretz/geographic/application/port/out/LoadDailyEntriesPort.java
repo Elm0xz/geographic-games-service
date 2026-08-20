@@ -13,4 +13,6 @@ public interface LoadDailyEntriesPort {
      * <p>
      */
     List<DailyEntry> loadEntries(Game game, LocalDate date);
+
+    List<DailyEntry> loadEntries(List<Game> games, LocalDate date);
 }

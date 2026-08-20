@@ -15,19 +15,19 @@ public record DailyRanking(Game game, LocalDate date, List<DailyEntry> entries) 
         validateEntriesPointsDescending(entries);
     }
 
+    private static void validateGameAndDateMatch(Game game, LocalDate date, List<DailyEntry> entries) {
+
+        if (entries.stream().anyMatch(entry -> !game.equals(entry.game()) || !date.equals(entry.date()))) {
+            throw new IllegalArgumentException("DailyRanking entries must match ranking game and date");
+        }
+    }
+
     private static void validateEntriesPointsDescending(List<DailyEntry> entries) {
 
         for (int i = 1; i < entries.size(); i++) {
             if (entries.get(i - 1).points() < entries.get(i).points()) {
                 throw new IllegalArgumentException("DailyRanking entries must be sorted by points in descending order");
             }
-        }
-    }
-
-    private static void validateGameAndDateMatch(Game game, LocalDate date, List<DailyEntry> entries) {
-
-        if (entries.stream().anyMatch(entry -> !game.equals(entry.game()) || !date.equals(entry.date()))) {
-            throw new IllegalArgumentException("DailyRanking entries must match ranking game and date");
         }
     }
 

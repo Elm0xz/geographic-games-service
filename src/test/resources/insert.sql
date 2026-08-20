@@ -2,4 +2,4 @@ INSERT INTO game (name, scoring_system)
 values ('Test', 'STANDARD');
 
 INSERT INTO player (name)
-values ('Testplayer');
+values ('Testplayer'), ('Testplayer2');

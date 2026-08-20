@@ -106,6 +106,7 @@ class DailyEntriesServiceTest {
         verify(saveDailyEntryPort, never()).save(any());
     }
 
+    //TODO should not allow duplicate player names?
     @Test
     void shouldFindPlayerByNameWhenPlayerIdIsNull() {
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);

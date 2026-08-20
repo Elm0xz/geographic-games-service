@@ -8,9 +8,12 @@ Content-Type: application/json
     "name": "Test"
   },
   "player": {
-    "id" : 1,
-    "name": "Testplayer"
+    "id" : 4,
+    "name": "Testplayer2"
   },
   "date": "2026-08-17",
-  "points" : 933
+  "points" : 973
 }
+
+### Send get daily ranking GET request
+GET http://localhost:8080/api/daily-ranking?date=2026-08-17
