@@ -6,6 +6,8 @@ import com.pretz.geographic.application.port.out.exception.GameNotFoundException
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Component
 public class GamePersistenceAdapter implements LoadGamePort {
 
@@ -24,5 +26,14 @@ public class GamePersistenceAdapter implements LoadGamePort {
         return gameJpaRepository.findById(id)
                 .map(gamePersistenceMapper::toDomain)
                 .orElseThrow(() -> new GameNotFoundException(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Game> loadActiveGames() {
+        return gameJpaRepository.findAll()
+                .stream()
+                .map(gamePersistenceMapper::toDomain)
+                .toList();
     }
 }
