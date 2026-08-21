@@ -85,28 +85,34 @@ class DailyEntriesServiceTest {
     }
 
     @Test
-    void shouldThrowInvalidGameNameExceptionWhenInputGameNameDoesNotMatchPersistedOne() {
-        Game game = new Game(new GameId(2L), "Worldle", ScoringSystem.STANDARD);
+    void shouldAddNewDailyEntryWithoutDailyEntryId() {
+        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+        Player player = new Player(new PlayerId(2L), "Player1");
+        LocalDate date = LocalDate.now().minusDays(10);
         AddDailyEntryCommand command = command(
-                2L,
-                "WhenTaken",
+                1L,
+                "Mapster",
                 2L,
                 "Player1",
-                LocalDate.now().minusDays(10),
-                950
+                date,
+                930
         );
-        when(loadGamePort.loadGame(2L)).thenReturn(game);
+        DailyEntry savedEntry = new DailyEntry(new DailyEntryId(10L), game, date, player, 930);
 
-        assertThatThrownBy(() -> dailyEntriesService.addDailyEntry(command))
-                .isInstanceOf(InvalidGameNameException.class)
-                .hasMessage("Input game name: WhenTaken doesn't match persisted game name: Worldle");
+        when(loadGamePort.loadGame(1L)).thenReturn(game);
+        when(loadPlayerPort.loadPlayer(2L)).thenReturn(player);
+        when(saveDailyEntryPort.save(any())).thenReturn(savedEntry);
 
-        verify(loadGamePort).loadGame(2L);
-        verify(loadPlayerPort, never()).loadPlayer(2L);
-        verify(saveDailyEntryPort, never()).save(any());
+        dailyEntriesService.addDailyEntry(command);
+
+        ArgumentCaptor<DailyEntry> dailyEntryCaptor = ArgumentCaptor.forClass(DailyEntry.class);
+        verify(saveDailyEntryPort).save(dailyEntryCaptor.capture());
+
+        assertThat(dailyEntryCaptor.getValue())
+                .isEqualTo(new DailyEntry(null, game, date, player, 930));
+        assertThat(dailyEntryCaptor.getValue().dailyEntryId()).isNull();
     }
 
-    //TODO should not allow duplicate player names?
     @Test
     void shouldFindPlayerByNameWhenPlayerIdIsNull() {
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
@@ -134,6 +140,29 @@ class DailyEntriesServiceTest {
         verify(loadPlayerPort, never()).loadPlayer(2L);
         verify(saveDailyEntryPort).save(new DailyEntry(null, game, date, player, 950));
     }
+    @Test
+    void shouldThrowInvalidGameNameExceptionWhenInputGameNameDoesNotMatchPersistedOne() {
+        Game game = new Game(new GameId(2L), "Worldle", ScoringSystem.STANDARD);
+        AddDailyEntryCommand command = command(
+                2L,
+                "WhenTaken",
+                2L,
+                "Player1",
+                LocalDate.now().minusDays(10),
+                950
+        );
+        when(loadGamePort.loadGame(2L)).thenReturn(game);
+
+        assertThatThrownBy(() -> dailyEntriesService.addDailyEntry(command))
+                .isInstanceOf(InvalidGameNameException.class)
+                .hasMessage("Input game name: WhenTaken doesn't match persisted game name: Worldle");
+
+        verify(loadGamePort).loadGame(2L);
+        verify(loadPlayerPort, never()).loadPlayer(2L);
+        verify(saveDailyEntryPort, never()).save(any());
+    }
+
+    //TODO should not allow duplicate player names?
 
     @Test
     void shouldThrowInvalidPlayerNameExceptionWhenInputPlayerNameDoesNotMatchPersistedOne() {
@@ -158,35 +187,6 @@ class DailyEntriesServiceTest {
         verify(loadGamePort).loadGame(1L);
         verify(loadPlayerPort).loadPlayer(2L);
         verify(saveDailyEntryPort, never()).save(any());
-    }
-
-    @Test
-    void shouldSaveNewDailyEntryWithoutDailyEntryId() {
-        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
-        LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(
-                1L,
-                "Mapster",
-                2L,
-                "Player1",
-                date,
-                930
-        );
-        DailyEntry savedEntry = new DailyEntry(new DailyEntryId(10L), game, date, player, 930);
-
-        when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer(2L)).thenReturn(player);
-        when(saveDailyEntryPort.save(any())).thenReturn(savedEntry);
-
-        dailyEntriesService.addDailyEntry(command);
-
-        ArgumentCaptor<DailyEntry> dailyEntryCaptor = ArgumentCaptor.forClass(DailyEntry.class);
-        verify(saveDailyEntryPort).save(dailyEntryCaptor.capture());
-
-        assertThat(dailyEntryCaptor.getValue())
-                .isEqualTo(new DailyEntry(null, game, date, player, 930));
-        assertThat(dailyEntryCaptor.getValue().dailyEntryId()).isNull();
     }
 
     // ... existing code ...
