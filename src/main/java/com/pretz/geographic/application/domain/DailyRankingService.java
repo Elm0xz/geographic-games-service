@@ -4,6 +4,7 @@ import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyRanking;
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.service.DailyRankingCalculator;
+import com.pretz.geographic.application.domain.validation.InvalidDateException;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.LoadGamePort;
@@ -28,12 +29,19 @@ public class DailyRankingService implements GetDailyRankingUseCase {
     @Override
     public List<DailyRanking> getDailyRankings(LocalDate date) {
 
-        List<Game> activeGames = loadGamePort.loadActiveGames();
-        List<DailyEntry> dailyEntries = loadDailyEntriesPort.loadEntries(activeGames, date);
-        var results = dailyEntries.stream().collect(Collectors.groupingBy(DailyEntry::game));
-        return results.entrySet().stream().map(it ->
+        validatePastDate(date);
+
+        return loadDailyEntriesPort.loadEntries(loadGamePort.loadActiveGames(), date).stream()
+                .collect(Collectors.groupingBy(DailyEntry::game))
+                .entrySet().stream().map(it ->
                         dailyRankingCalculator.calculateDailyRanking(it.getValue(), it.getKey(), date))
                 .toList();
+    }
+
+    private static void validatePastDate(LocalDate date) {
+        if (!date.isBefore(LocalDate.now())) {
+            throw new InvalidDateException(String.format("Ranking calculation is possible only for past dates, input date: %s", date));
+        }
     }
 
     //TODO implement later
@@ -41,5 +49,4 @@ public class DailyRankingService implements GetDailyRankingUseCase {
     public DailyRanking getDailyRanking(LocalDate date, Game game) {
         return null;
     }
-
 }

@@ -2,7 +2,6 @@ package com.pretz.geographic.infrastructure.adapter.in.web.dailyranking;
 
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyranking.dto.DailyRankingResponseDto;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,7 @@ import java.util.List;
 public interface DailyRankingApi {
 
     @GetMapping
-    ResponseEntity<List<DailyRankingResponseDto>> getDailyRankings(@NotNull @Past @RequestParam LocalDate date);
+    ResponseEntity<List<DailyRankingResponseDto>> getDailyRankings(@NotNull @RequestParam LocalDate date);
 
     //TODO single game rankings
 }
