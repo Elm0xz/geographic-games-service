@@ -28,6 +28,7 @@ public class GamePersistenceAdapter implements LoadGamePort {
                 .orElseThrow(() -> new GameNotFoundException(id));
     }
 
+    //for now, we assume all games are active; in the future we will add a boolean activity status field in schema
     @Override
     @Transactional(readOnly = true)
     public List<Game> loadActiveGames() {

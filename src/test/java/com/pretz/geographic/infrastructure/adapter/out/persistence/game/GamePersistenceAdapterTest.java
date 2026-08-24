@@ -11,6 +11,8 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -43,6 +45,21 @@ class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var result = adapter.loadGame(id);
         //then
         assertThat(result).isEqualTo(game);
+    }
+
+    @Test
+    void shouldLoadAllActiveGames() {
+        //given
+        repository.deleteAllInBatch();
+        var games = repository.saveAll(
+                        List.of(new GameJpaEntity("Mapster", ScoringSystem.STANDARD),
+                                new GameJpaEntity("WhenTaken", ScoringSystem.STANDARD),
+                                new GameJpaEntity("Geogrid", ScoringSystem.STANDARD)))
+                .stream().map(it -> mapper.toDomain(it)).toList();
+        //when
+        var result = adapter.loadActiveGames();
+        //then
+        assertThat(result).isEqualTo(games);
     }
 
     @Test
