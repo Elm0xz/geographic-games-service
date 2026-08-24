@@ -78,7 +78,7 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
 
         //when
         var saved = adapter.save(entry);
-        var loaded = adapter.loadEntries(savedGames, date);
+        var loaded = adapter.loadEntries(savedGames.getFirst(), date);
 
         //then
         assertIdIsNotNull(saved);

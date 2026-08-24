@@ -1,4 +1,4 @@
-package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry;
+package com.pretz.geographic.infrastructure.adapter.in.web.dailyranking;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.Game;
@@ -59,25 +59,34 @@ public class DailyRankingIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private final Game game = new Game(null, "Mapster", ScoringSystem.STANDARD);
+    private final Game game1 = new Game(null, "Mapster", ScoringSystem.STANDARD);
+    private final Game game2 = new Game(null, "WhenTaken", ScoringSystem.STANDARD);
     private final Player player1 = new Player(null, "Andrzej");
     private final Player player2 = new Player(null, "Ferdynand");
-    private final DailyEntry dailyEntry1 = new DailyEntry(null, game, LocalDate.of(2026, 4, 4), player1, 836);
-    private final DailyEntry dailyEntry2 = new DailyEntry(null, game, LocalDate.of(2026, 4, 4), player2, 911);
+    private final DailyEntry dailyEntry1 = new DailyEntry(null, game1, LocalDate.of(2026, 4, 4), player1, 836);
+    private final DailyEntry dailyEntry2 = new DailyEntry(null, game1, LocalDate.of(2026, 4, 4), player2, 911);
+    private final DailyEntry dailyEntry3 = new DailyEntry(null, game2, LocalDate.of(2026, 4, 4), player1, 777);
+    private final DailyEntry dailyEntry4 = new DailyEntry(null, game2, LocalDate.of(2026, 4, 4), player2, 734);
 
     @BeforeEach
     void initEntities() {
         jdbcTemplate.execute("TRUNCATE TABLE daily_entry, game, player RESTART IDENTITY CASCADE");
-        var savedGame = gameJpaRepository.save(new GameJpaEntity(game.name(), game.scoringSystem()));
-        var savedPlayers = playerJpaRepository.saveAll(List.of(new PlayerJpaEntity(player1.name()), new PlayerJpaEntity(player2.name())));
+        var savedGames = gameJpaRepository.saveAll(List.of(
+                new GameJpaEntity(game1.name(), game1.scoringSystem()),
+                new GameJpaEntity(game2.name(), game2.scoringSystem())));
+        var savedPlayers = playerJpaRepository.saveAll(List.of(
+                new PlayerJpaEntity(player1.name()),
+                new PlayerJpaEntity(player2.name())));
         dailyEntryJpaRepository.saveAll(List.of(
-                new DailyEntryJpaEntity(savedGame, savedPlayers.getFirst(), dailyEntry1.date(), dailyEntry1.points()),
-                new DailyEntryJpaEntity(savedGame, savedPlayers.get(1), dailyEntry2.date(), dailyEntry2.points())
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.getFirst(), dailyEntry1.date(), dailyEntry1.points()),
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.get(1), dailyEntry2.date(), dailyEntry2.points()),
+                new DailyEntryJpaEntity(savedGames.get(1), savedPlayers.getFirst(), dailyEntry3.date(), dailyEntry3.points()),
+                new DailyEntryJpaEntity(savedGames.get(1), savedPlayers.get(1), dailyEntry4.date(), dailyEntry4.points())
         ));
     }
 
     @Test
-    void shouldReturnOkForValidGetDailyRankingRequest() throws Exception {
+    void shouldReturnOkForValidGetDailyRankingRequest() {
 
         assertThat(mockMvc.get().uri(ENDPOINT).param("date", "2026-04-04"))
                 .hasStatusOk()
@@ -90,6 +99,14 @@ public class DailyRankingIntegrationTest {
                             "entries": [
                               { "id": 2, "player": "Ferdynand", "points": 911 },
                               { "id": 1, "player": "Andrzej",   "points": 836 }
+                            ]
+                          },
+                          {
+                            "game": { "gameId": 2, "name": "WhenTaken" },
+                            "date": "2026-04-04",
+                            "entries": [
+                              { "id": 3, "player": "Andrzej",   "points": 777 },
+                              { "id": 4, "player": "Ferdynand", "points": 734 }
                             ]
                           }
                         ]

@@ -42,31 +42,31 @@ class BaseWeeklyRankingCalculatorTest {
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                        new DailyRanking(game1, monday, List.of(
+                        DailyRanking.of(game1, monday, List.of(
                                 entry(game1, monday, player3, 960),
                                 entry(game1, monday, player1, 900),
                                 entry(game1, monday, player2, 820))),
-                        new DailyRanking(game1, monday.plusDays(1), List.of(
+                        DailyRanking.of(game1, monday.plusDays(1), List.of(
                                 entry(game1, monday.plusDays(1), player1, 930),
                                 entry(game1, monday.plusDays(1), player3, 910),
                                 entry(game1, monday.plusDays(1), player2, 870))),
-                        new DailyRanking(game1, monday.plusDays(2), List.of(
+                        DailyRanking.of(game1, monday.plusDays(2), List.of(
                                 entry(game1, monday.plusDays(2), player2, 940),
                                 entry(game1, monday.plusDays(2), player3, 900),
                                 entry(game1, monday.plusDays(2), player1, 880))),
-                        new DailyRanking(game1, monday.plusDays(3), List.of(
+                        DailyRanking.of(game1, monday.plusDays(3), List.of(
                                 entry(game1, monday.plusDays(3), player1, 970),
                                 entry(game1, monday.plusDays(3), player3, 920),
                                 entry(game1, monday.plusDays(3), player2, 860))),
-                        new DailyRanking(game1, monday.plusDays(4), List.of(
+                        DailyRanking.of(game1, monday.plusDays(4), List.of(
                                 entry(game1, monday.plusDays(4), player2, 950),
                                 entry(game1, monday.plusDays(4), player3, 930),
                                 entry(game1, monday.plusDays(4), player1, 910))),
-                        new DailyRanking(game1, monday.plusDays(5), List.of(
+                        DailyRanking.of(game1, monday.plusDays(5), List.of(
                                 entry(game1, monday.plusDays(5), player3, 970),
                                 entry(game1, monday.plusDays(5), player1, 890),
                                 entry(game1, monday.plusDays(5), player2, 880))),
-                        new DailyRanking(game1, monday.plusDays(6), List.of(
+                        DailyRanking.of(game1, monday.plusDays(6), List.of(
                                 entry(game1, monday.plusDays(6), player1, 940),
                                 entry(game1, monday.plusDays(6), player2, 920),
                                 entry(game1, monday.plusDays(6), player3, 900)))),
@@ -91,22 +91,22 @@ class BaseWeeklyRankingCalculatorTest {
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                        new DailyRanking(game1, monday, List.of(
+                        DailyRanking.of(game1, monday, List.of(
                                 entry(game1, monday, player3, 960),
                                 entry(game1, monday, player1, 900))),
-                        new DailyRanking(game1, monday.plusDays(1), List.of(
+                        DailyRanking.of(game1, monday.plusDays(1), List.of(
                                 entry(game1, monday.plusDays(1), player1, 930))),
-                        new DailyRanking(game1, monday.plusDays(2), List.of(
+                        DailyRanking.of(game1, monday.plusDays(2), List.of(
                                 entry(game1, monday.plusDays(2), player2, 940),
                                 entry(game1, monday.plusDays(2), player1, 880))),
-                        new DailyRanking(game1, monday.plusDays(3), List.of(
+                        DailyRanking.of(game1, monday.plusDays(3), List.of(
                                 entry(game1, monday.plusDays(3), player1, 970),
                                 entry(game1, monday.plusDays(3), player3, 920),
                                 entry(game1, monday.plusDays(3), player2, 860))),
-                        new DailyRanking(game1, monday.plusDays(5), List.of(
+                        DailyRanking.of(game1, monday.plusDays(5), List.of(
                                 entry(game1, monday.plusDays(5), player3, 970),
                                 entry(game1, monday.plusDays(5), player1, 890))),
-                        new DailyRanking(game1, monday.plusDays(6), List.of(
+                        DailyRanking.of(game1, monday.plusDays(6), List.of(
                                 entry(game1, monday.plusDays(6), player1, 940),
                                 entry(game1, monday.plusDays(6), player2, 920),
                                 entry(game1, monday.plusDays(6), player3, 900)))),
@@ -131,35 +131,35 @@ class BaseWeeklyRankingCalculatorTest {
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                        new DailyRanking(game1, monday.minusDays(1), List.of(
+                        DailyRanking.of(game1, monday.minusDays(1), List.of(
                                 entry(game1, monday.minusDays(1), player2, 1000),
                                 entry(game1, monday.minusDays(1), player1, 990),
                                 entry(game1, monday.minusDays(1), player3, 980))),
-                        new DailyRanking(game1, monday, List.of(
+                        DailyRanking.of(game1, monday, List.of(
                                 entry(game1, monday, player3, 975),
                                 entry(game1, monday, player1, 904),
                                 entry(game1, monday, player2, 831))),
-                        new DailyRanking(game1, monday.plusDays(1), List.of(
+                        DailyRanking.of(game1, monday.plusDays(1), List.of(
                                 entry(game1, monday.plusDays(1), player1, 934),
                                 entry(game1, monday.plusDays(1), player3, 917),
                                 entry(game1, monday.plusDays(1), player2, 872))),
-                        new DailyRanking(game1, monday.plusDays(2), List.of(
+                        DailyRanking.of(game1, monday.plusDays(2), List.of(
                                 entry(game1, monday.plusDays(2), player2, 948),
                                 entry(game1, monday.plusDays(2), player3, 906),
                                 entry(game1, monday.plusDays(2), player1, 883))),
-                        new DailyRanking(game1, monday.plusDays(3), List.of(
+                        DailyRanking.of(game1, monday.plusDays(3), List.of(
                                 entry(game1, monday.plusDays(3), player1, 982),
                                 entry(game1, monday.plusDays(3), player3, 924),
                                 entry(game1, monday.plusDays(3), player2, 864))),
-                        new DailyRanking(game1, monday.plusDays(4), List.of(
+                        DailyRanking.of(game1, monday.plusDays(4), List.of(
                                 entry(game1, monday.plusDays(4), player2, 953),
                                 entry(game1, monday.plusDays(4), player3, 937),
                                 entry(game1, monday.plusDays(4), player1, 912))),
-                        new DailyRanking(game1, monday.plusDays(5), List.of(
+                        DailyRanking.of(game1, monday.plusDays(5), List.of(
                                 entry(game1, monday.plusDays(5), player3, 986),
                                 entry(game1, monday.plusDays(5), player1, 895),
                                 entry(game1, monday.plusDays(5), player2, 889))),
-                        new DailyRanking(game1, monday.plusDays(6), List.of(
+                        DailyRanking.of(game1, monday.plusDays(6), List.of(
                                 entry(game1, monday.plusDays(6), player1, 946),
                                 entry(game1, monday.plusDays(6), player2, 929),
                                 entry(game1, monday.plusDays(6), player3, 908)))),
@@ -186,35 +186,35 @@ class BaseWeeklyRankingCalculatorTest {
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                        new DailyRanking(game1, monday, List.of(
+                        DailyRanking.of(game1, monday, List.of(
                                 entry(game1, monday, player3, 960),
                                 entry(game1, monday, player1, 900),
                                 entry(game1, monday, player2, 820))),
-                        new DailyRanking(game1, monday.plusDays(1), List.of(
+                        DailyRanking.of(game1, monday.plusDays(1), List.of(
                                 entry(game1, monday.plusDays(1), player1, 930),
                                 entry(game1, monday.plusDays(1), player3, 910),
                                 entry(game1, monday.plusDays(1), player2, 870))),
-                        new DailyRanking(game1, monday.plusDays(2), List.of(
+                        DailyRanking.of(game1, monday.plusDays(2), List.of(
                                 entry(game1, monday.plusDays(2), player2, 940),
                                 entry(game1, monday.plusDays(2), player3, 900),
                                 entry(game1, monday.plusDays(2), player1, 880))),
-                        new DailyRanking(game1, monday.plusDays(3), List.of(
+                        DailyRanking.of(game1, monday.plusDays(3), List.of(
                                 entry(game1, monday.plusDays(3), player1, 970),
                                 entry(game1, monday.plusDays(3), player3, 920),
                                 entry(game1, monday.plusDays(3), player2, 860))),
-                        new DailyRanking(game1, monday.plusDays(4), List.of(
+                        DailyRanking.of(game1, monday.plusDays(4), List.of(
                                 entry(game1, monday.plusDays(4), player2, 950),
                                 entry(game1, monday.plusDays(4), player3, 930),
                                 entry(game1, monday.plusDays(4), player1, 910))),
-                        new DailyRanking(game1, monday.plusDays(5), List.of(
+                        DailyRanking.of(game1, monday.plusDays(5), List.of(
                                 entry(game1, monday.plusDays(5), player3, 970),
                                 entry(game1, monday.plusDays(5), player1, 890),
                                 entry(game1, monday.plusDays(5), player2, 880))),
-                        new DailyRanking(game1, monday.plusDays(6), List.of(
+                        DailyRanking.of(game1, monday.plusDays(6), List.of(
                                 entry(game1, monday.plusDays(6), player1, 940),
                                 entry(game1, monday.plusDays(6), player2, 920),
                                 entry(game1, monday.plusDays(6), player3, 900))),
-                        new DailyRanking(game2, monday, List.of(
+                        DailyRanking.of(game2, monday, List.of(
                                 entry(game2, monday, player3, 960),
                                 entry(game2, monday, player1, 900),
                                 entry(game2, monday, player2, 820)))),
@@ -240,15 +240,15 @@ class BaseWeeklyRankingCalculatorTest {
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                        new DailyRanking(game1, monday, List.of(
+                        DailyRanking.of(game1, monday, List.of(
                                 entry(game1, monday, player3, 960),
                                 entry(game1, monday, player1, 960),
                                 entry(game1, monday, player2, 960))),
-                        new DailyRanking(game1, monday.plusDays(1), List.of(
+                        DailyRanking.of(game1, monday.plusDays(1), List.of(
                                 entry(game1, monday.plusDays(1), player1, 920),
                                 entry(game1, monday.plusDays(1), player3, 920),
                                 entry(game1, monday.plusDays(1), player2, 900))),
-                        new DailyRanking(game1, monday.plusDays(2), List.of(
+                        DailyRanking.of(game1, monday.plusDays(2), List.of(
                                 entry(game1, monday.plusDays(2), player1, 910),
                                 entry(game1, monday.plusDays(2), player2, 910),
                                 entry(game1, monday.plusDays(2), player3, 850)))),
@@ -281,8 +281,8 @@ class BaseWeeklyRankingCalculatorTest {
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                new DailyRanking(game, monday, List.of()),
-                new DailyRanking(game, monday.plusDays(1), List.of())
+                DailyRanking.of(game, monday, List.of()),
+                DailyRanking.of(game, monday.plusDays(1), List.of())
         ), game, week);
 
         Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game, week, List.of()));

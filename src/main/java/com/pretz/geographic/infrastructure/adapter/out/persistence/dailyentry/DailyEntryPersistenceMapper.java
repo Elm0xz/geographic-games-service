@@ -9,8 +9,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class DailyEntryPersistenceMapper {
 
-    private final PlayerPersistenceMapper playerPersistenceMapper = new PlayerPersistenceMapper();
-    private final GamePersistenceMapper gamePersistenceMapper = new GamePersistenceMapper();
+    private final PlayerPersistenceMapper playerPersistenceMapper;
+    private final GamePersistenceMapper gamePersistenceMapper;
+
+    public DailyEntryPersistenceMapper(PlayerPersistenceMapper playerPersistenceMapper, GamePersistenceMapper gamePersistenceMapper) {
+        this.playerPersistenceMapper = playerPersistenceMapper;
+        this.gamePersistenceMapper = gamePersistenceMapper;
+    }
 
     public DailyEntry toDomain(DailyEntryJpaEntity entity) {
         return new DailyEntry(

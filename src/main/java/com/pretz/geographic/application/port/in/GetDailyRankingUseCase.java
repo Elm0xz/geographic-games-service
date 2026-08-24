@@ -10,6 +10,7 @@ public interface GetDailyRankingUseCase {
 
     List<DailyRanking> getDailyRankings(LocalDate date);
 
+    //TODO implement
     DailyRanking getDailyRanking(LocalDate date, Game game);
 
 }

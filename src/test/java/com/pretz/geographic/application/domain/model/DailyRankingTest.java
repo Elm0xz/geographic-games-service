@@ -15,6 +15,50 @@ class DailyRankingTest {
     public static final String RANKING_ENTRY_VALIDATION_ERROR = "DailyRanking entries must match ranking game and date";
 
     @Test
+    public void shouldReturnListOfEntriesSortedByRank() {
+
+        //given
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
+        LocalDate date = LocalDate.of(2026, 4, 12);
+
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 830);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Player2"), 990);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Player3"), 560);
+
+        var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry));
+
+        //when
+        List<DailyEntry> result = dailyRanking.entries();
+
+        //then
+        Assertions.assertThat(result).isNotEmpty();
+        Assertions.assertThat(result).hasSize(3);
+        Assertions.assertThat(result).isEqualTo(List.of(player2Entry, player1Entry, player3Entry));
+    }
+    @Test
+    public void shouldReturnListOfEntriesSortedByNameIfPointsEqual() {
+
+        //given
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
+        LocalDate date = LocalDate.of(2026, 4, 12);
+
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Roman"), 900);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Ferdynand"), 900);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Maria"), 920);
+        DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Andrzej"), 920);
+
+        var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry, player4Entry));
+
+        //when
+        List<DailyEntry> result = dailyRanking.entries();
+
+        //then
+        Assertions.assertThat(result).isNotEmpty();
+        Assertions.assertThat(result).hasSize(4);
+        Assertions.assertThat(result).isEqualTo(List.of(player4Entry, player3Entry, player2Entry, player1Entry));
+    }
+
+    @Test
     public void shouldReturnWinnerWhenOneExists() {
 
         //given
@@ -25,7 +69,7 @@ class DailyRankingTest {
         DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Player2"), 970);
         DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Player3"), 900);
 
-        var dailyRanking = new DailyRanking(game, date, List.of(player1Entry, player2Entry, player3Entry));
+        var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry));
 
         //when
         List<Player> result = dailyRanking.getWinner();
@@ -37,7 +81,7 @@ class DailyRankingTest {
     }
 
     @Test
-    public void shouldReturnAllPlayedTiedForFirstAsWinners() {
+    public void shouldReturnAllPlayedTiedForFirstAsWinnersSortedByName() {
 
         //given
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
@@ -48,7 +92,7 @@ class DailyRankingTest {
         DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Andrew"), 990);
         DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Zheng"), 900);
 
-        var dailyRanking = new DailyRanking(game, date, List.of(player1Entry, player2Entry, player3Entry, player4Entry));
+        var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry, player4Entry));
 
         //when
         List<Player> result = dailyRanking.getWinner();
@@ -56,7 +100,7 @@ class DailyRankingTest {
         //then
         Assertions.assertThat(result).isNotEmpty();
         Assertions.assertThat(result).hasSize(3);
-        Assertions.assertThat(result).isEqualTo(List.of(player1Entry.player(), player2Entry.player(), player3Entry.player()));
+        Assertions.assertThat(result).containsExactly(player3Entry.player(), player2Entry.player(), player1Entry.player());
     }
 
     @Test
@@ -66,7 +110,7 @@ class DailyRankingTest {
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        var dailyRanking = new DailyRanking(game, date, List.of());
+        var dailyRanking = DailyRanking.of(game, date, List.of());
 
         //when
         List<Player> result = dailyRanking.getWinner();
@@ -87,7 +131,7 @@ class DailyRankingTest {
         DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, date, new Player(new PlayerId(2L), "Player2"), 970);
 
         //when //then
-        Assertions.assertThatThrownBy(() -> new DailyRanking(game, date, List.of(player1Entry, player2Entry)))
+        Assertions.assertThatThrownBy(() -> DailyRanking.of(game, date, List.of(player1Entry, player2Entry)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(RANKING_ENTRY_VALIDATION_ERROR);
     }
@@ -104,7 +148,7 @@ class DailyRankingTest {
         DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, otherDate, new Player(new PlayerId(2L), "Player2"), 970);
 
         //when //then
-        Assertions.assertThatThrownBy(() -> new DailyRanking(game, date, List.of(player1Entry, player2Entry)))
+        Assertions.assertThatThrownBy(() -> DailyRanking.of(game, date, List.of(player1Entry, player2Entry)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(RANKING_ENTRY_VALIDATION_ERROR);
     }
@@ -122,7 +166,7 @@ class DailyRankingTest {
         DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, otherDate, new Player(new PlayerId(2L), "Player2"), 970);
 
         //when //then
-        Assertions.assertThatThrownBy(() -> new DailyRanking(game, date, List.of(player1Entry, player2Entry)))
+        Assertions.assertThatThrownBy(() -> DailyRanking.of(game, date, List.of(player1Entry, player2Entry)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(RANKING_ENTRY_VALIDATION_ERROR);
     }
@@ -134,7 +178,7 @@ class DailyRankingTest {
         //given
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
 
-        var dailyRanking = new DailyRanking(game, inputDate, List.of());
+        var dailyRanking = DailyRanking.of(game, inputDate, List.of());
 
         //when
         Week result = dailyRanking.getWeek();

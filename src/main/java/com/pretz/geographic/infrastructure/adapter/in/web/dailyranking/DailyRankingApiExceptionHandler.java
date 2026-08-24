@@ -12,13 +12,13 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import static com.pretz.geographic.infrastructure.adapter.in.web.dailyranking.DailyRankingApiExceptionHandler.ApiErrorCode.INVALID_DATE;
 import static com.pretz.geographic.infrastructure.adapter.in.web.dailyranking.DailyRankingApiExceptionHandler.ApiErrorCode.MALFORMED_REQUEST;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.pretz.geographic.infrastructure.adapter.in.web.dailyranking")
 public class DailyRankingApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DailyRankingApiExceptionHandler.class);
 
     @ExceptionHandler(InvalidDateException.class)
-    ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(InvalidDateException exception) {
+    ResponseEntity<ApiErrorResponse> handleInvalidDate(InvalidDateException exception) {
         log.warn(exception.getMessage());
         return ResponseEntity.badRequest()
                 .body(new ApiErrorResponse(INVALID_DATE, exception.getMessage()));

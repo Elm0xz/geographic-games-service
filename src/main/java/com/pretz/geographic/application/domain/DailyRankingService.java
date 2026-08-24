@@ -3,45 +3,44 @@ package com.pretz.geographic.application.domain;
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyRanking;
 import com.pretz.geographic.application.domain.model.Game;
-import com.pretz.geographic.application.domain.service.DailyRankingCalculator;
-import com.pretz.geographic.application.domain.validation.InvalidDateException;
+import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DailyRankingService implements GetDailyRankingUseCase {
 
+    private static final Comparator<DailyRanking> BY_GAME_NAME =
+            Comparator.comparing(it -> it.game().name());
+
     private final LoadGamePort loadGamePort;
     private final LoadDailyEntriesPort loadDailyEntriesPort;
-    private final DailyRankingCalculator dailyRankingCalculator;
+    private final RankingDateValidator rankingDateValidator;
 
-    public DailyRankingService(LoadGamePort loadGamePort, LoadDailyEntriesPort loadDailyEntriesPort,
-                               DailyRankingCalculator dailyRankingCalculator) {
+    public DailyRankingService(LoadGamePort loadGamePort,
+                               LoadDailyEntriesPort loadDailyEntriesPort,
+                               RankingDateValidator rankingDateValidator) {
         this.loadGamePort = loadGamePort;
         this.loadDailyEntriesPort = loadDailyEntriesPort;
-        this.dailyRankingCalculator = dailyRankingCalculator;
+        this.rankingDateValidator = rankingDateValidator;
     }
 
     @Override
     public List<DailyRanking> getDailyRankings(LocalDate date) {
 
-        validatePastDate(date);
+        rankingDateValidator.validatePastDate(date);
 
+        //ranking isn't persisted but calculated on demand; active games without results for the day won't be taken into account
         return loadDailyEntriesPort.loadEntries(loadGamePort.loadActiveGames(), date).stream()
                 .collect(Collectors.groupingBy(DailyEntry::game))
-                .entrySet().stream().map(it ->
-                        dailyRankingCalculator.calculateDailyRanking(it.getValue(), it.getKey(), date))
+                .entrySet().stream().map(it -> DailyRanking.of(it.getKey(), date, it.getValue()))
+                .sorted(BY_GAME_NAME)
                 .toList();
-    }
-
-    private static void validatePastDate(LocalDate date) {
-        if (!date.isBefore(LocalDate.now())) {
-            throw new InvalidDateException(String.format("Ranking calculation is possible only for past dates, input date: %s", date));
-        }
     }
 
     //TODO implement later

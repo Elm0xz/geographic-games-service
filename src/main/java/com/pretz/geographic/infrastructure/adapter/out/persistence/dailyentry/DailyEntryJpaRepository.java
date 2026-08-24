@@ -1,5 +1,6 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -8,7 +9,9 @@ import java.util.List;
 
 public interface DailyEntryJpaRepository extends JpaRepository<DailyEntryJpaEntity, Long> {
 
-    List<DailyEntryJpaEntity> findByGame_NameAndEntryDate(String gameName, LocalDate date);
+    @EntityGraph(attributePaths = {"game", "player"})
+    List<DailyEntryJpaEntity> findByGame_IdAndEntryDate(Long gameId, LocalDate entryDate);
 
-    List<DailyEntryJpaEntity> findByGame_NameInAndEntryDate(Collection<String> gameNames, LocalDate entryDate);
+    @EntityGraph(attributePaths = {"game", "player"})
+    List<DailyEntryJpaEntity> findByGame_IdInAndEntryDate(Collection<Long> gameIds, LocalDate entryDate);
 }
