@@ -21,7 +21,7 @@ import static com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.Dail
 import static com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.DailyEntriesApiExceptionHandler.ApiErrorCode.PLAYER_NOT_FOUND;
 import static com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.DailyEntriesApiExceptionHandler.ApiErrorCode.VALIDATION_ERROR;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.pretz.geographic.infrastructure.adapter.in.web.dailyentry")
 public class DailyEntriesApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DailyEntriesApiExceptionHandler.class);

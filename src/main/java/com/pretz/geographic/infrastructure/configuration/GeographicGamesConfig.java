@@ -2,10 +2,10 @@ package com.pretz.geographic.infrastructure.configuration;
 
 import com.pretz.geographic.application.domain.DailyEntriesService;
 import com.pretz.geographic.application.domain.DailyRankingService;
-import com.pretz.geographic.application.domain.service.BaseDailyRankingCalculator;
 import com.pretz.geographic.application.domain.service.DailyRankingCalculator;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
+import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.port.in.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
@@ -35,16 +35,11 @@ public class GeographicGamesConfig {
     @Bean
     GetDailyRankingUseCase getDailyRankingUseCase(LoadGamePort loadGamePort,
                                                   LoadDailyEntriesPort loadDailyEntriesPort,
-                                                  DailyRankingCalculator dailyRankingCalculator) {
+                                                  RankingDateValidator rankingDateValidator) {
         return new DailyRankingService(
                 loadGamePort,
                 loadDailyEntriesPort,
-                dailyRankingCalculator);
-    }
-
-    @Bean
-    DailyRankingCalculator dailyRankingCalculator() {
-        return new BaseDailyRankingCalculator();
+                rankingDateValidator);
     }
 
     @Bean
@@ -55,5 +50,10 @@ public class GeographicGamesConfig {
     @Bean
     PlayerNameValidator playerNameValidator() {
         return new PlayerNameValidator();
+    }
+
+    @Bean
+    RankingDateValidator rankingDateValidator() {
+        return new RankingDateValidator();
     }
 }

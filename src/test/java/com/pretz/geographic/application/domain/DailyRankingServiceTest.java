@@ -8,8 +8,8 @@ import com.pretz.geographic.application.domain.model.GameId;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
-import com.pretz.geographic.application.domain.service.DailyRankingCalculator;
 import com.pretz.geographic.application.domain.validation.InvalidDateException;
+import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,33 +34,34 @@ class DailyRankingServiceTest {
     @Mock
     private LoadDailyEntriesPort loadDailyEntriesPort;
 
-    @Mock
-    private DailyRankingCalculator dailyRankingCalculator;
-
     private DailyRankingService dailyRankingService;
 
     @BeforeEach
     void setUp() {
-        dailyRankingService = new DailyRankingService(loadGamePort, loadDailyEntriesPort, dailyRankingCalculator);
+        dailyRankingService = new DailyRankingService(loadGamePort, loadDailyEntriesPort, new RankingDateValidator());
     }
 
     @Test
     void shouldReturnDailyRankingsForPastDate() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
-        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+        Game game1 = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+        Game game2 = new Game(new GameId(2L), "WhenTaken", ScoringSystem.STANDARD);
+
         Player player1 = new Player(new PlayerId(1L), "Player1");
         Player player2 = new Player(new PlayerId(2L), "Player2");
-        DailyEntry entry1 = new DailyEntry(new DailyEntryId(1L), game, pastDate, player1, 950);
-        DailyEntry entry2 = new DailyEntry(new DailyEntryId(2L), game, pastDate, player2, 970);
-        DailyRanking ranking = new DailyRanking(game, pastDate, List.of(entry2, entry1));
+        DailyEntry entry1 = new DailyEntry(new DailyEntryId(1L), game1, pastDate, player1, 950);
+        DailyEntry entry2 = new DailyEntry(new DailyEntryId(2L), game1, pastDate, player2, 970);
+        DailyEntry entry3 = new DailyEntry(new DailyEntryId(3L), game2, pastDate, player1, 888);
+        DailyEntry entry4 = new DailyEntry(new DailyEntryId(4L), game2, pastDate, player2, 864);
+        DailyRanking ranking1 = DailyRanking.of(game1, pastDate, List.of(entry2, entry1));
+        DailyRanking ranking2 = DailyRanking.of(game2, pastDate, List.of(entry3, entry4));
 
-        when(loadGamePort.loadActiveGames()).thenReturn(List.of(game));
-        when(loadDailyEntriesPort.loadEntries(List.of(game), pastDate)).thenReturn(List.of(entry1, entry2));
-        when(dailyRankingCalculator.calculateDailyRanking(List.of(entry1, entry2), game, pastDate)).thenReturn(ranking);
+        when(loadGamePort.loadActiveGames()).thenReturn(List.of(game1, game2));
+        when(loadDailyEntriesPort.loadEntries(List.of(game1, game2), pastDate)).thenReturn(List.of(entry1, entry2, entry3, entry4));
 
         List<DailyRanking> result = dailyRankingService.getDailyRankings(pastDate);
 
-        assertThat(result).containsExactly(ranking);
+        assertThat(result).containsExactly(ranking1, ranking2);
     }
 
     @Test
