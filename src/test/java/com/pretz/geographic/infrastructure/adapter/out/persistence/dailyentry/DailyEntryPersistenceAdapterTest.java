@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,27 +47,38 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     @Autowired
     private PlayerJpaRepository playerRepository;
 
-    private final Game game = new Game(null, "Mapster", ScoringSystem.STANDARD);
-    private final Player player = new Player(null, "Player1");
+    private final Game game1 = new Game(null, "Mapster", ScoringSystem.STANDARD);
+    private final Player player1 = new Player(null, "Player1");
+    private final Game game2 = new Game(null, "WhenTaken", ScoringSystem.STANDARD);
+    private final Player player2 = new Player(null, "Player2");
     private final LocalDate date = LocalDate.of(2026, 6, 30);
-    private Game savedGame;
-    private Player savedPlayer;
+    private List<Game> savedGames;
+    private List<Player> savedPlayers;
 
     @BeforeEach
-    void saveGameAndPlayer() {
-        savedGame = gamePersistenceMapper.toDomain(gameRepository.save(new GameJpaEntity(game.name(), game.scoringSystem())));
-        savedPlayer = playerPersistenceMapper.toDomain(playerRepository.save(new PlayerJpaEntity(player.name())));
+    void saveGamesAndPlayers() {
+        savedGames = gameRepository.saveAll(List.of(
+                        new GameJpaEntity(game1.name(), game1.scoringSystem()),
+                        new GameJpaEntity(game2.name(), game2.scoringSystem())))
+                .stream().map(it -> gamePersistenceMapper.toDomain(it))
+                .toList();
+        savedPlayers = playerRepository.saveAll(List.of(
+                        new PlayerJpaEntity(player1.name()),
+                        new PlayerJpaEntity(player2.name())))
+                .stream().map(it -> playerPersistenceMapper.toDomain(it))
+                .toList();
+        ;
     }
 
     @Test
-    void shouldSaveAndLoadEntryOnRequestedDate() {
+    void shouldSaveAndLoadEntriesOnRequestedDate() {
 
         //given
-        var entry = new DailyEntry(null, savedGame, date, savedPlayer, 900);
+        var entry = new DailyEntry(null, getGame1(), date, getPlayer1(), 900);
 
         //when
         var saved = adapter.save(entry);
-        var loaded = adapter.loadEntries(savedGame, date);
+        var loaded = adapter.loadEntries(savedGames, date);
 
         //then
         assertIdIsNotNull(saved);
@@ -78,19 +90,48 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     void shouldNotLoadEntriesOutsideDateRange() {
 
         //given
-        adapter.save(new DailyEntry(null, savedGame, date, savedPlayer, 900));
+        adapter.save(new DailyEntry(null, getGame1(), date, getPlayer1(), 900));
 
         //when
-        var loaded = adapter.loadEntries(savedGame, date.plusDays(1));
+        var loaded = adapter.loadEntries(savedGames, date.plusDays(1));
 
         //then
         assertThat(loaded).isEmpty();
     }
 
     @Test
+    void shouldSaveAndLoadEntriesOnRequestedDateForManyGames() {
+
+        //given
+        var entry1 = new DailyEntry(null, getGame1(), date, getPlayer1(), 900);
+        var entry2 = new DailyEntry(null, getGame2(), date, getPlayer1(), 860);
+        var entry3 = new DailyEntry(null, getGame1(), date, getPlayer2(), 890);
+        var entry4 = new DailyEntry(null, getGame2(), date, getPlayer2(), 930);
+
+        //when
+        //TODO [GEOG-11] refactor this code to use saveAll after save endpoint expanded to batch mode
+        var saved1 = adapter.save(entry1);
+        var saved2 = adapter.save(entry2);
+        var saved3 = adapter.save(entry3);
+        var saved4 = adapter.save(entry4);
+        var loaded = adapter.loadEntries(savedGames, date);
+
+        //then
+        assertIdIsNotNull(saved1);
+        assertEqualsIgnoringId(saved1, entry1);
+        assertIdIsNotNull(saved2);
+        assertEqualsIgnoringId(saved2, entry2);
+        assertIdIsNotNull(saved3);
+        assertEqualsIgnoringId(saved3, entry3);
+        assertIdIsNotNull(saved4);
+        assertEqualsIgnoringId(saved4, entry4);
+        assertThat(loaded).contains(saved1, saved2, saved3, saved4);
+    }
+
+    @Test
     void shouldFailWhenSavingTheSameEntryTwice() {
         // given
-        var entry = new DailyEntry(null, savedGame, date, savedPlayer, 900);
+        var entry = new DailyEntry(null, getGame1(), date, getPlayer1(), 900);
         adapter.save(entry);
 
         // when / then
@@ -102,7 +143,7 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     void shouldFailWhenSavingEntryWithUnknownGameId() {
         // given
         var unknownGame = new Game(new GameId(999L), "Unknown", ScoringSystem.STANDARD);
-        var entry = new DailyEntry(null, unknownGame, date, savedPlayer, 900);
+        var entry = new DailyEntry(null, unknownGame, date, getPlayer1(), 900);
 
         // when / then
         assertThatThrownBy(() -> adapter.save(entry))
@@ -113,7 +154,7 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     void shouldFailWhenSavingEntryWithUnknownPlayerId() {
         // given
         var unknownPlayer = new Player(new PlayerId(999L), "Unknown");
-        var entry = new DailyEntry(null, savedGame, date, unknownPlayer, 900);
+        var entry = new DailyEntry(null, getGame1(), date, unknownPlayer, 900);
 
         // when / then
         assertThatThrownBy(() -> adapter.save(entry))
@@ -130,5 +171,21 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
                 .usingRecursiveComparison()
                 .ignoringFields("dailyEntryId")
                 .isEqualTo(inputEntry);
+    }
+
+    private Game getGame1() {
+        return savedGames.getFirst();
+    }
+
+    private Game getGame2() {
+        return savedGames.get(1);
+    }
+
+    private Player getPlayer1() {
+        return savedPlayers.getFirst();
+    }
+
+    private Player getPlayer2() {
+        return savedPlayers.get(1);
     }
 }
