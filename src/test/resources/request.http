@@ -5,14 +5,14 @@ Content-Type: application/json
 {
   "game": {
     "id" : 1,
-    "name": "Test"
+    "name": "TestGame1"
   },
   "player": {
-    "id" : 4,
-    "name": "Testplayer2"
+    "id" : 1,
+    "name": "Testplayer"
   },
   "date": "2026-08-17",
-  "points" : 973
+  "points" : 568
 }
 
 ### Send get daily ranking GET request
