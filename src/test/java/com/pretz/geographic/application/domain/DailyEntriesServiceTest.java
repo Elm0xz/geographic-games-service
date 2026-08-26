@@ -7,6 +7,7 @@ import com.pretz.geographic.application.domain.model.GameId;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
+import com.pretz.geographic.application.domain.service.DailyEntriesService;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.InvalidGameNameException;
 import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
@@ -162,7 +163,7 @@ class DailyEntriesServiceTest {
         verify(saveDailyEntryPort, never()).save(any());
     }
 
-    //TODO should not allow duplicate player names?
+    //TODO [GEOG-12] should not allow duplicate player names?
 
     @Test
     void shouldThrowInvalidPlayerNameExceptionWhenInputPlayerNameDoesNotMatchPersistedOne() {

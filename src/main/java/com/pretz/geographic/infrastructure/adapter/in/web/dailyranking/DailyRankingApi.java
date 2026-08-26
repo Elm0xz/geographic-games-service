@@ -15,5 +15,5 @@ public interface DailyRankingApi {
     @GetMapping
     ResponseEntity<List<DailyRankingResponseDto>> getDailyRankings(@RequestParam LocalDate date);
 
-    //TODO single game rankings
+    //TODO [GEOG-17] single game rankings
 }

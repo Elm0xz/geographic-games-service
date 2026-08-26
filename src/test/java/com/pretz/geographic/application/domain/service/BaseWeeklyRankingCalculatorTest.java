@@ -19,7 +19,7 @@ import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.List;
 
-//TODO add given-when-then clauses
+//TODO [GEOG-10] add given-when-then clauses
 class BaseWeeklyRankingCalculatorTest {
 
     private long nextDailyEntryId;

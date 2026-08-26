@@ -24,16 +24,18 @@ public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
     @Override
     public WeeklyRanking calculateWeeklyRanking(List<DailyRanking> dailyRankings, Game game, Week week) {
 
+        //this doesn't look like responsibility of calculator, but service.
         var filteredDailyRankings = dailyRankings.stream()
                 .filter(dRank -> week.equals(dRank.getWeek()))
                 .filter(dRank -> game.equals(dRank.game()))
                 .toList();
 
+
         var winsByPlayer = filteredDailyRankings.stream()
                 .flatMap(dRank -> dRank.getWinner().stream())
                 .collect(Collectors.groupingBy(
                         player -> player,
-                        Collectors.summingInt(_ -> 1)
+                        Collectors.counting()
                 ));
 
         var entriesByPlayer = filteredDailyRankings.stream()
@@ -41,16 +43,18 @@ public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
                 .collect(Collectors.groupingBy(DailyEntry::player));
 
         var weeklyPositions = entriesByPlayer.entrySet().stream()
-                .map(entry -> new WeeklyPosition(game, week,
+                .map(entry -> new WeeklyPosition(
+                        game,
+                        week,
                         entry.getKey(),
-                        winsByPlayer.getOrDefault(entry.getKey(), 0),
+                        Math.toIntExact(winsByPlayer.getOrDefault(entry.getKey(), 0L)),
                         calculatePoints(entry.getValue())))
                 .toList();
 
         return new WeeklyRanking(game, week, weeklyPositions);
     }
 
-    private Integer calculatePoints(List<DailyEntry> playerEntries) {
+    private int calculatePoints(List<DailyEntry> playerEntries) {
 
         return playerEntries.stream()
                 .mapToInt(DailyEntry::points)

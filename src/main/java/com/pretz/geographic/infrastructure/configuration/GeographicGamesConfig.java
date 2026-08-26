@@ -1,8 +1,7 @@
 package com.pretz.geographic.infrastructure.configuration;
 
-import com.pretz.geographic.application.domain.DailyEntriesService;
-import com.pretz.geographic.application.domain.DailyRankingService;
-import com.pretz.geographic.application.domain.service.DailyRankingCalculator;
+import com.pretz.geographic.application.domain.service.DailyEntriesService;
+import com.pretz.geographic.application.domain.service.DailyRankingService;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;

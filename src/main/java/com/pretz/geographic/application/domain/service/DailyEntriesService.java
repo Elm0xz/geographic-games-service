@@ -1,4 +1,4 @@
-package com.pretz.geographic.application.domain;
+package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.Game;
