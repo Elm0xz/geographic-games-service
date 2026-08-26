@@ -1,4 +1,4 @@
-package com.pretz.geographic.application.domain;
+package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyRanking;
@@ -43,7 +43,7 @@ public class DailyRankingService implements GetDailyRankingUseCase {
                 .toList();
     }
 
-    //TODO implement later
+    //TODO [GEOG-17] implement later
     @Override
     public DailyRanking getDailyRanking(LocalDate date, Game game) {
         return null;
