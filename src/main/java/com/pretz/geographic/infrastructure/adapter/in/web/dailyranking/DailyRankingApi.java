@@ -16,4 +16,5 @@ public interface DailyRankingApi {
     ResponseEntity<List<DailyRankingResponseDto>> getDailyRankings(@RequestParam LocalDate date);
 
     //TODO [GEOG-17] single game rankings
+    //TODO Consider restructuring Dto here: aggregate class, player id in response
 }
