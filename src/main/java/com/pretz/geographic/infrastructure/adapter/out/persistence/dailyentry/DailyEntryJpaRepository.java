@@ -14,4 +14,7 @@ public interface DailyEntryJpaRepository extends JpaRepository<DailyEntryJpaEnti
 
     @EntityGraph(attributePaths = {"game", "player"})
     List<DailyEntryJpaEntity> findByGame_IdInAndEntryDate(Collection<Long> gameIds, LocalDate entryDate);
+
+    @EntityGraph(attributePaths = {"game", "player"})
+    List<DailyEntryJpaEntity> findByGame_IdInAndEntryDateBetween(Collection<Long> gameIds, LocalDate from, LocalDate to);
 }

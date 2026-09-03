@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Year;
 
+//TODO [GEOG-10] Add integration test
 @RestController
 public class WeeklyRankingController implements WeeklyRankingApi {
 
@@ -20,8 +21,8 @@ public class WeeklyRankingController implements WeeklyRankingApi {
     @Override
     public ResponseEntity<FullWeeklyRankingsResponseDto> getWeeklyRankings(Year year, int week) {
         return ResponseEntity.ok(new FullWeeklyRankingsResponseDto(
-                getWeeklyRankingUseCase.getWeeklyRankings(new Week(year.getValue(), week)))); //TODO ISO mapping of weeks
+                getWeeklyRankingUseCase.getWeeklyRankings(new Week(year.getValue(), week)))); //TODO [GEOG-10] ISO mapping of weeks
     }
 
-    //TODO unified exception handlers in different task
+    //TODO [GEOG-12] unified exception handlers in different task
 }
