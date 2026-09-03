@@ -9,7 +9,7 @@ public record WeeklyRanking(Game game, Week week, List<WeeklyPosition> positions
 
     private static final Comparator<WeeklyPosition> BY_WINS_AND_POINTS_DESC =
             Comparator.comparingInt(WeeklyPosition::wins)
-                    .thenComparingInt(WeeklyPosition::points)
+                    .thenComparing(WeeklyPosition::points)
                     .reversed();
 
     public WeeklyRanking {
