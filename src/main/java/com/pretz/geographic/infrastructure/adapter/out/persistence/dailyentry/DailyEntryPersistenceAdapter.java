@@ -48,6 +48,15 @@ public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveD
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<DailyEntry> loadEntries(List<Game> games, LocalDate from, LocalDate to) {
+        return dailyEntryRepository.findByGame_IdInAndEntryDateBetween(games.stream()
+                        .map(it -> it.gameId().id()).toList(), from, to).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public DailyEntry save(DailyEntry entry) {
 

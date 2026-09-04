@@ -25,7 +25,7 @@ public class GameJpaEntity {
     @Column(name = "scoring_system", nullable = false)
     private ScoringSystem scoringSystem;
 
-    //TODO add active boolean column to differentiate games that are no longer played (no need to calculate results for them)
+    //TODO [GEOG-18] add active boolean column to differentiate games that are no longer played (no need to calculate results for them)
 
     protected GameJpaEntity() {
     }

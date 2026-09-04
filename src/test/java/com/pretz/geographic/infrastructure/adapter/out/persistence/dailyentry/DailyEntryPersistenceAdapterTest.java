@@ -129,6 +129,33 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
+    void shouldLoadEntriesInDateInterval() {
+
+        //given
+        var startDate = date.minusDays(2);
+        var endDate = date.plusDays(2);
+        var entryBeforeStart = new DailyEntry(null, getGame1(), startDate.minusDays(1), getPlayer1(), 800);
+        var entryOnStart = new DailyEntry(null, getGame1(), startDate, getPlayer1(), 850);
+        var entryInMiddle1 = new DailyEntry(null, getGame1(), date, getPlayer1(), 900);
+        var entryInMiddle2 = new DailyEntry(null, getGame2(), date, getPlayer2(), 920);
+        var entryOnEnd = new DailyEntry(null, getGame1(), endDate, getPlayer1(), 880);
+        var entryAfterEnd = new DailyEntry(null, getGame1(), endDate.plusDays(1), getPlayer1(), 870);
+
+        //when
+        adapter.save(entryBeforeStart);
+        var savedOnStart = adapter.save(entryOnStart);
+        var savedInMiddle1 = adapter.save(entryInMiddle1);
+        var savedInMiddle2 = adapter.save(entryInMiddle2);
+        var savedOnEnd = adapter.save(entryOnEnd);
+        adapter.save(entryAfterEnd);
+        var loaded = adapter.loadEntries(savedGames, startDate, endDate);
+
+        //then
+        assertThat(loaded).containsExactlyInAnyOrder(savedOnStart, savedInMiddle1, savedInMiddle2, savedOnEnd);
+        assertThat(loaded).doesNotContain(entryBeforeStart, entryAfterEnd);
+    }
+
+    @Test
     void shouldFailWhenSavingTheSameEntryTwice() {
         // given
         var entry = new DailyEntry(null, getGame1(), date, getPlayer1(), 900);

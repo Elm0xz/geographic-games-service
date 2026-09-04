@@ -1,4 +1,4 @@
-package com.pretz.geographic.application.domain;
+package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyRanking;
@@ -16,7 +16,10 @@ import java.util.stream.Collectors;
 public class DailyRankingService implements GetDailyRankingUseCase {
 
     private static final Comparator<DailyRanking> BY_GAME_NAME =
-            Comparator.comparing(it -> it.game().name());
+            Comparator.comparing(DailyRanking::game);
+
+    private static final Comparator<DailyRanking> BY_GAME_NAME_AND_DATE =
+            Comparator.comparing(DailyRanking::game).thenComparing(DailyRanking::date);
 
     private final LoadGamePort loadGamePort;
     private final LoadDailyEntriesPort loadDailyEntriesPort;
@@ -43,9 +46,26 @@ public class DailyRankingService implements GetDailyRankingUseCase {
                 .toList();
     }
 
-    //TODO implement later
+    //TODO [GEOG-10] Add unit test
+    @Override
+    public List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to, List<Game> games) {
+
+        rankingDateValidator.validatePastDate(to);
+
+        return loadDailyEntriesPort.loadEntries(loadGamePort.loadGames(
+                        games.stream().map(it -> it.gameId().id()).toList()), from, to).stream()
+                .collect(Collectors.groupingBy(it -> new GameAndDate(it.game(), it.date())))
+                .entrySet().stream().map(it -> DailyRanking.of(it.getKey().game(), it.getKey().date(), it.getValue()))
+                .sorted(BY_GAME_NAME_AND_DATE)
+                .toList();
+    }
+
+    //TODO [GEOG-17] implement later
     @Override
     public DailyRanking getDailyRanking(LocalDate date, Game game) {
         return null;
+    }
+
+    record GameAndDate(Game game, LocalDate date) {
     }
 }

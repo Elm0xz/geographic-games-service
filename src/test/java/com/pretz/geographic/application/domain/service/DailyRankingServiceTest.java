@@ -1,4 +1,4 @@
-package com.pretz.geographic.application.domain;
+package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyEntryId;
@@ -43,6 +43,8 @@ class DailyRankingServiceTest {
 
     @Test
     void shouldReturnDailyRankingsForPastDate() {
+
+        //given
         LocalDate pastDate = LocalDate.now().minusDays(1);
         Game game1 = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
         Game game2 = new Game(new GameId(2L), "WhenTaken", ScoringSystem.STANDARD);
@@ -56,18 +58,23 @@ class DailyRankingServiceTest {
         DailyRanking ranking1 = DailyRanking.of(game1, pastDate, List.of(entry2, entry1));
         DailyRanking ranking2 = DailyRanking.of(game2, pastDate, List.of(entry3, entry4));
 
+        //when
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(game1, game2));
         when(loadDailyEntriesPort.loadEntries(List.of(game1, game2), pastDate)).thenReturn(List.of(entry1, entry2, entry3, entry4));
 
         List<DailyRanking> result = dailyRankingService.getDailyRankings(pastDate);
 
+        //then
         assertThat(result).containsExactly(ranking1, ranking2);
     }
 
     @Test
     void shouldThrowInvalidDateExceptionWhenDateIsToday() {
+
+        //given
         LocalDate today = LocalDate.now();
 
+        //when, then
         assertThatThrownBy(() -> dailyRankingService.getDailyRankings(today))
                 .isInstanceOf(InvalidDateException.class)
                 .hasMessageContaining(today.toString());
@@ -75,8 +82,11 @@ class DailyRankingServiceTest {
 
     @Test
     void shouldThrowInvalidDateExceptionWhenDateIsInFuture() {
+
+        //given
         LocalDate futureDate = LocalDate.now().plusDays(1);
 
+        //when, then
         assertThatThrownBy(() -> dailyRankingService.getDailyRankings(futureDate))
                 .isInstanceOf(InvalidDateException.class)
                 .hasMessageContaining(futureDate.toString());

@@ -10,7 +10,9 @@ public interface GetDailyRankingUseCase {
 
     List<DailyRanking> getDailyRankings(LocalDate date);
 
-    //TODO implement
+    List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to, List<Game> games);
+
+    //TODO [GEOG-17] implement
     DailyRanking getDailyRanking(LocalDate date, Game game);
 
 }

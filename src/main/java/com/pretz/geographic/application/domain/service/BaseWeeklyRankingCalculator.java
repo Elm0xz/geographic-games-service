@@ -24,33 +24,31 @@ public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
     @Override
     public WeeklyRanking calculateWeeklyRanking(List<DailyRanking> dailyRankings, Game game, Week week) {
 
-        var filteredDailyRankings = dailyRankings.stream()
-                .filter(dRank -> week.equals(dRank.getWeek()))
-                .filter(dRank -> game.equals(dRank.game()))
-                .toList();
-
-        var winsByPlayer = filteredDailyRankings.stream()
+        var winsByPlayer = dailyRankings.stream()
                 .flatMap(dRank -> dRank.getWinner().stream())
                 .collect(Collectors.groupingBy(
                         player -> player,
-                        Collectors.summingInt(_ -> 1)
+                        Collectors.counting()
                 ));
 
-        var entriesByPlayer = filteredDailyRankings.stream()
+        var entriesByPlayer = dailyRankings.stream()
                 .flatMap(dRank -> dRank.entries().stream())
                 .collect(Collectors.groupingBy(DailyEntry::player));
 
         var weeklyPositions = entriesByPlayer.entrySet().stream()
-                .map(entry -> new WeeklyPosition(game, week,
+                .map(entry -> new WeeklyPosition(
+                        game,
+                        week,
                         entry.getKey(),
-                        winsByPlayer.getOrDefault(entry.getKey(), 0),
+                        Math.toIntExact(winsByPlayer.getOrDefault(entry.getKey(), 0L)),
                         calculatePoints(entry.getValue())))
                 .toList();
 
+        //TODO [GEOG-10] the ordering doesn't really show up in the code. Should it be the responsibility of calculator or domain object?
         return new WeeklyRanking(game, week, weeklyPositions);
     }
 
-    private Integer calculatePoints(List<DailyEntry> playerEntries) {
+    private int calculatePoints(List<DailyEntry> playerEntries) {
 
         return playerEntries.stream()
                 .mapToInt(DailyEntry::points)

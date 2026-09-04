@@ -99,5 +99,4 @@ public final class DailyRanking {
                 "date=" + date + ", " +
                 "entries=" + entries + ']';
     }
-
 }
