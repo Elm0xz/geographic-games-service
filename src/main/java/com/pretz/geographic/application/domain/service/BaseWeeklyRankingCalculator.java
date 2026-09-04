@@ -24,21 +24,14 @@ public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
     @Override
     public WeeklyRanking calculateWeeklyRanking(List<DailyRanking> dailyRankings, Game game, Week week) {
 
-        //this doesn't look like responsibility of calculator, but service.
-        var filteredDailyRankings = dailyRankings.stream()
-                .filter(dRank -> week.equals(dRank.getWeek()))
-                .filter(dRank -> game.equals(dRank.game()))
-                .toList();
-
-
-        var winsByPlayer = filteredDailyRankings.stream()
+        var winsByPlayer = dailyRankings.stream()
                 .flatMap(dRank -> dRank.getWinner().stream())
                 .collect(Collectors.groupingBy(
                         player -> player,
                         Collectors.counting()
                 ));
 
-        var entriesByPlayer = filteredDailyRankings.stream()
+        var entriesByPlayer = dailyRankings.stream()
                 .flatMap(dRank -> dRank.entries().stream())
                 .collect(Collectors.groupingBy(DailyEntry::player));
 
@@ -51,7 +44,7 @@ public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
                         calculatePoints(entry.getValue())))
                 .toList();
 
-        //the ordering doesn't really show up in the code. Should it be the responsibility of calculator or domain object?
+        //TODO [GEOG-10] the ordering doesn't really show up in the code. Should it be the responsibility of calculator or domain object?
         return new WeeklyRanking(game, week, weeklyPositions);
     }
 

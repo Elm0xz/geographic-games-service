@@ -48,12 +48,12 @@ public class DailyRankingService implements GetDailyRankingUseCase {
 
     //TODO [GEOG-10] Add unit test
     @Override
-    public List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to) {
+    public List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to, List<Game> games) {
 
         rankingDateValidator.validatePastDate(to);
 
-        //ranking isn't persisted but calculated on demand; active games without results for the day won't be taken into account
-        return loadDailyEntriesPort.loadEntries(loadGamePort.loadActiveGames(), from, to).stream()
+        return loadDailyEntriesPort.loadEntries(loadGamePort.loadGames(
+                        games.stream().map(it -> it.gameId().id()).toList()), from, to).stream()
                 .collect(Collectors.groupingBy(it -> new GameAndDate(it.game(), it.date())))
                 .entrySet().stream().map(it -> DailyRanking.of(it.getKey().game(), it.getKey().date(), it.getValue()))
                 .sorted(BY_GAME_NAME_AND_DATE)
@@ -66,5 +66,6 @@ public class DailyRankingService implements GetDailyRankingUseCase {
         return null;
     }
 
-    record GameAndDate(Game game, LocalDate date) {}
+    record GameAndDate(Game game, LocalDate date) {
+    }
 }

@@ -12,6 +12,7 @@ import com.pretz.geographic.application.port.out.LoadWeeklyRankingPort;
 import com.pretz.geographic.application.port.out.SaveWeeklyRankingPort;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class WeeklyRankingService implements GetWeeklyRankingUseCase {
 
@@ -36,23 +37,24 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
         this.getDailyRankingUseCase = getDailyRankingUseCase;
     }
 
-    //TODO [GEOG-10] unit test
     @Override
     public List<WeeklyRanking> getWeeklyRankings(Week week) {
 
         weekValidator.validate(week);
 
-        //only active games taken into account; game deactivation process might need some intermediate state probably?
-        List<Game> activeGames = loadGamePort.loadActiveGames();
-
-        //TODO [GEOG-10] refactor - consider partial presence of rankings
-        List<WeeklyRanking> ranking = loadWeeklyRankingPort.loadWeeklyRankings(activeGames, week);
-        if (!ranking.isEmpty()) {
-            return ranking;
-        } else {
-            List<DailyRanking> rankings = getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday());
-            List<WeeklyRanking> calculatedRankings = activeGames.stream().map(it -> calculateRankingForGame(week, it, rankings)).toList();
-            return saveWeeklyRankingPort.save(calculatedRankings);
+        //TODO only active games taken into account; game deactivation process will need intermediate state to be added
+        var activeGames = loadGamePort.loadActiveGames();
+        var weeklyRankings = loadWeeklyRankingPort.loadWeeklyRankings(activeGames, week);
+        var calculatedGames = weeklyRankings.stream().map(WeeklyRanking::game).toList();
+        var gamesToCalculate = activeGames.stream().filter(it -> !calculatedGames.contains(it)).toList();
+        if (gamesToCalculate.isEmpty()) return weeklyRankings;
+        else {
+            var newWeeklyRankings = gamesToCalculate.stream()
+                    .map(it -> calculateRankingForGame(week, it,
+                            getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), gamesToCalculate)))
+                    .toList();
+            saveWeeklyRankingPort.save(newWeeklyRankings);
+            return Stream.concat(weeklyRankings.stream(), newWeeklyRankings.stream()).toList();
         }
     }
 

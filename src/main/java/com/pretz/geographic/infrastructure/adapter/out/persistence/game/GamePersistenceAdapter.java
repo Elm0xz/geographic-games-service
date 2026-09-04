@@ -37,4 +37,13 @@ public class GamePersistenceAdapter implements LoadGamePort {
                 .map(gamePersistenceMapper::toDomain)
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Game> loadGames(List<Long> gameIds) {
+        return gameJpaRepository.findAllById(gameIds)
+                .stream()
+                .map(gamePersistenceMapper::toDomain)
+                .toList();
+    }
 }

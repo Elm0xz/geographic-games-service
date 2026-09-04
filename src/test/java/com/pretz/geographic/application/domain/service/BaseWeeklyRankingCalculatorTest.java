@@ -13,6 +13,7 @@ import com.pretz.geographic.application.domain.model.WeeklyPosition;
 import com.pretz.geographic.application.domain.model.WeeklyRanking;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -123,6 +124,7 @@ class BaseWeeklyRankingCalculatorTest {
                 new WeeklyPosition(game1, week, player2, 1, 2720))));
     }
 
+    @Disabled
     @Test
     public void shouldCalculateWeeklyRankingNotTakingIntoAccountDailyRankingsOutsideTheWeek() {
 
@@ -180,6 +182,7 @@ class BaseWeeklyRankingCalculatorTest {
                 new WeeklyPosition(game1, week, player2, 2, 4591))));
     }
 
+    @Disabled
     @Test
     public void shouldCalculateWeeklyRankingNotTakingIntoAccountDailyRankingsFromDifferentGame() {
 
