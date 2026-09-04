@@ -56,7 +56,6 @@ public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveD
                 .toList();
     }
 
-    //TODO [GEOG-10] Add unit test
     @Override
     @Transactional
     public DailyEntry save(DailyEntry entry) {

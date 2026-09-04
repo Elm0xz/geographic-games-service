@@ -5,7 +5,6 @@ import com.pretz.geographic.application.domain.model.Week;
 import com.pretz.geographic.application.domain.model.WeeklyRanking;
 import com.pretz.geographic.application.port.out.LoadWeeklyRankingPort;
 import com.pretz.geographic.application.port.out.SaveWeeklyRankingPort;
-import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaEntity;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaRepository;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.player.PlayerJpaRepository;
 import org.springframework.stereotype.Component;
@@ -47,16 +46,12 @@ public class WeeklyRankingPersistenceAdapter implements LoadWeeklyRankingPort, S
     @Transactional
     public List<WeeklyRanking> save(List<WeeklyRanking> rankings) {
         return rankings.stream()
-                .map(ranking -> {
-                    Long gameId = ranking.game().gameId().id();
-                    GameJpaEntity gameEntity = gameRepository.getReferenceById(gameId);
-                    WeeklyRankingJpaEntity entity = mapper.toEntity(
-                            ranking,
-                            gameEntity,
-                            playerRepository::getReferenceById
-                    );
-                    return mapper.toDomain(weeklyRankingRepository.save(entity));
-                })
+                .map(ranking -> mapper.toDomain(
+                        weeklyRankingRepository.save(mapper.toEntity(
+                                ranking,
+                                gameRepository::getReferenceById,
+                                playerRepository::getReferenceById
+                        ))))
                 .toList();
     }
 }

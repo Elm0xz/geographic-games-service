@@ -45,7 +45,7 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
         //only active games taken into account; game deactivation process might need some intermediate state probably?
         List<Game> activeGames = loadGamePort.loadActiveGames();
 
-        //TODO [GEOG-10] refactor
+        //TODO [GEOG-10] refactor - consider partial presence of rankings
         List<WeeklyRanking> ranking = loadWeeklyRankingPort.loadWeeklyRankings(activeGames, week);
         if (!ranking.isEmpty()) {
             return ranking;

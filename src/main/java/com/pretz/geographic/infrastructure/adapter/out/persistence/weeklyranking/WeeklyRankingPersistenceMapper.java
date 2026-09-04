@@ -25,7 +25,7 @@ public class WeeklyRankingPersistenceMapper {
         this.playerPersistenceMapper = playerPersistenceMapper;
     }
 
-    public WeeklyRanking toDomain(WeeklyRankingJpaEntity entity) {
+    WeeklyRanking toDomain(WeeklyRankingJpaEntity entity) {
         var game = gamePersistenceMapper.toDomain(entity.getGame());
         var week = new Week(entity.getYear(), entity.getWeek());
         List<WeeklyPosition> positions = entity.getPositions().stream()
@@ -39,12 +39,11 @@ public class WeeklyRankingPersistenceMapper {
         return new WeeklyRanking(game, week, positions);
     }
 
-    //TODO [GEOG-10] playerLookup?
-    public WeeklyRankingJpaEntity toEntity(WeeklyRanking ranking,
-                                           GameJpaEntity gameEntity,
-                                           Function<Long, PlayerJpaEntity> playerLookup) {
+    WeeklyRankingJpaEntity toEntity(WeeklyRanking ranking,
+                                    Function<Long, GameJpaEntity> gameLookup,
+                                    Function<Long, PlayerJpaEntity> playerLookup) {
         WeeklyRankingJpaEntity rankingEntity = new WeeklyRankingJpaEntity(
-                gameEntity,
+                gameLookup.apply(ranking.game().gameId().id()),
                 ranking.week().year(),
                 ranking.week().number(),
                 new ArrayList<>()
