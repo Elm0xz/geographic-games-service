@@ -164,7 +164,7 @@ class WeeklyRankingServiceTest {
     private static WeeklyRanking rankingFor(Game game, Week week) {
         WeeklyPosition pos1 = new WeeklyPosition(game, week, PLAYER_1, 3, 4500);
         WeeklyPosition pos2 = new WeeklyPosition(game, week, PLAYER_2, 2, 4200);
-        return new WeeklyRanking(game, week, List.of(pos1, pos2));
+        return WeeklyRanking.of(game, week, List.of(pos1, pos2));
     }
 
     private static Week weekFromDate(LocalDate date) {

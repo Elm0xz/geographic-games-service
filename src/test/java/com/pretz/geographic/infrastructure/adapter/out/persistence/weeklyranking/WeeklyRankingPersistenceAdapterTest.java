@@ -130,6 +130,6 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         List<WeeklyPosition> positions = List.of(
                 new WeeklyPosition(game, week, players[0], 3, 2700),
                 new WeeklyPosition(game, week, players[1], 1, 1800));
-        return new WeeklyRanking(game, week, positions);
+        return WeeklyRanking.of(game, week, positions);
     }
 }
