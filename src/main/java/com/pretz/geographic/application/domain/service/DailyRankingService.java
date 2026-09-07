@@ -46,7 +46,6 @@ public class DailyRankingService implements GetDailyRankingUseCase {
                 .toList();
     }
 
-    //TODO [GEOG-10] Add unit test
     @Override
     public List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to, List<Game> games) {
 
