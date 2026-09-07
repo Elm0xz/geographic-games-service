@@ -36,7 +36,7 @@ public class WeeklyRankingPersistenceMapper {
                         pos.getWins(),
                         pos.getPoints()))
                 .toList();
-        return new WeeklyRanking(game, week, positions);
+        return WeeklyRanking.of(game, week, positions);
     }
 
     WeeklyRankingJpaEntity toEntity(WeeklyRanking ranking,

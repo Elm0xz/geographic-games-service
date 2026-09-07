@@ -75,7 +75,7 @@ class BaseWeeklyRankingCalculatorTest {
                 game1, week);
 
         //then
-        Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game1, week, List.of(
+        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game1, week, List.of(
                 new WeeklyPosition(game1, week, player1, 3, 4650),
                 new WeeklyPosition(game1, week, player3, 2, 4690),
                 new WeeklyPosition(game1, week, player2, 2, 4560))));
@@ -118,7 +118,7 @@ class BaseWeeklyRankingCalculatorTest {
                 game1, week);
 
         //then
-        Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game1, week, List.of(
+        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game1, week, List.of(
                 new WeeklyPosition(game1, week, player1, 3, 4630),
                 new WeeklyPosition(game1, week, player3, 2, 3750),
                 new WeeklyPosition(game1, week, player2, 1, 2720))));
@@ -176,7 +176,7 @@ class BaseWeeklyRankingCalculatorTest {
 
         //then
         Assertions.assertThat(numberOfEntriesCheckedForWinner(result)).isEqualTo(7);
-        Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game1, week, List.of(
+        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game1, week, List.of(
                 new WeeklyPosition(game1, week, player1, 3, 4678),
                 new WeeklyPosition(game1, week, player3, 2, 4739),
                 new WeeklyPosition(game1, week, player2, 2, 4591))));
@@ -235,7 +235,7 @@ class BaseWeeklyRankingCalculatorTest {
 
         //then
         Assertions.assertThat(numberOfEntriesCheckedForWinner(result)).isEqualTo(7);
-        Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game1, week, List.of(
+        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game1, week, List.of(
                 new WeeklyPosition(game1, week, player1, 3, 4650),
                 new WeeklyPosition(game1, week, player3, 2, 4690),
                 new WeeklyPosition(game1, week, player2, 2, 4560))));
@@ -271,7 +271,7 @@ class BaseWeeklyRankingCalculatorTest {
                 game1, week);
 
         //then
-        Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game1, week, List.of(
+        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game1, week, List.of(
                 new WeeklyPosition(game1, week, player1, 3, 2790),
                 new WeeklyPosition(game1, week, player2, 2, 2770),
                 new WeeklyPosition(game1, week, player3, 2, 2730))));
@@ -290,7 +290,7 @@ class BaseWeeklyRankingCalculatorTest {
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(), game, week);
 
         //then
-        Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game, week, List.of()));
+        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game, week, List.of()));
     }
 
     @Test
@@ -310,7 +310,7 @@ class BaseWeeklyRankingCalculatorTest {
         ), game, week);
 
         //then
-        Assertions.assertThat(result).isEqualTo(new WeeklyRanking(game, week, List.of()));
+        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game, week, List.of()));
     }
 
     private DailyEntry entry(Game game, LocalDate date, Player player, int points) {

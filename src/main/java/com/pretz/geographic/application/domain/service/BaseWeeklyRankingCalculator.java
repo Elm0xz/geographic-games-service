@@ -44,8 +44,7 @@ public class BaseWeeklyRankingCalculator implements WeeklyRankingCalculator {
                         calculatePoints(entry.getValue())))
                 .toList();
 
-        //TODO [GEOG-10] the ordering doesn't really show up in the code. Should it be the responsibility of calculator or domain object?
-        return new WeeklyRanking(game, week, weeklyPositions);
+        return WeeklyRanking.of(game, week, weeklyPositions);
     }
 
     private int calculatePoints(List<DailyEntry> playerEntries) {
