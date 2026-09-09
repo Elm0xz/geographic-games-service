@@ -46,7 +46,7 @@ public final class DailyRanking {
     }
 
     public Week getWeek() {
-        return new Week(date.get(WeekFields.ISO.weekBasedYear()),
+        return Week.of(date.get(WeekFields.ISO.weekBasedYear()),
                 date.get(WeekFields.ISO.weekOfWeekBasedYear()));
     }
 

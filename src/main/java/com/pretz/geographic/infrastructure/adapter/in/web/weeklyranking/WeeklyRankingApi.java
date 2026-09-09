@@ -12,8 +12,7 @@ import java.time.Year;
 public interface WeeklyRankingApi {
 
     @GetMapping
-    ResponseEntity<FullWeeklyRankingsResponseDto> getWeeklyRankings(@RequestParam Year year, @RequestParam int week); //TODO validate week number valid
+    ResponseEntity<FullWeeklyRankingsResponseDto> getWeeklyRankings(@RequestParam Year year, @RequestParam int week);
 
     //TODO single game weekly rankings
 }
-

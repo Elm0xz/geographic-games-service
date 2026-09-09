@@ -38,7 +38,7 @@ class BaseWeeklyRankingCalculatorTest {
         Player player2 = new Player(new PlayerId(2L), "Player2");
         Player player3 = new Player(new PlayerId(3L), "Player3");
         LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = new Week(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
 
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
@@ -90,7 +90,7 @@ class BaseWeeklyRankingCalculatorTest {
         Player player2 = new Player(new PlayerId(2L), "Player2");
         Player player3 = new Player(new PlayerId(3L), "Player3");
         LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = new Week(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
 
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
@@ -134,7 +134,7 @@ class BaseWeeklyRankingCalculatorTest {
         Player player2 = new Player(new PlayerId(2L), "Player2");
         Player player3 = new Player(new PlayerId(3L), "Player3");
         LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = new Week(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
 
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
@@ -193,7 +193,7 @@ class BaseWeeklyRankingCalculatorTest {
         Player player2 = new Player(new PlayerId(2L), "Player2");
         Player player3 = new Player(new PlayerId(3L), "Player3");
         LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = new Week(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
 
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
@@ -250,7 +250,7 @@ class BaseWeeklyRankingCalculatorTest {
         Player player2 = new Player(new PlayerId(2L), "Player2");
         Player player3 = new Player(new PlayerId(3L), "Player3");
         LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = new Week(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
 
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
@@ -282,7 +282,7 @@ class BaseWeeklyRankingCalculatorTest {
 
         //given
         Game game = new Game(new GameId(1L), "Game1", ScoringSystem.STANDARD);
-        Week week = new Week(2026, 4);
+        Week week = Week.of(2026, 4);
 
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 
@@ -299,7 +299,7 @@ class BaseWeeklyRankingCalculatorTest {
         //given
         Game game = new Game(new GameId(1L), "Game1", ScoringSystem.STANDARD);
         LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = new Week(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
 
         var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
 

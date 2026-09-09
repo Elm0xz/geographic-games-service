@@ -170,7 +170,7 @@ class WeeklyRankingServiceTest {
     private static Week weekFromDate(LocalDate date) {
         int year = date.get(WeekFields.ISO.weekBasedYear());
         int week = date.get(WeekFields.ISO.weekOfWeekBasedYear());
-        return new Week(year, week);
+        return Week.of(year, week);
     }
 
     private static Week pastWeek() {

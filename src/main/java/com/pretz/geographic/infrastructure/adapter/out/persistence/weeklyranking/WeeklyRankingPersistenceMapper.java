@@ -27,7 +27,7 @@ public class WeeklyRankingPersistenceMapper {
 
     WeeklyRanking toDomain(WeeklyRankingJpaEntity entity) {
         var game = gamePersistenceMapper.toDomain(entity.getGame());
-        var week = new Week(entity.getYear(), entity.getWeek());
+        var week = Week.of(entity.getYear(), entity.getWeek());
         List<WeeklyPosition> positions = entity.getPositions().stream()
                 .map(pos -> new WeeklyPosition(
                         game,
