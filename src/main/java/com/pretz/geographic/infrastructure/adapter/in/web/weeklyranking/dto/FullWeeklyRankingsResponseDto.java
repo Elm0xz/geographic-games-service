@@ -6,9 +6,13 @@ import java.time.Year;
 import java.util.List;
 
 public record FullWeeklyRankingsResponseDto(Year year, int week,
-                                            List<WeeklyRankingResponseDto> weeklyRankingResponseDtoList) {
+                                            List<WeeklyRankingResponseDto> weeklyRankings) {
 
     public FullWeeklyRankingsResponseDto(List<WeeklyRanking> weeklyRankings) {
-        this(null, 0, null); //TODO implement
+        this(
+                weeklyRankings.isEmpty() ? null : Year.of(weeklyRankings.getFirst().week().year()),
+                weeklyRankings.isEmpty() ? 0 : weeklyRankings.getFirst().week().number(),
+                weeklyRankings.stream().map(WeeklyRankingResponseDto::new).toList()
+        );
     }
 }

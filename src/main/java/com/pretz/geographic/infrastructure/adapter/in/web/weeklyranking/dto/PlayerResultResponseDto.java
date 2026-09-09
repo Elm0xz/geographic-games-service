@@ -1,4 +1,10 @@
 package com.pretz.geographic.infrastructure.adapter.in.web.weeklyranking.dto;
 
-public record PlayerResultResponseDto(PlayerResponseDto player, int wins, double points) {
+import com.pretz.geographic.application.domain.model.WeeklyPosition;
+
+public record PlayerResultResponseDto(PlayerResponseDto player, int wins, float points) {
+
+    public PlayerResultResponseDto(WeeklyPosition position) {
+        this(new PlayerResponseDto(position.player()), position.wins(), position.points());
+    }
 }

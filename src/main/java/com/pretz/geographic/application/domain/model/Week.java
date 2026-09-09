@@ -1,7 +1,10 @@
 package com.pretz.geographic.application.domain.model;
 
+import com.pretz.geographic.application.domain.validation.InvalidDateException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.IsoFields;
@@ -21,14 +24,18 @@ public final class Week {
     }
 
     public static Week of(int year, int number) {
-        LocalDate date = LocalDate.parse(
-                String.format("%04d-W%02d-1", year, number),
-                ISO_WEEK_STRICT
-        );
-        return new Week(
-                date.get(IsoFields.WEEK_BASED_YEAR),
-                date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
-        );
+        try {
+            LocalDate date = LocalDate.parse(
+                    String.format("%04d-W%02d-1", year, number),
+                    ISO_WEEK_STRICT
+            );
+            return new Week(
+                    date.get(IsoFields.WEEK_BASED_YEAR),
+                    date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+            );
+        } catch (DateTimeParseException e) {
+            throw new InvalidDateException("Invalid week number: " + number);
+        }
     }
 
     public LocalDate monday() {
