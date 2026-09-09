@@ -188,8 +188,8 @@ class DailyRankingTest {
     }
 
     public static Stream<Arguments> dateAndWeek() {
-        return Stream.of(Arguments.of(LocalDate.of(2029, 12, 31), new Week(2030, 1)),
-                Arguments.of(LocalDate.of(2027, 1, 1), new Week(2026, 53))
+        return Stream.of(Arguments.of(LocalDate.of(2029, 12, 31), Week.of(2030, 1)),
+                Arguments.of(LocalDate.of(2027, 1, 1), Week.of(2026, 53))
         );
     }
 }

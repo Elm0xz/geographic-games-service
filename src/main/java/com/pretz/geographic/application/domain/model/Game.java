@@ -9,7 +9,6 @@ public record Game(GameId gameId, String name, ScoringSystem scoringSystem) impl
         Objects.requireNonNull(scoringSystem, "Game scoringSystem must not be null");
     }
 
-    //TODO [GEOG-10] unit test?
     @Override
     public int compareTo(Game o) {
         return this.name().compareTo(o.name());

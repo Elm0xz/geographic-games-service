@@ -3,7 +3,7 @@ package com.pretz.geographic.application.domain.validation;
 import com.pretz.geographic.application.domain.model.Week;
 
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
+import java.time.temporal.IsoFields;
 
 public class WeekValidator {
 
@@ -15,7 +15,7 @@ public class WeekValidator {
 
         if (week.year() > LocalDate.now().getYear())
             throw new InvalidDateException(String.format(INVALID_RANKING_MESSAGE, YEAR, week.year()));
-        else if (week.number() >= LocalDate.now().get(WeekFields.ISO.weekOfWeekBasedYear()))
+        else if (week.number() >= LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))
             throw new InvalidDateException(String.format(INVALID_RANKING_MESSAGE, WEEK, week.year()));
     }
 }

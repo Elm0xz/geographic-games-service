@@ -56,7 +56,7 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     private Player player1;
     private Player player2;
 
-    private final Week week = new Week(2026, 4);
+    private final Week week = Week.of(2026, 4);
 
     @BeforeEach
     void setup() {
