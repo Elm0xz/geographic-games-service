@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Year;
 
-//TODO [GEOG-10] Add integration test
 @RestController
 public class WeeklyRankingController implements WeeklyRankingApi {
 

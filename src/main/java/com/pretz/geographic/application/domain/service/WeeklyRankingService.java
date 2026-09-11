@@ -49,11 +49,9 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
         var gamesToCalculate = activeGames.stream().filter(it -> !calculatedGames.contains(it)).toList();
         if (gamesToCalculate.isEmpty()) return weeklyRankings;
         else {
-            //TODO [GEOG-10] Unnecessary n calls for daily rankings
+            var dailyRankings = getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), gamesToCalculate);
             var newWeeklyRankings = gamesToCalculate.stream()
-                    .map(it -> calculateRankingForGame(week, it,
-                            getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), gamesToCalculate)))
-                    .toList();
+                    .map(game -> calculateRankingForGame(week, game, dailyRankings)).toList();
             saveWeeklyRankingPort.save(newWeeklyRankings);
             return Stream.concat(weeklyRankings.stream(), newWeeklyRankings.stream()).toList();
         }
