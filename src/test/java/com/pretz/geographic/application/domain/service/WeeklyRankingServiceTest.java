@@ -149,6 +149,30 @@ class WeeklyRankingServiceTest {
         verify(saveWeeklyRankingPort).save(List.of(newRanking1, newRanking2));
     }
 
+    @Test
+    void shouldReturnEmptyListWhenNoDailyEntriesExistForAWeekInDb() {
+
+        //given
+        Week week = pastWeek();
+        WeeklyRanking emptyRanking1 = emptyRanking(GAME_1, week);
+        WeeklyRanking emptyRanking2 = emptyRanking(GAME_2, week);
+
+        when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
+                .thenReturn(List.of());
+        when(getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), List.of(GAME_1, GAME_2)))
+                .thenReturn(List.of());
+        when(weeklyRankingCalculator.calculateWeeklyRanking(List.of(), GAME_1, week)).thenReturn(emptyRanking1);
+        when(weeklyRankingCalculator.calculateWeeklyRanking(List.of(), GAME_2, week)).thenReturn(emptyRanking2);
+
+        //when
+        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(week);
+
+        //then
+        assertThat(result).containsExactlyInAnyOrder(emptyRanking1, emptyRanking2);
+        verify(saveWeeklyRankingPort, never()).save(any());
+    }
+
     @MethodSource("invalidWeeks")
     @ParameterizedTest
     void shouldThrowInvalidDateExceptionOnInvalidWeeks(LocalDate wrongDate) {
@@ -165,6 +189,10 @@ class WeeklyRankingServiceTest {
         WeeklyPosition pos1 = new WeeklyPosition(game, week, PLAYER_1, 3, 4500);
         WeeklyPosition pos2 = new WeeklyPosition(game, week, PLAYER_2, 2, 4200);
         return WeeklyRanking.of(game, week, List.of(pos1, pos2));
+    }
+
+    private static WeeklyRanking emptyRanking(Game game, Week week) {
+        return WeeklyRanking.of(game, week, List.of());
     }
 
     private static Week weekFromDate(LocalDate date) {

@@ -19,7 +19,7 @@ public class WeeklyRankingController implements WeeklyRankingApi {
 
     @Override
     public ResponseEntity<FullWeeklyRankingsResponseDto> getWeeklyRankings(Year year, int week) {
-        return ResponseEntity.ok(new FullWeeklyRankingsResponseDto(
+        return ResponseEntity.ok(new FullWeeklyRankingsResponseDto(year, week,
                 getWeeklyRankingUseCase.getWeeklyRankings(Week.of(year.getValue(), week))));
     }
 

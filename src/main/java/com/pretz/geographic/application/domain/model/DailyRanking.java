@@ -20,6 +20,7 @@ public final class DailyRanking {
         Objects.requireNonNull(game, "DailyRanking game must not be null");
         Objects.requireNonNull(date, "DailyRanking date must not be null");
         Objects.requireNonNull(entries, "DailyRanking entries must not be null");
+        validateEntriesNotEmpty(entries);
         validateIdsPresent(game, entries);
         validateGameAndDateMatch(game, date, entries);
         this.game = game;
@@ -29,6 +30,10 @@ public final class DailyRanking {
 
     public static DailyRanking of(Game game, LocalDate date, List<DailyEntry> entries) {
         return new DailyRanking(game, date, List.copyOf(entries.stream().sorted(BY_POINTS_DESC_THEN_PLAYER_NAME).toList()));
+    }
+
+    private static void validateEntriesNotEmpty(List<DailyEntry> entries) {
+        if (entries.isEmpty()) throw new IllegalArgumentException("DailyRanking entries list can't be empty");
     }
 
     private static void validateIdsPresent(Game game, List<DailyEntry> entries) {

@@ -12,7 +12,8 @@ import java.util.stream.Stream;
 
 class DailyRankingTest {
 
-    public static final String RANKING_ENTRY_VALIDATION_ERROR = "DailyRanking entries must match ranking game and date";
+    private static final String RANKING_ENTRY_VALIDATION_ERROR = "DailyRanking entries must match ranking game and date";
+    private static final String NO_ENTRIES_VALIDATION_ERROR = "DailyRanking entries list can't be empty";
 
     @Test
     public void shouldReturnListOfEntriesSortedByRank() {
@@ -35,6 +36,7 @@ class DailyRankingTest {
         Assertions.assertThat(result).hasSize(3);
         Assertions.assertThat(result).isEqualTo(List.of(player2Entry, player1Entry, player3Entry));
     }
+
     @Test
     public void shouldReturnListOfEntriesSortedByNameIfPointsEqual() {
 
@@ -104,22 +106,6 @@ class DailyRankingTest {
     }
 
     @Test
-    public void shouldReturnEmptyListOfWinnersIfNoEntries() {
-
-        //given
-        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
-        LocalDate date = LocalDate.of(2026, 4, 12);
-
-        var dailyRanking = DailyRanking.of(game, date, List.of());
-
-        //when
-        List<Player> result = dailyRanking.getWinner();
-
-        //then
-        Assertions.assertThat(result).isEmpty();
-    }
-
-    @Test
     public void shouldThrowExceptionWhenEntryHasDifferentGameThanRanking() {
 
         //given
@@ -178,13 +164,29 @@ class DailyRankingTest {
         //given
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
 
-        var dailyRanking = DailyRanking.of(game, inputDate, List.of());
+        var dailyRanking = DailyRanking.of(game, inputDate, List.of(
+                new DailyEntry(new DailyEntryId(1L), game, inputDate,
+                        new Player(new PlayerId(1L), "Player1"), 990)));
 
         //when
         Week result = dailyRanking.getWeek();
 
         //then
         Assertions.assertThat(result).isEqualTo(expectedWeek);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNoEntriesAreProvidedForRanking() {
+
+        //given
+        Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
+        LocalDate date = LocalDate.of(2026, 4, 12);
+
+        //when //then
+        Assertions.assertThatThrownBy(() -> DailyRanking.of(game, date, List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(NO_ENTRIES_VALIDATION_ERROR);
+
     }
 
     public static Stream<Arguments> dateAndWeek() {

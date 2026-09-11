@@ -13,7 +13,6 @@ import com.pretz.geographic.application.domain.model.WeeklyPosition;
 import com.pretz.geographic.application.domain.model.WeeklyRanking;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -124,123 +123,6 @@ class BaseWeeklyRankingCalculatorTest {
                 new WeeklyPosition(game1, week, player2, 1, 2720))));
     }
 
-    @Disabled
-    @Test
-    public void shouldCalculateWeeklyRankingNotTakingIntoAccountDailyRankingsOutsideTheWeek() {
-
-        //given
-        Game game1 = new Game(new GameId(1L), "Game1", ScoringSystem.STANDARD);
-        Player player1 = new Player(new PlayerId(1L), "Player1");
-        Player player2 = new Player(new PlayerId(2L), "Player2");
-        Player player3 = new Player(new PlayerId(3L), "Player3");
-        LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
-
-        var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
-
-        //when
-        var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                        DailyRanking.of(game1, monday.minusDays(1), List.of(
-                                entry(game1, monday.minusDays(1), player2, 1000),
-                                entry(game1, monday.minusDays(1), player1, 990),
-                                entry(game1, monday.minusDays(1), player3, 980))),
-                        DailyRanking.of(game1, monday, List.of(
-                                entry(game1, monday, player3, 975),
-                                entry(game1, monday, player1, 904),
-                                entry(game1, monday, player2, 831))),
-                        DailyRanking.of(game1, monday.plusDays(1), List.of(
-                                entry(game1, monday.plusDays(1), player1, 934),
-                                entry(game1, monday.plusDays(1), player3, 917),
-                                entry(game1, monday.plusDays(1), player2, 872))),
-                        DailyRanking.of(game1, monday.plusDays(2), List.of(
-                                entry(game1, monday.plusDays(2), player2, 948),
-                                entry(game1, monday.plusDays(2), player3, 906),
-                                entry(game1, monday.plusDays(2), player1, 883))),
-                        DailyRanking.of(game1, monday.plusDays(3), List.of(
-                                entry(game1, monday.plusDays(3), player1, 982),
-                                entry(game1, monday.plusDays(3), player3, 924),
-                                entry(game1, monday.plusDays(3), player2, 864))),
-                        DailyRanking.of(game1, monday.plusDays(4), List.of(
-                                entry(game1, monday.plusDays(4), player2, 953),
-                                entry(game1, monday.plusDays(4), player3, 937),
-                                entry(game1, monday.plusDays(4), player1, 912))),
-                        DailyRanking.of(game1, monday.plusDays(5), List.of(
-                                entry(game1, monday.plusDays(5), player3, 986),
-                                entry(game1, monday.plusDays(5), player1, 895),
-                                entry(game1, monday.plusDays(5), player2, 889))),
-                        DailyRanking.of(game1, monday.plusDays(6), List.of(
-                                entry(game1, monday.plusDays(6), player1, 946),
-                                entry(game1, monday.plusDays(6), player2, 929),
-                                entry(game1, monday.plusDays(6), player3, 908)))),
-                game1, week);
-
-        //then
-        Assertions.assertThat(numberOfEntriesCheckedForWinner(result)).isEqualTo(7);
-        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game1, week, List.of(
-                new WeeklyPosition(game1, week, player1, 3, 4678),
-                new WeeklyPosition(game1, week, player3, 2, 4739),
-                new WeeklyPosition(game1, week, player2, 2, 4591))));
-    }
-
-    @Disabled
-    @Test
-    public void shouldCalculateWeeklyRankingNotTakingIntoAccountDailyRankingsFromDifferentGame() {
-
-        //given
-        Game game1 = new Game(new GameId(1L), "Game1", ScoringSystem.STANDARD);
-        Game game2 = new Game(new GameId(2L), "Game2", ScoringSystem.STANDARD);
-        Player player1 = new Player(new PlayerId(1L), "Player1");
-        Player player2 = new Player(new PlayerId(2L), "Player2");
-        Player player3 = new Player(new PlayerId(3L), "Player3");
-        LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
-
-        var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
-
-        //when
-        var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                        DailyRanking.of(game1, monday, List.of(
-                                entry(game1, monday, player3, 960),
-                                entry(game1, monday, player1, 900),
-                                entry(game1, monday, player2, 820))),
-                        DailyRanking.of(game1, monday.plusDays(1), List.of(
-                                entry(game1, monday.plusDays(1), player1, 930),
-                                entry(game1, monday.plusDays(1), player3, 910),
-                                entry(game1, monday.plusDays(1), player2, 870))),
-                        DailyRanking.of(game1, monday.plusDays(2), List.of(
-                                entry(game1, monday.plusDays(2), player2, 940),
-                                entry(game1, monday.plusDays(2), player3, 900),
-                                entry(game1, monday.plusDays(2), player1, 880))),
-                        DailyRanking.of(game1, monday.plusDays(3), List.of(
-                                entry(game1, monday.plusDays(3), player1, 970),
-                                entry(game1, monday.plusDays(3), player3, 920),
-                                entry(game1, monday.plusDays(3), player2, 860))),
-                        DailyRanking.of(game1, monday.plusDays(4), List.of(
-                                entry(game1, monday.plusDays(4), player2, 950),
-                                entry(game1, monday.plusDays(4), player3, 930),
-                                entry(game1, monday.plusDays(4), player1, 910))),
-                        DailyRanking.of(game1, monday.plusDays(5), List.of(
-                                entry(game1, monday.plusDays(5), player3, 970),
-                                entry(game1, monday.plusDays(5), player1, 890),
-                                entry(game1, monday.plusDays(5), player2, 880))),
-                        DailyRanking.of(game1, monday.plusDays(6), List.of(
-                                entry(game1, monday.plusDays(6), player1, 940),
-                                entry(game1, monday.plusDays(6), player2, 920),
-                                entry(game1, monday.plusDays(6), player3, 900))),
-                        DailyRanking.of(game2, monday, List.of(
-                                entry(game2, monday, player3, 960),
-                                entry(game2, monday, player1, 900),
-                                entry(game2, monday, player2, 820)))),
-                game1, week);
-
-        //then
-        Assertions.assertThat(numberOfEntriesCheckedForWinner(result)).isEqualTo(7);
-        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game1, week, List.of(
-                new WeeklyPosition(game1, week, player1, 3, 4650),
-                new WeeklyPosition(game1, week, player3, 2, 4690),
-                new WeeklyPosition(game1, week, player2, 2, 4560))));
-    }
-
     @Test
     public void shouldCalculateWeeklyRankingWithTiedDailyWinners() {
 
@@ -288,26 +170,6 @@ class BaseWeeklyRankingCalculatorTest {
 
         //when
         var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(), game, week);
-
-        //then
-        Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game, week, List.of()));
-    }
-
-    @Test
-    public void shouldReturnEmptyWeeklyRankingWhenMatchingDailyRankingsHaveNoEntries() {
-
-        //given
-        Game game = new Game(new GameId(1L), "Game1", ScoringSystem.STANDARD);
-        LocalDate monday = LocalDate.of(2026, 1, 19);
-        Week week = Week.of(2026, monday.get(WeekFields.ISO.weekOfWeekBasedYear()));
-
-        var weeklyRankingCalculator = new BaseWeeklyRankingCalculator();
-
-        //when
-        var result = weeklyRankingCalculator.calculateWeeklyRanking(List.of(
-                DailyRanking.of(game, monday, List.of()),
-                DailyRanking.of(game, monday.plusDays(1), List.of())
-        ), game, week);
 
         //then
         Assertions.assertThat(result).isEqualTo(WeeklyRanking.of(game, week, List.of()));
