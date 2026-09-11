@@ -52,7 +52,9 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
             var dailyRankings = getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), gamesToCalculate);
             var newWeeklyRankings = gamesToCalculate.stream()
                     .map(game -> calculateRankingForGame(week, game, dailyRankings)).toList();
-            saveWeeklyRankingPort.save(newWeeklyRankings);
+            if (isNonEmptyRankingPresent(newWeeklyRankings)) {
+                saveWeeklyRankingPort.save(newWeeklyRankings.stream().filter(it -> !it.positions().isEmpty()).toList());
+            }
             return Stream.concat(weeklyRankings.stream(), newWeeklyRankings.stream()).toList();
         }
     }
@@ -60,6 +62,10 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
     private WeeklyRanking calculateRankingForGame(Week week, Game game, List<DailyRanking> rankings) {
         List<DailyRanking> relevantRankings = rankings.stream().filter(it -> game.equals(it.game())).toList();
         return weeklyRankingCalculator.calculateWeeklyRanking(relevantRankings, game, week);
+    }
+
+    private boolean isNonEmptyRankingPresent(List<WeeklyRanking> rankings) {
+        return !rankings.stream().filter(it -> !it.positions().isEmpty()).toList().isEmpty();
     }
 
     //TODO implement later
