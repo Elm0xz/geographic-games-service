@@ -53,7 +53,7 @@ public final class Week {
         return year;
     }
 
-    public int number() {
+    public int week() {
         return week;
     }
 

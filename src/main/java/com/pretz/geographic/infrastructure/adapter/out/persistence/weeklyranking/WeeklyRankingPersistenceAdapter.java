@@ -36,7 +36,7 @@ public class WeeklyRankingPersistenceAdapter implements LoadWeeklyRankingPort, S
         return weeklyRankingRepository.findByGame_IdInAndYearAndWeek(
                         games.stream().map(g -> g.gameId().id()).toList(),
                         week.year(),
-                        week.number())
+                        week.week())
                 .stream()
                 .map(mapper::toDomain)
                 .toList();

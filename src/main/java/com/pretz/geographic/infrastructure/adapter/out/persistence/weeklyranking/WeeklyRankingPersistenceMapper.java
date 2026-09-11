@@ -45,7 +45,7 @@ public class WeeklyRankingPersistenceMapper {
         WeeklyRankingJpaEntity rankingEntity = new WeeklyRankingJpaEntity(
                 gameLookup.apply(ranking.game().gameId().id()),
                 ranking.week().year(),
-                ranking.week().number(),
+                ranking.week().week(),
                 new ArrayList<>()
         );
         List<WeeklyPositionJpaEntity> positionEntities = ranking.positions().stream()

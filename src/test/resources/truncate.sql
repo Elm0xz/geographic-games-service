@@ -1,1 +1,1 @@
-TRUNCATE table player, game, daily_entry RESTART IDENTITY;
+TRUNCATE table player, game, daily_entry, weekly_position, weekly_ranking RESTART IDENTITY;

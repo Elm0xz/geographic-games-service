@@ -17,3 +17,6 @@ Content-Type: application/json
 
 ### Send get daily ranking GET request
 GET http://localhost:8080/api/daily-ranking?date=2026-08-17
+
+### Send get weekly ranking GET request
+GET http://localhost:8080/api/weekly-ranking?year=2026&week=50
