@@ -84,6 +84,7 @@ public class ApiExceptionHandler {
                 .body(new ApiErrorResponse(ApiErrorCode.PLAYER_NOT_FOUND, exception.getMessage()));
     }
 
+    //TODO improve this exception handler
     @ExceptionHandler(DataIntegrityViolationException.class)
     ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
         log.warn("Daily entry could not be saved due to data integrity violation");
