@@ -7,17 +7,14 @@ import com.pretz.geographic.infrastructure.adapter.out.persistence.AbstractPostg
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({GamePersistenceAdapter.class, GamePersistenceMapper.class})
 class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
 
@@ -30,10 +27,14 @@ class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     @Autowired
     private GameJpaRepository repository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private Game game;
 
     @BeforeEach
     void setupExistingGame() {
+        jdbcTemplate.execute("TRUNCATE TABLE game RESTART IDENTITY CASCADE");
         game = mapper.toDomain(repository.save(new GameJpaEntity("Mapster", ScoringSystem.STANDARD)));
     }
 

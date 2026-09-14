@@ -16,10 +16,9 @@ import com.pretz.geographic.infrastructure.adapter.out.persistence.player.Player
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,8 +26,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({DailyEntryPersistenceAdapter.class, DailyEntryPersistenceMapper.class, GamePersistenceMapper.class, PlayerPersistenceMapper.class})
 class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
 
@@ -47,6 +44,9 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     @Autowired
     private PlayerJpaRepository playerRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private final Game game1 = new Game(null, "Mapster", ScoringSystem.STANDARD);
     private final Player player1 = new Player(null, "Player1");
     private final Game game2 = new Game(null, "WhenTaken", ScoringSystem.STANDARD);
@@ -56,7 +56,8 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     private List<Player> savedPlayers;
 
     @BeforeEach
-    void saveGamesAndPlayers() {
+    void setupGamesAndPlayers() {
+        jdbcTemplate.execute("TRUNCATE TABLE daily_entry, game, player RESTART IDENTITY CASCADE");
         savedGames = gameRepository.saveAll(List.of(
                         new GameJpaEntity(game1.name(), game1.scoringSystem()),
                         new GameJpaEntity(game2.name(), game2.scoringSystem())))
