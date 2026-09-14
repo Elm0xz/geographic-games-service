@@ -3,6 +3,7 @@ package com.pretz.geographic.infrastructure.adapter.in.web.weeklyranking;
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
+import com.pretz.geographic.infrastructure.adapter.in.web.AbstractWebIntegrationTest;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry.DailyEntryJpaEntity;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry.DailyEntryJpaRepository;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaEntity;
@@ -15,15 +16,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.LocalDate;
 import java.time.temporal.IsoFields;
@@ -32,22 +26,13 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//TODO [GEOG-16] create shared class for integration tests & separate package (?)
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Testcontainers
-public class WeeklyRankingIntegrationTest {
+public class WeeklyRankingIntegrationTest extends AbstractWebIntegrationTest {
 
     private static final String ENDPOINT = "/api/weekly-ranking";
 
     // Week 2 of 2025: Mon 2025-01-06 to Sun 2025-01-12
     private static final String PAST_YEAR = "2025";
     private static final String PAST_WEEK = "2";
-
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
 
     @Autowired
     private MockMvcTester mockMvc;

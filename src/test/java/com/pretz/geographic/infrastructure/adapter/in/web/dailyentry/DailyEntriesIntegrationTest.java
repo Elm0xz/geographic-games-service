@@ -3,6 +3,7 @@ package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry;
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
+import com.pretz.geographic.infrastructure.adapter.in.web.AbstractWebIntegrationTest;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaEntity;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaRepository;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.player.PlayerJpaEntity;
@@ -13,16 +14,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.stream.Stream;
 
@@ -31,17 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Testcontainers
-class DailyEntriesIntegrationTest {
+class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
 
     private static final String ENDPOINT = "/api/daily-entries";
-
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
 
     @Autowired
     private MockMvc mockMvc;
@@ -290,6 +276,6 @@ class DailyEntriesIntegrationTest {
                           "points": 990
                         }
                         """, "PLAYER_NOT_FOUND")
-                );
+        );
     }
 }
