@@ -8,5 +8,5 @@ public interface AddDailyEntriesUseCase {
 
     DailyEntry addDailyEntry(AddDailyEntryCommand addDailyEntryCommand);
 
-    List<DailyEntry> addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands);
+    AddDailyEntriesResult addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands);
 }
