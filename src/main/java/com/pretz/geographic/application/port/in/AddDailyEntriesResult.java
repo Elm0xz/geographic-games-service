@@ -18,7 +18,7 @@ public record AddDailyEntriesResult(List<AddDailyEntrySuccess> successList,
 
         public enum DailyEntrySuccess {
             NEW,
-            UPDATED
+            CORRECTED //entry timestamp was earlier than incumbent entry, becoming a new incumbent
         }
     }
 
@@ -32,7 +32,7 @@ public record AddDailyEntriesResult(List<AddDailyEntrySuccess> successList,
             UNKNOWN_PLAYER,
             INVALID_DATE,
             WEEK_CLOSED,
-            DUPLICATE
+            SUPERSEDED //entry timestamp was equal or later than incumbent entry
         }
     }
 }

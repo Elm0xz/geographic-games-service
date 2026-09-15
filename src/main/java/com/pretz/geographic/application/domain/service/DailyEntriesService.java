@@ -46,6 +46,9 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
     //TODO [GEOG-11] implement
     @Override
     public AddDailyEntriesResult addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
+        //TODO 1. [GEOG-11] fetch db data (games, players, weeks, existing entries)
+        //TODO 2. [GEOG-11] tier one - validate commands (game, players vs db data, date independently, timestamp of the same date)
+        //TODO 3. [GEOG-11] tier two - validate week not closed, data against DB, detect duplicates, update/insert if needed (transaction)
         return new AddDailyEntriesResult();
     }
 

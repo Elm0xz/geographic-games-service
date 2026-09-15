@@ -11,6 +11,5 @@ public interface LoadGamePort {
 
     List<Game> loadActiveGames();
 
-    @Transactional(readOnly = true)
     List<Game> loadGames(List<Long> gameIds);
 }
