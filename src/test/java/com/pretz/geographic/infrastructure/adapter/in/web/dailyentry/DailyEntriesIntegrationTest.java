@@ -67,7 +67,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                                     "name": "Player1"
                                   },
                                   "date": "2026-07-29",
-                                  "points": 990
+                                  "points": 990,
+                                  "submittedAt": "2026-07-29T00:00:00Z"
                                 }
                                 """))
                 .andExpect(status().isCreated());
@@ -106,7 +107,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "VALIDATION_ERROR"),
                 Arguments.of("""
@@ -116,7 +118,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Mapster"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "VALIDATION_ERROR"),
                 Arguments.of("""
@@ -129,6 +132,21 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "id": 1,
                             "name": "Player1"
                           },
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
+                        }
+                        """, "VALIDATION_ERROR"),
+                Arguments.of("""
+                        {
+                          "game": {
+                            "id": 1,
+                            "name": "Mapster"
+                          },
+                          "player": {
+                            "id": 1,
+                            "name": "Player1"
+                          },
+                          "date": "2026-07-29",
                           "points": 990
                         }
                         """, "VALIDATION_ERROR"),
@@ -143,7 +161,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "MALFORMED_REQUEST"),
                 Arguments.of("""
@@ -157,7 +176,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "MALFORMED_REQUEST"),
                 Arguments.of("""
@@ -171,7 +191,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "VALIDATION_ERROR"),
                 Arguments.of("""
@@ -185,7 +206,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "VALIDATION_ERROR")
         );
@@ -197,20 +219,6 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                         {
                           "game": {
                             "id": 1,
-                            "name": "Mapster"
-                          },
-                          "player": {
-                            "id": 1,
-                            "name": "Player1"
-                          },
-                          "date": "2056-07-29",
-                          "points": 990
-                        }
-                        """, "VALIDATION_ERROR"),
-                Arguments.of("""
-                        {
-                          "game": {
-                            "id": 1,
                             "name": "Wrong Name"
                           },
                           "player": {
@@ -218,7 +226,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "INVALID_GAME_NAME"),
                 Arguments.of("""
@@ -232,7 +241,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Wrong Name"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "INVALID_PLAYER_NAME"),
                 Arguments.of("""
@@ -246,7 +256,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "GAME_NOT_FOUND"),
                 Arguments.of("""
@@ -260,7 +271,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Player1"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "PLAYER_NOT_FOUND"),
                 Arguments.of("""
@@ -273,7 +285,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                             "name": "Unknown"
                           },
                           "date": "2026-07-29",
-                          "points": 990
+                          "points": 990,
+                          "submittedAt": "2026-07-29T00:00:00Z"
                         }
                         """, "PLAYER_NOT_FOUND")
         );

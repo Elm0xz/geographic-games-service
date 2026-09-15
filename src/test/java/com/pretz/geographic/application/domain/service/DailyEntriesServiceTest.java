@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
+import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -210,8 +211,6 @@ class DailyEntriesServiceTest {
         verify(saveDailyEntryPort, never()).save(any());
     }
 
-    // ... existing code ...
-
     private AddDailyEntryCommand command(Long gameId,
                                          String gameName,
                                          Long playerId,
@@ -222,7 +221,7 @@ class DailyEntriesServiceTest {
                 new AddDailyEntryCommand.GameRef(gameId, gameName),
                 new AddDailyEntryCommand.PlayerRef(playerId, playerName),
                 date,
-                points
-        );
+                points,
+                date.atStartOfDay().toInstant(UTC));
     }
 }
