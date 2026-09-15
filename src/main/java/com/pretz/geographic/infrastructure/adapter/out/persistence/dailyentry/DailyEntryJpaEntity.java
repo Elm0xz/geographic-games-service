@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
@@ -38,14 +39,19 @@ public class DailyEntryJpaEntity {
     @Column(nullable = false)
     private int points;
 
-    protected DailyEntryJpaEntity() {
-    }
+    @Column(name = "submitted_at", nullable = false)
+    private Instant submittedAt;
 
-    public DailyEntryJpaEntity(GameJpaEntity game, PlayerJpaEntity player, LocalDate entryDate, int points) {
+    public DailyEntryJpaEntity(GameJpaEntity game, PlayerJpaEntity player, LocalDate entryDate, int points, Instant submittedAt) {
         this.game = game;
         this.player = player;
         this.entryDate = entryDate;
         this.points = points;
+        this.submittedAt = submittedAt;
+    }
+
+    public DailyEntryJpaEntity() {
+
     }
 
     public Long getId() {
