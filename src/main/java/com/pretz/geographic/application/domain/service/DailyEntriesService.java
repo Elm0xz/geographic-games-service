@@ -5,6 +5,7 @@ import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
+import com.pretz.geographic.application.port.in.AddDailyEntriesResult;
 import com.pretz.geographic.application.port.in.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.out.LoadGamePort;
@@ -44,8 +45,8 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
 
     //TODO [GEOG-11] implement
     @Override
-    public List<DailyEntry> addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
-        return List.of();
+    public AddDailyEntriesResult addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
+        return new AddDailyEntriesResult();
     }
 
     private Game loadAndValidateGame(AddDailyEntryCommand command) {
