@@ -56,7 +56,7 @@ public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveD
         var player = playerRepository.getReferenceById(entry.player().playerId().id());
 
         var saved = dailyEntryRepository.save(
-                new DailyEntryJpaEntity(game, player, entry.date(), entry.points()));
+                new DailyEntryJpaEntity(game, player, entry.date(), entry.points(), entry.submittedAt()));
 
         return mapper.toDomain(saved);
     }
