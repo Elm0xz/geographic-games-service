@@ -15,6 +15,7 @@ public record DailyEntry(DailyEntryId dailyEntryId, Game game, LocalDate date, P
         Objects.requireNonNull(submittedAt, "DailyEntry timestamp must not be null");
     }
 
+    //TODO get rid of this constructor -> move to test cases
     public DailyEntry(DailyEntryId dailyEntryId, Game game, LocalDate date, Player player, int points) {
         this(dailyEntryId,game, date, player, points, date.atStartOfDay().toInstant(UTC));
 

@@ -1,4 +1,4 @@
-package com.pretz.geographic.application.port.in;
+package com.pretz.geographic.application.port.in.dailyentry;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -37,16 +37,12 @@ public record AddDailyEntryCommand(
     public record PlayerRef(Long id, String name) {
 
         public PlayerRef {
-            if (id != null && id <= 0) {
-                throw new IllegalArgumentException("Player id must be positive when provided");
+            if (id == null || id <= 0) {
+                throw new IllegalArgumentException("Player id must be positive");
             }
             if (name == null || name.isBlank()) {
                 throw new IllegalArgumentException("Player name must not be blank");
             }
-        }
-
-        public boolean hasId() {
-            return id != null;
         }
     }
 }

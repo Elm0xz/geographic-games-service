@@ -1,6 +1,6 @@
 package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry;
 
-import com.pretz.geographic.application.port.in.AddDailyEntriesUseCase;
+import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntriesRequestDto;
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntriesResponseDto;
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntryRequestDto;

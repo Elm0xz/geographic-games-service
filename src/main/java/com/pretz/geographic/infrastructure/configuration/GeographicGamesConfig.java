@@ -9,7 +9,7 @@ import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.domain.validation.WeekValidator;
-import com.pretz.geographic.application.port.in.AddDailyEntriesUseCase;
+import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.in.GetWeeklyRankingUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;

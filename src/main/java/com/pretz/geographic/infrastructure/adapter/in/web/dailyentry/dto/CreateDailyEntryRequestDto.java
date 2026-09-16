@@ -1,6 +1,6 @@
 package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto;
 
-import com.pretz.geographic.application.port.in.AddDailyEntryCommand;
+import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
