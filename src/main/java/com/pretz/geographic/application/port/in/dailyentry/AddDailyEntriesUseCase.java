@@ -1,6 +1,7 @@
-package com.pretz.geographic.application.port.in;
+package com.pretz.geographic.application.port.in.dailyentry;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
+import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
 
 import java.util.List;
 

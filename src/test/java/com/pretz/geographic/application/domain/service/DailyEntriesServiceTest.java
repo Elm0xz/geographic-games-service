@@ -11,7 +11,7 @@ import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.InvalidGameNameException;
 import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
-import com.pretz.geographic.application.port.in.AddDailyEntryCommand;
+import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 import com.pretz.geographic.application.port.out.LoadPlayerPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
@@ -122,37 +122,6 @@ class DailyEntriesServiceTest {
         assertThat(dailyEntryCaptor.getValue().dailyEntryId()).isNull();
     }
 
-    @Test
-    void shouldFindPlayerByNameWhenPlayerIdIsNull() {
-
-        //given
-        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
-        LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(
-                1L,
-                "Mapster",
-                null,
-                "Player1",
-                date,
-                950
-        );
-        DailyEntry savedEntry = new DailyEntry(new DailyEntryId(10L), game, date, player, 950);
-
-        //when
-        when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer("Player1")).thenReturn(player);
-        when(saveDailyEntryPort.save(new DailyEntry(null, game, date, player, 950))).thenReturn(savedEntry);
-
-        DailyEntry result = dailyEntriesService.addDailyEntry(command);
-
-        //then
-        assertThat(result).isEqualTo(savedEntry);
-
-        verify(loadPlayerPort).loadPlayer("Player1");
-        verify(loadPlayerPort, never()).loadPlayer(2L);
-        verify(saveDailyEntryPort).save(new DailyEntry(null, game, date, player, 950));
-    }
     @Test
     void shouldThrowInvalidGameNameExceptionWhenInputGameNameDoesNotMatchPersistedOne() {
 

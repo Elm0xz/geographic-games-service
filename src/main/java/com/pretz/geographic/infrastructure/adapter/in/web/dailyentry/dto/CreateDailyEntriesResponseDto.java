@@ -1,9 +1,9 @@
 
 package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto;
 
-import com.pretz.geographic.application.port.in.AddDailyEntriesResult;
-import com.pretz.geographic.application.port.in.AddDailyEntriesResult.AddDailyEntryFailure;
-import com.pretz.geographic.application.port.in.AddDailyEntriesResult.AddDailyEntrySuccess;
+import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
+import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
+import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntrySuccess;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,14 +33,14 @@ public record CreateDailyEntriesResponseDto(
         }
     }
 
-    record CreateDailyEntryFailureResponseDto(GameSummaryDto game, PlayerSummaryDto player, LocalDate date, String failureCode) {
+    record CreateDailyEntryFailureResponseDto(GameSummaryDto game, PlayerSummaryDto player, LocalDate date, List<String> failureCode) {
 
         CreateDailyEntryFailureResponseDto(AddDailyEntryFailure failure) {
             this(
-                    new GameSummaryDto(failure.failureKey().game().gameId().id(), failure.failureKey().game().name()),
-                    new PlayerSummaryDto(failure.failureKey().player().playerId().id(), failure.failureKey().player().name()),
-                    failure.failureKey().date(),
-                    failure.failureCode().name()
+                    new GameSummaryDto(failure.failedCommand().game().id(), failure.failedCommand().game().name()),
+                    new PlayerSummaryDto(failure.failedCommand().player().id(), failure.failedCommand().player().name()),
+                    failure.failedCommand().date(),
+                    failure.reasons().stream().map(Enum::name).toList()
             );
         }
     }

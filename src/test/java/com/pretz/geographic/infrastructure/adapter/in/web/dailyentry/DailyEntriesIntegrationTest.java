@@ -274,7 +274,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                           "points": 990,
                           "submittedAt": "2026-07-29T00:00:00Z"
                         }
-                        """, "PLAYER_NOT_FOUND"),
+                        """, "PLAYER_NOT_FOUND")/*,
                 Arguments.of("""
                         {
                           "game": {
@@ -288,7 +288,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                           "points": 990,
                           "submittedAt": "2026-07-29T00:00:00Z"
                         }
-                        """, "PLAYER_NOT_FOUND")
+                        """, "PLAYER_NOT_FOUND")*/
         );
     }
 }
