@@ -17,4 +17,7 @@ public interface DailyEntryJpaRepository extends JpaRepository<DailyEntryJpaEnti
 
     @EntityGraph(attributePaths = {"game", "player"})
     List<DailyEntryJpaEntity> findByGame_IdInAndEntryDateBetween(Collection<Long> gameIds, LocalDate from, LocalDate to);
+
+    @EntityGraph(attributePaths = {"game", "player"})//TODO maybe we can drop player nere?
+    List<DailyEntryJpaEntity> findByGame_IdInAndEntryDateIn(Collection<Long> gameIds, Collection<LocalDate> entryDates);
 }

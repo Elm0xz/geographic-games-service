@@ -65,6 +65,6 @@ public class DailyRankingService implements GetDailyRankingUseCase {
         return null;
     }
 
-    record GameAndDate(Game game, LocalDate date) {
+    public record GameAndDate(Game game, LocalDate date) {
     }
 }
