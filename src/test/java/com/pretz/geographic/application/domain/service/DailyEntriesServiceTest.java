@@ -12,8 +12,10 @@ import com.pretz.geographic.application.domain.validation.InvalidGameNameExcepti
 import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
+import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 import com.pretz.geographic.application.port.out.LoadPlayerPort;
+import com.pretz.geographic.application.port.out.LoadWeeklyRankingPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +46,14 @@ class DailyEntriesServiceTest {
     @Mock
     private LoadPlayerPort loadPlayerPort;
 
+    @Mock
+    private LoadWeeklyRankingPort loadWeeklyRankingPort;
+
+    @Mock
+    private LoadDailyEntriesPort loadDailyEntriesPort;
+
     private DailyEntriesService dailyEntriesService;
+
 
     @BeforeEach
     void setUp() {
@@ -52,6 +61,8 @@ class DailyEntriesServiceTest {
                 saveDailyEntryPort,
                 loadGamePort,
                 loadPlayerPort,
+                loadWeeklyRankingPort,
+                loadDailyEntriesPort,
                 new GameNameValidator(),
                 new PlayerNameValidator()
         );

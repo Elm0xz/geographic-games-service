@@ -2,6 +2,7 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.Game;
+import com.pretz.geographic.application.domain.service.DailyRankingService;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaRepository;
@@ -44,6 +45,16 @@ public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveD
     public List<DailyEntry> loadEntries(List<Game> games, LocalDate from, LocalDate to) {
         return dailyEntryRepository.findByGame_IdInAndEntryDateBetween(games.stream()
                         .map(it -> it.gameId().id()).toList(), from, to).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DailyEntry> loadEntries(List<DailyRankingService.GameAndDate> gamesAndDates) {
+        return dailyEntryRepository.findByGame_IdInAndEntryDateIn((gamesAndDates.stream()
+                        .map(it -> it.game().gameId().id()).toList()), gamesAndDates.stream()
+                        .map(it -> it.date()).toList()).stream()
                 .map(mapper::toDomain)
                 .toList();
     }
