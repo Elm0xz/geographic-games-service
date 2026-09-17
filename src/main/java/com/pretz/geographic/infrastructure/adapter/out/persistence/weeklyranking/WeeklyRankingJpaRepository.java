@@ -10,4 +10,6 @@ public interface WeeklyRankingJpaRepository extends JpaRepository<WeeklyRankingJ
 
     @EntityGraph(attributePaths = {"game", "positions", "positions.player"})
     List<WeeklyRankingJpaEntity> findByGame_IdInAndYearAndWeek(Collection<Long> gameIds, int year, int week);
+
+    List<WeeklyRankingJpaEntity> findByGame_IdInAndYearInAndWeekIn(Collection<Long> gameIds, Collection<Integer> years, Collection<Integer> weeks);
 }

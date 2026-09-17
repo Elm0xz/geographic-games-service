@@ -2,6 +2,7 @@ package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.Game;
+import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
@@ -9,20 +10,30 @@ import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCas
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
+import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntrySuccess;
+import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 import com.pretz.geographic.application.port.out.LoadPlayerPort;
+import com.pretz.geographic.application.port.out.LoadWeeklyRankingPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure.Reason.INVALID_DATE;
+import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure.Reason.SUPERSEDED;
 import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure.Reason.UNKNOWN_GAME;
 import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure.Reason.UNKNOWN_PLAYER;
+import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure.Reason.WEEK_CLOSED;
+import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntrySuccess.DailyEntrySuccess.CORRECTED;
+import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntrySuccess.DailyEntrySuccess.NEW;
 import static java.time.ZoneOffset.UTC;
 
 public class DailyEntriesService implements AddDailyEntriesUseCase {
@@ -30,17 +41,21 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
     private final SaveDailyEntryPort saveDailyEntryPort;
     private final LoadGamePort loadGamePort;
     private final LoadPlayerPort loadPlayerPort;
+    private final LoadWeeklyRankingPort loadWeeklyRankingPort;
+    private final LoadDailyEntriesPort loadDailyEntriesPort;
     private final GameNameValidator gameNameValidator;
     private final PlayerNameValidator playerNameValidator;
 
     public DailyEntriesService(SaveDailyEntryPort saveDailyEntryPort,
                                LoadGamePort loadGamePort,
-                               LoadPlayerPort loadPlayerPort,
+                               LoadPlayerPort loadPlayerPort, LoadWeeklyRankingPort loadWeeklyRankingPort, LoadDailyEntriesPort loadDailyEntriesPort,
                                GameNameValidator gameNameValidator,
                                PlayerNameValidator playerNameValidator) {
         this.saveDailyEntryPort = saveDailyEntryPort;
         this.loadGamePort = loadGamePort;
         this.loadPlayerPort = loadPlayerPort;
+        this.loadWeeklyRankingPort = loadWeeklyRankingPort;
+        this.loadDailyEntriesPort = loadDailyEntriesPort;
         this.gameNameValidator = gameNameValidator;
         this.playerNameValidator = playerNameValidator;
     }
@@ -64,8 +79,8 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
 
         var intermediateResult = validateDateAndGameAndPlayers(addDailyEntryCommands, gameLookup, playerLookup);
         var finalResult = validateTierTwo(intermediateResult);
-        //TODO 3. [GEOG-11] tier two - validate week not closed, data against DB, detect duplicates, update/insert if needed (transaction)
-        return new AddDailyEntriesResult();
+        //TODO 3. [GEOG-11] tier two - validate week not closed, detect duplicates, update/insert if needed (transaction)
+        return finalResult;
     }
 
     private ValidationIntermediateResult validateDateAndGameAndPlayers(List<AddDailyEntryCommand> addDailyEntryCommands,
@@ -82,7 +97,78 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
     }
 
     private AddDailyEntriesResult validateTierTwo(ValidationIntermediateResult intermediateResult) {
-        return null;
+        var calculatedWeeks = loadWeeklyRankingPort.loadCalculatedWeeks(intermediateResult.entriesPassed.stream()
+                .map(it -> new GameWeek(it.game().gameId(), it.getWeek())).toList());
+        var dbPresentEntries = loadDailyEntriesPort.loadEntries(intermediateResult.entriesPassed().stream()
+                .map(it -> new DailyRankingService.GameAndDate(it.game(), it.date())).toList());
+
+        var afterWeekValResult = validateWeek(intermediateResult, calculatedWeeks);
+        var afterDuplResult = validateDuplicates(afterWeekValResult, dbPresentEntries);
+        //TODO insert/update
+        return afterDuplResult;
+    }
+
+    private AddDailyEntriesResult validateDuplicates(ValidationIntermediateResult intermediateResult,
+                                                     List<DailyEntry> dbPresentEntries) {
+
+        var referenceMap = dbPresentEntries.stream()
+                .collect(Collectors.toMap(
+                        it -> new DailyRankingService.GameAndDate(it.game(), it.date()),
+                        it -> new TimestampIndex(-1, it.submittedAt(), null)));
+
+        var entriesToCheck = intermediateResult.entriesPassed();
+
+        List<AddDailyEntryFailure> failuresToAdd = new ArrayList<>();
+        for (int i = 0; i < entriesToCheck.size(); i++) {
+            var entry = entriesToCheck.get(i);
+            DailyRankingService.GameAndDate key = new DailyRankingService.GameAndDate(entry.game(), entry.date());
+            if (referenceMap.containsKey(key)) {
+                if (entry.submittedAt().isBefore(referenceMap.get(key).timestamp())) {
+                    if (referenceMap.get(key).index() != -1) {
+                        var entryToPurge = entriesToCheck.get(referenceMap.get(key).index());
+                        failuresToAdd.add(new AddDailyEntryFailure(new AddDailyEntryCommand(
+                                new AddDailyEntryCommand.GameRef(entryToPurge.game().gameId().id(), entryToPurge.game().name()),
+                                new AddDailyEntryCommand.PlayerRef(entryToPurge.player().playerId().id(), entryToPurge.player().name()),
+                                entryToPurge.date(),
+                                entryToPurge.points(),
+                                entryToPurge.submittedAt()), List.of(SUPERSEDED)));
+                    }
+                    referenceMap.put(key, new TimestampIndex(i, entry.submittedAt(), CORRECTED));
+                } else {
+                    failuresToAdd.add(new AddDailyEntryFailure(new AddDailyEntryCommand(
+                            new AddDailyEntryCommand.GameRef(entry.game().gameId().id(), entry.game().name()),
+                            new AddDailyEntryCommand.PlayerRef(entry.player().playerId().id(), entry.player().name()),
+                            entry.date(),
+                            entry.points(),
+                            entry.submittedAt()), List.of(SUPERSEDED)));
+                }
+            } else {
+                referenceMap.put(key, new TimestampIndex(i, entry.submittedAt(), NEW));
+            }
+        }
+        var successfulEntriesIds = referenceMap.values().stream()
+                .filter(it -> it.index() != -1)
+                .toList();
+        var successfulEntries = successfulEntriesIds.stream()
+                .map(it -> new AddDailyEntrySuccess(entriesToCheck.get(it.index()), it.successType()))
+                .toList();
+
+        return new AddDailyEntriesResult(successfulEntries,
+                Stream.concat(intermediateResult.failures().stream(), failuresToAdd.stream()).toList());
+    }
+
+    private ValidationIntermediateResult validateWeek(ValidationIntermediateResult validationIntermediateResult,
+                                                      Set<GameWeek> calculatedWeeks) {
+        var result = validationIntermediateResult.entriesPassed().stream().collect(Collectors.partitioningBy(
+                it -> !calculatedWeeks.contains(new GameWeek(it.game().gameId(), it.getWeek()))));
+        var successes = result.get(true);
+        var newFailures = result.get(false).stream().map(it -> new AddDailyEntryFailure(new AddDailyEntryCommand(
+                new AddDailyEntryCommand.GameRef(it.game().gameId().id(), it.game().name()),
+                new AddDailyEntryCommand.PlayerRef(it.player().playerId().id(), it.player().name()),
+                it.date(),
+                it.points(),
+                it.submittedAt()), List.of(WEEK_CLOSED)));
+        return new ValidationIntermediateResult(successes, Stream.concat(validationIntermediateResult.failures().stream(), newFailures).toList());
     }
 
     private SingleCommandValidationStep validateDate(SingleCommandValidationStep step) {
@@ -142,5 +228,8 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
                     .toList();
             this(validatedEntries, failedCommands);
         }
+    }
+
+    private record TimestampIndex(int index, Instant timestamp, AddDailyEntrySuccess.DailyEntrySuccess successType) {
     }
 }

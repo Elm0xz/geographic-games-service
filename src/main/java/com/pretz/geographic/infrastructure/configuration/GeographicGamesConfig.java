@@ -28,12 +28,16 @@ public class GeographicGamesConfig {
     AddDailyEntriesUseCase addDailyEntriesUseCase(SaveDailyEntryPort saveDailyEntryPort,
                                                   LoadGamePort loadGamePort,
                                                   LoadPlayerPort loadPlayerPort,
+                                                  LoadWeeklyRankingPort loadWeeklyRankingPort,
+                                                  LoadDailyEntriesPort loadDailyEntriesPort,
                                                   GameNameValidator gameNameValidator,
                                                   PlayerNameValidator playerNameValidator) {
         return new DailyEntriesService(
                 saveDailyEntryPort,
                 loadGamePort,
                 loadPlayerPort,
+                loadWeeklyRankingPort,
+                loadDailyEntriesPort,
                 gameNameValidator,
                 playerNameValidator);
     }
