@@ -50,6 +50,15 @@ public class DailyEntryJpaEntity {
         this.submittedAt = submittedAt;
     }
 
+    public DailyEntryJpaEntity(Long id, GameJpaEntity game, PlayerJpaEntity player, LocalDate entryDate, int points, Instant submittedAt) {
+        this.id = id;
+        this.game = game;
+        this.player = player;
+        this.entryDate = entryDate;
+        this.points = points;
+        this.submittedAt = submittedAt;
+    }
+
     public DailyEntryJpaEntity() {
 
     }
@@ -72,5 +81,9 @@ public class DailyEntryJpaEntity {
 
     public int getPoints() {
         return points;
+    }
+
+    public Instant getSubmittedAt() {
+        return submittedAt;
     }
 }

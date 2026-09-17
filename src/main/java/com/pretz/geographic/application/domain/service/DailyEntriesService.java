@@ -1,6 +1,7 @@
 package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
+import com.pretz.geographic.application.domain.model.DailyEntryId;
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.model.Player;
@@ -20,11 +21,13 @@ import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure.Reason.INVALID_DATE;
@@ -69,7 +72,6 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return saveDailyEntryPort.save(new DailyEntry(null, game, command.date(), player, command.points()));
     }
 
-    //TODO [GEOG-11] implement
     @Override
     public AddDailyEntriesResult addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
         var gameLookup = loadGamePort.loadGames(addDailyEntryCommands.stream().map(it -> it.game().id()).toList())
@@ -78,9 +80,13 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
                 .stream().collect(Collectors.toMap(it -> it.playerId().id(), Function.identity()));
 
         var intermediateResult = validateDateAndGameAndPlayers(addDailyEntryCommands, gameLookup, playerLookup);
-        var finalResult = validateTierTwo(intermediateResult);
-        //TODO 3. [GEOG-11] tier two - validate week not closed, detect duplicates, update/insert if needed (transaction)
-        return finalResult;
+        var afterTierTwoResult = validateTierTwo(intermediateResult);
+
+        var saved = saveDailyEntryPort.saveAll(afterTierTwoResult.successList().stream().map(AddDailyEntrySuccess::entry).toList());
+        var successList = IntStream.range(0, saved.size())
+                .mapToObj(i -> new AddDailyEntrySuccess(saved.get(i), afterTierTwoResult.successList().get(i).successCode()))
+                .toList();
+        return new AddDailyEntriesResult(successList, afterTierTwoResult.failureList());
     }
 
     private ValidationIntermediateResult validateDateAndGameAndPlayers(List<AddDailyEntryCommand> addDailyEntryCommands,
@@ -103,9 +109,7 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
                 .map(it -> new DailyRankingService.GameAndDate(it.game(), it.date())).toList());
 
         var afterWeekValResult = validateWeek(intermediateResult, calculatedWeeks);
-        var afterDuplResult = validateDuplicates(afterWeekValResult, dbPresentEntries);
-        //TODO insert/update
-        return afterDuplResult;
+        return validateDuplicates(afterWeekValResult, dbPresentEntries);
     }
 
     private AddDailyEntriesResult validateDuplicates(ValidationIntermediateResult intermediateResult,
@@ -113,27 +117,31 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
 
         var referenceMap = dbPresentEntries.stream()
                 .collect(Collectors.toMap(
-                        it -> new DailyRankingService.GameAndDate(it.game(), it.date()),
-                        it -> new TimestampIndex(-1, it.submittedAt(), null)));
+                        it -> new GamePlayerDate(it.game(), it.player(), it.date()),
+                        it -> new TimestampIndex(-1, it.submittedAt(), null, it.dailyEntryId())));
 
         var entriesToCheck = intermediateResult.entriesPassed();
 
         List<AddDailyEntryFailure> failuresToAdd = new ArrayList<>();
         for (int i = 0; i < entriesToCheck.size(); i++) {
             var entry = entriesToCheck.get(i);
-            DailyRankingService.GameAndDate key = new DailyRankingService.GameAndDate(entry.game(), entry.date());
+            GamePlayerDate key = new GamePlayerDate(entry.game(), entry.player(), entry.date());
             if (referenceMap.containsKey(key)) {
-                if (entry.submittedAt().isBefore(referenceMap.get(key).timestamp())) {
-                    if (referenceMap.get(key).index() != -1) {
-                        var entryToPurge = entriesToCheck.get(referenceMap.get(key).index());
+                TimestampIndex incumbent = referenceMap.get(key);
+                if (entry.submittedAt().isBefore(incumbent.timestamp())) {
+                    if (incumbent.index() != -1) {
+                        var entryToPurge = entriesToCheck.get(incumbent.index());
                         failuresToAdd.add(new AddDailyEntryFailure(new AddDailyEntryCommand(
                                 new AddDailyEntryCommand.GameRef(entryToPurge.game().gameId().id(), entryToPurge.game().name()),
                                 new AddDailyEntryCommand.PlayerRef(entryToPurge.player().playerId().id(), entryToPurge.player().name()),
                                 entryToPurge.date(),
                                 entryToPurge.points(),
                                 entryToPurge.submittedAt()), List.of(SUPERSEDED)));
+                        referenceMap.put(key, new TimestampIndex(i, entry.submittedAt(), incumbent.successType(), incumbent.dbId()));
+                    } else {
+                        referenceMap.put(key, new TimestampIndex(i, entry.submittedAt(), CORRECTED, incumbent.dbId()));
                     }
-                    referenceMap.put(key, new TimestampIndex(i, entry.submittedAt(), CORRECTED));
+
                 } else {
                     failuresToAdd.add(new AddDailyEntryFailure(new AddDailyEntryCommand(
                             new AddDailyEntryCommand.GameRef(entry.game().gameId().id(), entry.game().name()),
@@ -143,18 +151,25 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
                             entry.submittedAt()), List.of(SUPERSEDED)));
                 }
             } else {
-                referenceMap.put(key, new TimestampIndex(i, entry.submittedAt(), NEW));
+                referenceMap.put(key, new TimestampIndex(i, entry.submittedAt(), NEW, null));
             }
         }
         var successfulEntriesIds = referenceMap.values().stream()
                 .filter(it -> it.index() != -1)
+                .sorted(Comparator.comparingInt(TimestampIndex::index))
                 .toList();
         var successfulEntries = successfulEntriesIds.stream()
-                .map(it -> new AddDailyEntrySuccess(entriesToCheck.get(it.index()), it.successType()))
+                .map(it -> buildEntryToSave(it, entriesToCheck))
                 .toList();
 
         return new AddDailyEntriesResult(successfulEntries,
                 Stream.concat(intermediateResult.failures().stream(), failuresToAdd.stream()).toList());
+    }
+
+    private AddDailyEntrySuccess buildEntryToSave(TimestampIndex timestampIndex, List<DailyEntry> entriesToCheck) {
+
+        DailyEntry rawEntry = entriesToCheck.get(timestampIndex.index());
+        return new AddDailyEntrySuccess(new DailyEntry(timestampIndex.dbId, rawEntry.game(), rawEntry.date(), rawEntry.player(), rawEntry.points(), rawEntry.submittedAt()), timestampIndex.successType());
     }
 
     private ValidationIntermediateResult validateWeek(ValidationIntermediateResult validationIntermediateResult,
@@ -230,6 +245,9 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         }
     }
 
-    private record TimestampIndex(int index, Instant timestamp, AddDailyEntrySuccess.DailyEntrySuccess successType) {
+    private record TimestampIndex(int index, Instant timestamp, AddDailyEntrySuccess.DailyEntrySuccess successType,
+                                  DailyEntryId dbId) {
     }
+    
+    private record GamePlayerDate(Game game, Player player, LocalDate date) {}
 }
