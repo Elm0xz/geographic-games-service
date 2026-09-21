@@ -46,12 +46,15 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
     private final LoadPlayerPort loadPlayerPort;
     private final LoadWeeklyRankingPort loadWeeklyRankingPort;
     private final LoadDailyEntriesPort loadDailyEntriesPort;
+
     private final GameNameValidator gameNameValidator;
     private final PlayerNameValidator playerNameValidator;
 
     public DailyEntriesService(SaveDailyEntryPort saveDailyEntryPort,
                                LoadGamePort loadGamePort,
-                               LoadPlayerPort loadPlayerPort, LoadWeeklyRankingPort loadWeeklyRankingPort, LoadDailyEntriesPort loadDailyEntriesPort,
+                               LoadPlayerPort loadPlayerPort,
+                               LoadWeeklyRankingPort loadWeeklyRankingPort,
+                               LoadDailyEntriesPort loadDailyEntriesPort,
                                GameNameValidator gameNameValidator,
                                PlayerNameValidator playerNameValidator) {
         this.saveDailyEntryPort = saveDailyEntryPort;
@@ -72,14 +75,11 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return saveDailyEntryPort.save(new DailyEntry(null, game, command.date(), player, command.points()));
     }
 
+
     @Override
     public AddDailyEntriesResult addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
-        var gameLookup = loadGamePort.loadGames(addDailyEntryCommands.stream().map(it -> it.game().id()).toList())
-                .stream().collect(Collectors.toMap(it -> it.gameId().id(), Function.identity()));
-        var playerLookup = loadPlayerPort.loadPlayers(addDailyEntryCommands.stream().map(it -> it.player().id()).toList())
-                .stream().collect(Collectors.toMap(it -> it.playerId().id(), Function.identity()));
 
-        var intermediateResult = validateDateAndGameAndPlayers(addDailyEntryCommands, gameLookup, playerLookup);
+        var intermediateResult = validateTierOne(addDailyEntryCommands);
         var afterTierTwoResult = validateTierTwo(intermediateResult);
 
         var saved = saveDailyEntryPort.saveAll(afterTierTwoResult.successList().stream().map(AddDailyEntrySuccess::entry).toList());
@@ -89,17 +89,21 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return new AddDailyEntriesResult(successList, afterTierTwoResult.failureList());
     }
 
-    private ValidationIntermediateResult validateDateAndGameAndPlayers(List<AddDailyEntryCommand> addDailyEntryCommands,
-                                                                       Map<Long, Game> gameLookup,
-                                                                       Map<Long, Player> playerLookup) {
+    private ValidationIntermediateResult validateTierOne(List<AddDailyEntryCommand> addDailyEntryCommands) {
+
+        var gameLookup = loadGamePort.loadGames(addDailyEntryCommands.stream().map(it -> it.game().id()).toList())
+                .stream().collect(Collectors.toMap(it -> it.gameId().id(), Function.identity()));
+        var playerLookup = loadPlayerPort.loadPlayers(addDailyEntryCommands.stream().map(it -> it.player().id()).toList())
+                .stream().collect(Collectors.toMap(it -> it.playerId().id(), Function.identity()));
+
         var tier1Validation = addDailyEntryCommands.stream()
-                .map(it -> new SingleCommandValidationStep(it, List.of()))
+                .map(it -> new ValidatedCommand(it, List.of()))
                 .map(it -> validateDate(it))
                 .map(it -> validateGame(it, gameLookup))
                 .map(it -> validatePlayer(it, playerLookup))
                 .toList();
 
-        return new ValidationIntermediateResult(tier1Validation, gameLookup, playerLookup);
+        return ValidationIntermediateResult.from(tier1Validation, gameLookup, playerLookup);
     }
 
     private AddDailyEntriesResult validateTierTwo(ValidationIntermediateResult intermediateResult) {
@@ -186,26 +190,64 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return new ValidationIntermediateResult(successes, Stream.concat(validationIntermediateResult.failures().stream(), newFailures).toList());
     }
 
-    private SingleCommandValidationStep validateDate(SingleCommandValidationStep step) {
+    private ValidatedCommand validateDate(ValidatedCommand step) {
         var command = step.command();
         //TODO implement offset
         if (command.date().isAfter(LocalDate.now()) || (!LocalDate.ofInstant(command.submittedAt(), UTC).equals(command.date()))) {
-            return new SingleCommandValidationStep(command, Stream.concat(step.reasons().stream(), Stream.of(INVALID_DATE)).toList());
+            return new ValidatedCommand(command, Stream.concat(step.rejectionResults().stream(), Stream.of(INVALID_DATE)).toList());
         } else return step;
     }
 
-    private SingleCommandValidationStep validateGame(SingleCommandValidationStep step, Map<Long, Game> gameLookup) {
+    private ValidatedCommand validateGame(ValidatedCommand step, Map<Long, Game> gameLookup) {
         var command = step.command();
         if (!gameLookup.containsKey(command.game().id()) || !command.game().name().equals(gameLookup.get(command.game().id()).name())) {
-            return new SingleCommandValidationStep(command, Stream.concat(step.reasons().stream(), Stream.of(UNKNOWN_GAME)).toList());
+            return new ValidatedCommand(command, Stream.concat(step.rejectionResults().stream(), Stream.of(UNKNOWN_GAME)).toList());
         } else return step;
     }
 
-    private SingleCommandValidationStep validatePlayer(SingleCommandValidationStep step, Map<Long, Player> playerLookup) {
+    private ValidatedCommand validatePlayer(ValidatedCommand step, Map<Long, Player> playerLookup) {
         var command = step.command();
         if (!playerLookup.containsKey(command.player().id()) || !command.player().name().equals(playerLookup.get(command.player().id()).name())) {
-            return new SingleCommandValidationStep(command, Stream.concat(step.reasons().stream(), Stream.of(UNKNOWN_PLAYER)).toList());
+            return new ValidatedCommand(command, Stream.concat(step.rejectionResults().stream(), Stream.of(UNKNOWN_PLAYER)).toList());
         } else return step;
+    }
+
+    private record ValidatedCommand(AddDailyEntryCommand command,
+                                    List<AddDailyEntryFailure.Reason> rejectionResults) {
+    }
+
+    private record ValidationIntermediateResult(List<DailyEntry> entriesPassed,
+                                                List<AddDailyEntryFailure> failures) {
+
+        static ValidationIntermediateResult from(List<ValidatedCommand> commands,
+                                                 Map<Long, Game> gameLookup,
+                                                 Map<Long, Player> playerLookup) {
+            var validationResults = commands.stream()
+                    .collect(Collectors.partitioningBy(vc -> vc.rejectionResults().isEmpty()));
+            return new ValidationIntermediateResult(
+                    validationResults.get(true).stream().map(vc -> lookupEntry(gameLookup, playerLookup, vc.command())).toList(),
+                    validationResults.get(false).stream().map(ValidationIntermediateResult::toFailure).toList());
+        }
+
+        private static DailyEntry lookupEntry(Map<Long, Game> gameLookup,
+                                              Map<Long, Player> playerLookup,
+                                              AddDailyEntryCommand command) {
+            return new DailyEntry(null,
+                    gameLookup.get(command.game().id()), command.date(),
+                    playerLookup.get(command.player().id()), command.points(),
+                    command.submittedAt());
+        }
+
+        private static AddDailyEntryFailure toFailure(ValidatedCommand vc) {
+            return new AddDailyEntryFailure(vc.command(), vc.rejectionResults());
+        }
+    }
+
+    private record TimestampIndex(int index, Instant timestamp, AddDailyEntrySuccess.DailyEntrySuccess successType,
+                                  DailyEntryId dbId) {
+    }
+
+    private record GamePlayerDate(Game game, Player player, LocalDate date) {
     }
 
     private Game loadAndValidateGame(AddDailyEntryCommand command) {
@@ -219,35 +261,4 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         playerNameValidator.validate(command.player().name(), player.name());
         return player;
     }
-
-    private record SingleCommandValidationStep(AddDailyEntryCommand command,
-                                               List<AddDailyEntryFailure.Reason> reasons) {
-    }
-
-    private record ValidationIntermediateResult(List<DailyEntry> entriesPassed,
-                                                List<AddDailyEntryFailure> failures) {
-
-        ValidationIntermediateResult(List<SingleCommandValidationStep> steps,
-                                     Map<Long, Game> gameLookup,
-                                     Map<Long, Player> playerLookup) {
-            var validatedEntries = steps.stream()
-                    .filter(it -> it.reasons().isEmpty())
-                    .map(it -> new DailyEntry(null,
-                            gameLookup.get(it.command.game().id()), it.command.date(),
-                            playerLookup.get(it.command.player().id()), it.command.points(),
-                            it.command().submittedAt()))
-                    .toList();
-            var failedCommands = steps.stream()
-                    .filter(it -> !it.reasons().isEmpty())
-                    .map(it -> new AddDailyEntryFailure(it.command(), it.reasons()))
-                    .toList();
-            this(validatedEntries, failedCommands);
-        }
-    }
-
-    private record TimestampIndex(int index, Instant timestamp, AddDailyEntrySuccess.DailyEntrySuccess successType,
-                                  DailyEntryId dbId) {
-    }
-    
-    private record GamePlayerDate(Game game, Player player, LocalDate date) {}
 }
