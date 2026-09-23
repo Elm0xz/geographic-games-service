@@ -2,6 +2,8 @@ package com.pretz.geographic.infrastructure.configuration;
 
 import com.pretz.geographic.application.domain.service.BaseWeeklyRankingCalculator;
 import com.pretz.geographic.application.domain.service.DailyEntriesService;
+import com.pretz.geographic.application.domain.service.DailyEntryContextualValidator;
+import com.pretz.geographic.application.domain.service.DailyEntryReferenceValidator;
 import com.pretz.geographic.application.domain.service.DailyRankingService;
 import com.pretz.geographic.application.domain.service.WeeklyRankingCalculator;
 import com.pretz.geographic.application.domain.service.WeeklyRankingService;
@@ -9,9 +11,9 @@ import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.domain.validation.WeekValidator;
-import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.in.GetWeeklyRankingUseCase;
+import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.LoadGamePort;
 import com.pretz.geographic.application.port.out.LoadPlayerPort;
@@ -28,18 +30,30 @@ public class GeographicGamesConfig {
     AddDailyEntriesUseCase addDailyEntriesUseCase(SaveDailyEntryPort saveDailyEntryPort,
                                                   LoadGamePort loadGamePort,
                                                   LoadPlayerPort loadPlayerPort,
-                                                  LoadWeeklyRankingPort loadWeeklyRankingPort,
-                                                  LoadDailyEntriesPort loadDailyEntriesPort,
                                                   GameNameValidator gameNameValidator,
-                                                  PlayerNameValidator playerNameValidator) {
+                                                  PlayerNameValidator playerNameValidator,
+                                                  DailyEntryReferenceValidator dailyEntryReferenceValidator,
+                                                  DailyEntryContextualValidator dailyEntryContextualValidator) {
         return new DailyEntriesService(
                 saveDailyEntryPort,
                 loadGamePort,
                 loadPlayerPort,
-                loadWeeklyRankingPort,
-                loadDailyEntriesPort,
                 gameNameValidator,
-                playerNameValidator);
+                playerNameValidator,
+                dailyEntryReferenceValidator,
+                dailyEntryContextualValidator);
+    }
+
+    @Bean
+    DailyEntryReferenceValidator dailyEntryReferenceValidator(LoadGamePort loadGamePort,
+                                                              LoadPlayerPort loadPlayerPort) {
+        return new DailyEntryReferenceValidator(loadGamePort, loadPlayerPort);
+    }
+
+    @Bean
+    DailyEntryContextualValidator dailyEntryContextualValidator(LoadWeeklyRankingPort loadWeeklyRankingPort,
+                                                                LoadDailyEntriesPort loadDailyEntriesPort) {
+        return new DailyEntryContextualValidator(loadWeeklyRankingPort, loadDailyEntriesPort);
     }
 
     @Bean
