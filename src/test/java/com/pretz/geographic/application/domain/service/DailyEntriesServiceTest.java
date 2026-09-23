@@ -54,17 +54,16 @@ class DailyEntriesServiceTest {
 
     private DailyEntriesService dailyEntriesService;
 
-
     @BeforeEach
     void setUp() {
         dailyEntriesService = new DailyEntriesService(
                 saveDailyEntryPort,
                 loadGamePort,
                 loadPlayerPort,
-                loadWeeklyRankingPort,
-                loadDailyEntriesPort,
                 new GameNameValidator(),
-                new PlayerNameValidator()
+                new PlayerNameValidator(),
+                new DailyEntryReferenceValidator(loadGamePort, loadPlayerPort),
+                new DailyEntryContextualValidator(loadWeeklyRankingPort, loadDailyEntriesPort)
         );
     }
 
