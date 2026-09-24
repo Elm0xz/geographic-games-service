@@ -12,6 +12,11 @@ import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.InvalidGameNameException;
 import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceChainValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
+import com.pretz.geographic.application.domain.validation.dailyentry.DateValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.GameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.PlayerValidator;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
@@ -71,7 +76,10 @@ class DailyEntriesServiceTest {
                 loadPlayerPort,
                 new GameNameValidator(),
                 new PlayerNameValidator(),
-                new DailyEntryReferenceValidator(loadGamePort, loadPlayerPort),
+                new DailyEntryReferenceValidationManager(loadGamePort, loadPlayerPort,
+                        new DailyEntryReferenceChainValidator(
+                                List.of(new DateValidator(), new GameValidator(), new PlayerValidator())
+                        )),
                 new DailyEntryContextualValidator(loadWeeklyRankingPort, loadDailyEntriesPort)
         );
     }
@@ -168,7 +176,7 @@ class DailyEntriesServiceTest {
         verify(saveDailyEntryPort, never()).save(any());
     }
 
-    //TODO [GEOG-12] should not allow duplicate player names?
+    //TODO [GEOG-12] should not allow duplicate players names?
 
     @Test
     void shouldThrowInvalidPlayerNameExceptionWhenInputPlayerNameDoesNotMatchPersistedOne() {
@@ -399,8 +407,8 @@ class DailyEntriesServiceTest {
         assertThat(result.failureList()).hasSize(1);
         assertThat(result.failureList().stream().map(AddDailyEntryFailure::reasons))
                 .contains(List.of(AddDailyEntryFailure.Reason.INVALID_DATE,
-                                AddDailyEntryFailure.Reason.UNKNOWN_GAME,
-                                AddDailyEntryFailure.Reason.UNKNOWN_PLAYER));
+                        AddDailyEntryFailure.Reason.UNKNOWN_GAME,
+                        AddDailyEntryFailure.Reason.UNKNOWN_PLAYER));
 
         verify(saveDailyEntryPort).saveAll(List.of());
     }

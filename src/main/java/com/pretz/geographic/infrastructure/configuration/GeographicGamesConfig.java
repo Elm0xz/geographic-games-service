@@ -3,8 +3,13 @@ package com.pretz.geographic.infrastructure.configuration;
 import com.pretz.geographic.application.domain.service.BaseWeeklyRankingCalculator;
 import com.pretz.geographic.application.domain.service.DailyEntriesService;
 import com.pretz.geographic.application.domain.service.DailyEntryContextualValidator;
-import com.pretz.geographic.application.domain.service.DailyEntryReferenceValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceChainValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidator;
 import com.pretz.geographic.application.domain.service.DailyRankingService;
+import com.pretz.geographic.application.domain.validation.dailyentry.DateValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.GameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.PlayerValidator;
 import com.pretz.geographic.application.domain.service.WeeklyRankingCalculator;
 import com.pretz.geographic.application.domain.service.WeeklyRankingService;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
@@ -22,6 +27,9 @@ import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 import com.pretz.geographic.application.port.out.SaveWeeklyRankingPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+import java.util.List;
 
 @Configuration
 public class GeographicGamesConfig {
@@ -32,7 +40,7 @@ public class GeographicGamesConfig {
                                                   LoadPlayerPort loadPlayerPort,
                                                   GameNameValidator gameNameValidator,
                                                   PlayerNameValidator playerNameValidator,
-                                                  DailyEntryReferenceValidator dailyEntryReferenceValidator,
+                                                  DailyEntryReferenceValidationManager dailyEntryReferenceValidationManager,
                                                   DailyEntryContextualValidator dailyEntryContextualValidator) {
         return new DailyEntriesService(
                 saveDailyEntryPort,
@@ -40,20 +48,8 @@ public class GeographicGamesConfig {
                 loadPlayerPort,
                 gameNameValidator,
                 playerNameValidator,
-                dailyEntryReferenceValidator,
+                dailyEntryReferenceValidationManager,
                 dailyEntryContextualValidator);
-    }
-
-    @Bean
-    DailyEntryReferenceValidator dailyEntryReferenceValidator(LoadGamePort loadGamePort,
-                                                              LoadPlayerPort loadPlayerPort) {
-        return new DailyEntryReferenceValidator(loadGamePort, loadPlayerPort);
-    }
-
-    @Bean
-    DailyEntryContextualValidator dailyEntryContextualValidator(LoadWeeklyRankingPort loadWeeklyRankingPort,
-                                                                LoadDailyEntriesPort loadDailyEntriesPort) {
-        return new DailyEntryContextualValidator(loadWeeklyRankingPort, loadDailyEntriesPort);
     }
 
     @Bean
@@ -105,5 +101,41 @@ public class GeographicGamesConfig {
     @Bean
     WeeklyRankingCalculator weeklyRankingCalculator() {
         return new BaseWeeklyRankingCalculator();
+    }
+
+    @Bean
+    DailyEntryReferenceValidationManager dailyEntryReferenceValidatorWrapper(LoadGamePort loadGamePort,
+                                                                             LoadPlayerPort loadPlayerPort,
+                                                                             DailyEntryReferenceValidator validator) {
+        return new DailyEntryReferenceValidationManager(loadGamePort, loadPlayerPort, validator);
+    }
+
+    @Bean
+    @Primary
+    DailyEntryReferenceValidator dailyEntryReferenceValidator(DateValidator dateValidator,
+                                                              GameValidator gameValidator,
+                                                              PlayerValidator playerValidator) {
+        return new DailyEntryReferenceChainValidator(List.of(dateValidator, gameValidator, playerValidator));
+    }
+
+    @Bean
+    DateValidator dateValidator() {
+        return new DateValidator();
+    }
+
+    @Bean
+    GameValidator gameValidator() {
+        return new GameValidator();
+    }
+
+    @Bean
+    PlayerValidator playerValidator() {
+        return new PlayerValidator();
+    }
+
+    @Bean
+    DailyEntryContextualValidator dailyEntryContextualValidator(LoadWeeklyRankingPort loadWeeklyRankingPort,
+                                                                LoadDailyEntriesPort loadDailyEntriesPort) {
+        return new DailyEntryContextualValidator(loadWeeklyRankingPort, loadDailyEntriesPort);
     }
 }
