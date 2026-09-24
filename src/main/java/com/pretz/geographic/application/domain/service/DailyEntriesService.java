@@ -59,12 +59,19 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
 
         var referenceValidationResult = referenceValidator.validate(addDailyEntryCommands);
         var contextualValidationResult = contextualValidator.validate(referenceValidationResult);
+        var saved = saveDailyEntryPort.saveAll(getValidatedEntries(contextualValidationResult));
 
-        var saved = saveDailyEntryPort.saveAll(contextualValidationResult.successList().stream().map(AddDailyEntrySuccess::entry).toList());
-        var successList = IntStream.range(0, saved.size())
+        return new AddDailyEntriesResult(toSuccessList(saved, contextualValidationResult), contextualValidationResult.failureList());
+    }
+
+    private List<DailyEntry> getValidatedEntries(AddDailyEntriesResult contextualValidationResult) {
+        return contextualValidationResult.successList().stream().map(AddDailyEntrySuccess::entry).toList();
+    }
+
+    private List<AddDailyEntrySuccess> toSuccessList(List<DailyEntry> saved, AddDailyEntriesResult contextualValidationResult) {
+        return IntStream.range(0, saved.size())
                 .mapToObj(i -> new AddDailyEntrySuccess(saved.get(i), contextualValidationResult.successList().get(i).successCode()))
                 .toList();
-        return new AddDailyEntriesResult(successList, contextualValidationResult.failureList());
     }
 
     private Game loadAndValidateGame(AddDailyEntryCommand command) {
