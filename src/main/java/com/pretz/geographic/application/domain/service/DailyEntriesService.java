@@ -5,6 +5,7 @@ import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
@@ -25,7 +26,7 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
     private final GameNameValidator gameNameValidator;
     private final PlayerNameValidator playerNameValidator;
 
-    private final DailyEntryReferenceValidator referenceValidator;
+    private final DailyEntryReferenceValidationManager referenceValidator;
     private final DailyEntryContextualValidator contextualValidator;
 
     public DailyEntriesService(SaveDailyEntryPort saveDailyEntryPort,
@@ -33,7 +34,7 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
                                LoadPlayerPort loadPlayerPort,
                                GameNameValidator gameNameValidator,
                                PlayerNameValidator playerNameValidator,
-                               DailyEntryReferenceValidator referenceValidator,
+                               DailyEntryReferenceValidationManager referenceValidator,
                                DailyEntryContextualValidator contextualValidator) {
         this.saveDailyEntryPort = saveDailyEntryPort;
         this.loadGamePort = loadGamePort;
@@ -64,16 +65,6 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return new AddDailyEntriesResult(toSuccessList(saved, contextualValidationResult), contextualValidationResult.failureList());
     }
 
-    private List<DailyEntry> getValidatedEntries(AddDailyEntriesResult contextualValidationResult) {
-        return contextualValidationResult.successList().stream().map(AddDailyEntrySuccess::entry).toList();
-    }
-
-    private List<AddDailyEntrySuccess> toSuccessList(List<DailyEntry> saved, AddDailyEntriesResult contextualValidationResult) {
-        return IntStream.range(0, saved.size())
-                .mapToObj(i -> new AddDailyEntrySuccess(saved.get(i), contextualValidationResult.successList().get(i).successCode()))
-                .toList();
-    }
-
     private Game loadAndValidateGame(AddDailyEntryCommand command) {
         var game = loadGamePort.loadGame(command.game().id());
         gameNameValidator.validate(command.game().name(), game.name());
@@ -84,5 +75,15 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         var player = loadPlayerPort.loadPlayer(command.player().id());
         playerNameValidator.validate(command.player().name(), player.name());
         return player;
+    }
+
+    private List<DailyEntry> getValidatedEntries(AddDailyEntriesResult contextualValidationResult) {
+        return contextualValidationResult.successList().stream().map(AddDailyEntrySuccess::entry).toList();
+    }
+
+    private List<AddDailyEntrySuccess> toSuccessList(List<DailyEntry> saved, AddDailyEntriesResult contextualValidationResult) {
+        return IntStream.range(0, saved.size())
+                .mapToObj(i -> new AddDailyEntrySuccess(saved.get(i), contextualValidationResult.successList().get(i).successCode()))
+                .toList();
     }
 }
