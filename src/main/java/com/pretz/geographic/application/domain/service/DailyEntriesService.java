@@ -5,6 +5,7 @@ import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryContextualValidationManager;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
@@ -27,7 +28,8 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
     private final PlayerNameValidator playerNameValidator;
 
     private final DailyEntryReferenceValidationManager referenceValidator;
-    private final DailyEntryContextualValidator contextualValidator;
+    private final DailyEntryContextualValidationManager contextualValidator;
+    private final DailyEntryDuplicatesResolver resolver;
 
     public DailyEntriesService(SaveDailyEntryPort saveDailyEntryPort,
                                LoadGamePort loadGamePort,
@@ -35,7 +37,8 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
                                GameNameValidator gameNameValidator,
                                PlayerNameValidator playerNameValidator,
                                DailyEntryReferenceValidationManager referenceValidator,
-                               DailyEntryContextualValidator contextualValidator) {
+                               DailyEntryContextualValidationManager contextualValidator,
+                               DailyEntryDuplicatesResolver resolver) {
         this.saveDailyEntryPort = saveDailyEntryPort;
         this.loadGamePort = loadGamePort;
         this.loadPlayerPort = loadPlayerPort;
@@ -43,6 +46,7 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         this.playerNameValidator = playerNameValidator;
         this.referenceValidator = referenceValidator;
         this.contextualValidator = contextualValidator;
+        this.resolver = resolver;
     }
 
     @Override
@@ -60,9 +64,10 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
 
         var referenceValidationResult = referenceValidator.validate(addDailyEntryCommands);
         var contextualValidationResult = contextualValidator.validate(referenceValidationResult);
-        var saved = saveDailyEntryPort.saveAll(getValidatedEntries(contextualValidationResult));
+        var result = resolver.validateDuplicates(contextualValidationResult);
+        var saved = saveDailyEntryPort.saveAll(getValidatedEntries(result));
 
-        return new AddDailyEntriesResult(toSuccessList(saved, contextualValidationResult), contextualValidationResult.failureList());
+        return new AddDailyEntriesResult(toSuccessList(saved, result), result.failureList());
     }
 
     private Game loadAndValidateGame(AddDailyEntryCommand command) {
