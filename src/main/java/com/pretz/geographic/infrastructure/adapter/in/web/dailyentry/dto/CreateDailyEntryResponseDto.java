@@ -4,9 +4,9 @@ import com.pretz.geographic.application.domain.model.DailyEntry;
 
 import java.time.LocalDate;
 
-public record DailyEntryResponseDto(Long id, GameSummaryDto game, PlayerSummaryDto player, LocalDate date, int points) {
+public record CreateDailyEntryResponseDto(Long id, GameSummaryDto game, PlayerSummaryDto player, LocalDate date, int points) {
 
-    public DailyEntryResponseDto(DailyEntry dailyEntry) {
+    public CreateDailyEntryResponseDto(DailyEntry dailyEntry) {
         this(
                 dailyEntry.dailyEntryId().id(),
                 new GameSummaryDto(

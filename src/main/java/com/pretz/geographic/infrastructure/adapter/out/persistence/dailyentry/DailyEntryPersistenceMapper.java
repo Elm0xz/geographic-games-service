@@ -23,6 +23,7 @@ public class DailyEntryPersistenceMapper {
                 gamePersistenceMapper.toDomain(entity.getGame()),
                 entity.getEntryDate(),
                 playerPersistenceMapper.toDomain(entity.getPlayer()),
-                entity.getPoints());
+                entity.getPoints(),
+                entity.getSubmittedAt());
     }
 }

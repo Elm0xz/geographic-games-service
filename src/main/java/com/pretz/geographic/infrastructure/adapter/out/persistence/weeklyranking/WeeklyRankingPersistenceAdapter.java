@@ -1,6 +1,7 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence.weeklyranking;
 
 import com.pretz.geographic.application.domain.model.Game;
+import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.model.Week;
 import com.pretz.geographic.application.domain.model.WeeklyRanking;
 import com.pretz.geographic.application.port.out.LoadWeeklyRankingPort;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class WeeklyRankingPersistenceAdapter implements LoadWeeklyRankingPort, SaveWeeklyRankingPort {
@@ -40,6 +43,18 @@ public class WeeklyRankingPersistenceAdapter implements LoadWeeklyRankingPort, S
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<GameWeek> loadCalculatedWeeks(List<GameWeek> gameWeeks) {
+        return weeklyRankingRepository.findByGame_IdInAndYearInAndWeekIn(
+                        gameWeeks.stream().map(it -> it.gameId().id()).toList(),
+                        gameWeeks.stream().map(it -> it.week().year()).toList(),
+                        gameWeeks.stream().map(it -> it.week().week()).toList())
+                .stream()
+                .map(mapper::toGameWeek)
+                .collect(Collectors.toSet());
     }
 
     @Override

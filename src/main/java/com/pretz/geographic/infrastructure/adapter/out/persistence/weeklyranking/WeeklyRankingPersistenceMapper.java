@@ -1,5 +1,7 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence.weeklyranking;
 
+import com.pretz.geographic.application.domain.model.GameId;
+import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.model.Week;
 import com.pretz.geographic.application.domain.model.WeeklyPosition;
 import com.pretz.geographic.application.domain.model.WeeklyRanking;
@@ -37,6 +39,12 @@ public class WeeklyRankingPersistenceMapper {
                         pos.getPoints()))
                 .toList();
         return WeeklyRanking.of(game, week, positions);
+    }
+
+    GameWeek toGameWeek(WeeklyRankingJpaEntity entity) {
+        var gameId = new GameId(entity.getGame().getId());
+        var week = Week.of(entity.getYear(), entity.getWeek());
+        return new GameWeek(gameId, week);
     }
 
     WeeklyRankingJpaEntity toEntity(WeeklyRanking ranking,

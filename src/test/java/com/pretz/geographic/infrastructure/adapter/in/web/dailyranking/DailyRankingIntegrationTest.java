@@ -64,10 +64,10 @@ public class DailyRankingIntegrationTest extends AbstractWebIntegrationTest {
                 new PlayerJpaEntity(player1.name()),
                 new PlayerJpaEntity(player2.name())));
         dailyEntryJpaRepository.saveAll(List.of(
-                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.getFirst(), dailyEntry1.date(), dailyEntry1.points()),
-                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.get(1), dailyEntry2.date(), dailyEntry2.points()),
-                new DailyEntryJpaEntity(savedGames.get(1), savedPlayers.getFirst(), dailyEntry3.date(), dailyEntry3.points()),
-                new DailyEntryJpaEntity(savedGames.get(1), savedPlayers.get(1), dailyEntry4.date(), dailyEntry4.points())
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.getFirst(), dailyEntry1.date(), dailyEntry1.points(), dailyEntry1.submittedAt()),
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.get(1), dailyEntry2.date(), dailyEntry2.points(), dailyEntry2.submittedAt()),
+                new DailyEntryJpaEntity(savedGames.get(1), savedPlayers.getFirst(), dailyEntry3.date(), dailyEntry3.points(), dailyEntry3.submittedAt()),
+                new DailyEntryJpaEntity(savedGames.get(1), savedPlayers.get(1), dailyEntry4.date(), dailyEntry4.points(), dailyEntry4.submittedAt())
         ));
     }
 
