@@ -12,11 +12,13 @@ import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.InvalidGameNameException;
 import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryContextualValidationManager;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceChainValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
-import com.pretz.geographic.application.domain.validation.dailyentry.DateValidator;
-import com.pretz.geographic.application.domain.validation.dailyentry.GameValidator;
-import com.pretz.geographic.application.domain.validation.dailyentry.PlayerValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryDateValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryGameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryPlayerValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryWeekClosureValidator;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
@@ -78,9 +80,10 @@ class DailyEntriesServiceTest {
                 new PlayerNameValidator(),
                 new DailyEntryReferenceValidationManager(loadGamePort, loadPlayerPort,
                         new DailyEntryReferenceChainValidator(
-                                List.of(new DateValidator(), new GameValidator(), new PlayerValidator())
+                                List.of(new DailyEntryDateValidator(), new DailyEntryGameValidator(), new DailyEntryPlayerValidator())
                         )),
-                new DailyEntryContextualValidator(loadWeeklyRankingPort, loadDailyEntriesPort)
+                new DailyEntryContextualValidationManager(loadWeeklyRankingPort, new DailyEntryWeekClosureValidator()),
+                new DailyEntryDuplicatesResolver(loadDailyEntriesPort)
         );
     }
 
@@ -222,8 +225,8 @@ class DailyEntriesServiceTest {
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player1, player2));
-        stubEmptyContextualLookups();
-        stubSaveAllAssigningSequentialIds();
+        stubLookups();
+        stubSaveAll();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command1, command2));
 
@@ -250,7 +253,7 @@ class DailyEntriesServiceTest {
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
+        stubLookups();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command));
 
@@ -275,7 +278,7 @@ class DailyEntriesServiceTest {
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
+        stubLookups();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command));
 
@@ -299,7 +302,7 @@ class DailyEntriesServiceTest {
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
+        stubLookups();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command));
 
@@ -324,7 +327,7 @@ class DailyEntriesServiceTest {
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
+        stubLookups();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command));
 
@@ -348,7 +351,7 @@ class DailyEntriesServiceTest {
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
+        stubLookups();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command));
 
@@ -368,12 +371,12 @@ class DailyEntriesServiceTest {
         Player player = new Player(new PlayerId(2L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
         Instant submittedAtOnDifferentDay = date.minusDays(1).atStartOfDay().toInstant(UTC);
-        AddDailyEntryCommand command = commandWithSubmittedAt(1L, "Mapster", 2L, "Player1", date, 950, submittedAtOnDifferentDay);
+        AddDailyEntryCommand command = command(1L, "Mapster", 2L, "Player1", date, 950, submittedAtOnDifferentDay);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
+        stubLookups();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command));
 
@@ -393,12 +396,12 @@ class DailyEntriesServiceTest {
         Player player = new Player(new PlayerId(2L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
         Instant submittedAtOnDifferentDay = date.minusDays(1).atStartOfDay().toInstant(UTC);
-        AddDailyEntryCommand command = commandWithSubmittedAt(3L, "Malpster", 3L, "Bonobo", date, 999, submittedAtOnDifferentDay);
+        AddDailyEntryCommand command = command(3L, "Malpster", 3L, "Bonobo", date, 999, submittedAtOnDifferentDay);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
+        stubLookups();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(command));
 
@@ -456,8 +459,8 @@ class DailyEntriesServiceTest {
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
         when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
-        stubEmptyContextualLookups();
-        stubSaveAllAssigningSequentialIds();
+        stubLookups();
+        stubSaveAll();
 
         AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(validCommand, invalidCommand));
 
@@ -489,13 +492,13 @@ class DailyEntriesServiceTest {
                 date.atStartOfDay().toInstant(UTC));
     }
 
-    private AddDailyEntryCommand commandWithSubmittedAt(Long gameId,
-                                                        String gameName,
-                                                        Long playerId,
-                                                        String playerName,
-                                                        LocalDate date,
-                                                        int points,
-                                                        Instant submittedAt) {
+    private AddDailyEntryCommand command(Long gameId,
+                                         String gameName,
+                                         Long playerId,
+                                         String playerName,
+                                         LocalDate date,
+                                         int points,
+                                         Instant submittedAt) {
         return new AddDailyEntryCommand(
                 new AddDailyEntryCommand.GameRef(gameId, gameName),
                 new AddDailyEntryCommand.PlayerRef(playerId, playerName),
@@ -504,12 +507,12 @@ class DailyEntriesServiceTest {
                 submittedAt);
     }
 
-    private void stubEmptyContextualLookups() {
+    private void stubLookups() {
         when(loadWeeklyRankingPort.loadCalculatedWeeks(any())).thenReturn(Set.of());
         when(loadDailyEntriesPort.loadEntries(anyList())).thenReturn(List.of());
     }
 
-    private void stubSaveAllAssigningSequentialIds() {
+    private void stubSaveAll() {
         when(saveDailyEntryPort.saveAll(anyList())).thenAnswer(invocation -> {
             List<DailyEntry> toSave = invocation.getArgument(0);
             return IntStream.range(0, toSave.size())

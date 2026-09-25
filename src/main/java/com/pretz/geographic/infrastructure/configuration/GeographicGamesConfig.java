@@ -2,20 +2,22 @@ package com.pretz.geographic.infrastructure.configuration;
 
 import com.pretz.geographic.application.domain.service.BaseWeeklyRankingCalculator;
 import com.pretz.geographic.application.domain.service.DailyEntriesService;
-import com.pretz.geographic.application.domain.service.DailyEntryContextualValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryContextualValidationManager;
+import com.pretz.geographic.application.domain.service.DailyEntryDuplicatesResolver;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceChainValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidator;
 import com.pretz.geographic.application.domain.service.DailyRankingService;
-import com.pretz.geographic.application.domain.validation.dailyentry.DateValidator;
-import com.pretz.geographic.application.domain.validation.dailyentry.GameValidator;
-import com.pretz.geographic.application.domain.validation.dailyentry.PlayerValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryDateValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryGameValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryPlayerValidator;
 import com.pretz.geographic.application.domain.service.WeeklyRankingCalculator;
 import com.pretz.geographic.application.domain.service.WeeklyRankingService;
 import com.pretz.geographic.application.domain.validation.GameNameValidator;
 import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.domain.validation.WeekValidator;
+import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryWeekClosureValidator;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.in.GetWeeklyRankingUseCase;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
@@ -41,7 +43,8 @@ public class GeographicGamesConfig {
                                                   GameNameValidator gameNameValidator,
                                                   PlayerNameValidator playerNameValidator,
                                                   DailyEntryReferenceValidationManager dailyEntryReferenceValidationManager,
-                                                  DailyEntryContextualValidator dailyEntryContextualValidator) {
+                                                  DailyEntryContextualValidationManager dailyEntryContextualValidationManager,
+                                                  DailyEntryDuplicatesResolver dailyEntryDuplicatesResolver) {
         return new DailyEntriesService(
                 saveDailyEntryPort,
                 loadGamePort,
@@ -49,7 +52,8 @@ public class GeographicGamesConfig {
                 gameNameValidator,
                 playerNameValidator,
                 dailyEntryReferenceValidationManager,
-                dailyEntryContextualValidator);
+                dailyEntryContextualValidationManager,
+                dailyEntryDuplicatesResolver);
     }
 
     @Bean
@@ -112,30 +116,40 @@ public class GeographicGamesConfig {
 
     @Bean
     @Primary
-    DailyEntryReferenceValidator dailyEntryReferenceValidator(DateValidator dateValidator,
-                                                              GameValidator gameValidator,
-                                                              PlayerValidator playerValidator) {
-        return new DailyEntryReferenceChainValidator(List.of(dateValidator, gameValidator, playerValidator));
+    DailyEntryReferenceValidator dailyEntryReferenceValidator(DailyEntryDateValidator dailyEntryDateValidator,
+                                                              DailyEntryGameValidator dailyEntryGameValidator,
+                                                              DailyEntryPlayerValidator dailyEntryPlayerValidator) {
+        return new DailyEntryReferenceChainValidator(List.of(dailyEntryDateValidator, dailyEntryGameValidator, dailyEntryPlayerValidator));
     }
 
     @Bean
-    DateValidator dateValidator() {
-        return new DateValidator();
+    DailyEntryDateValidator dateValidator() {
+        return new DailyEntryDateValidator();
     }
 
     @Bean
-    GameValidator gameValidator() {
-        return new GameValidator();
+    DailyEntryGameValidator gameValidator() {
+        return new DailyEntryGameValidator();
     }
 
     @Bean
-    PlayerValidator playerValidator() {
-        return new PlayerValidator();
+    DailyEntryPlayerValidator playerValidator() {
+        return new DailyEntryPlayerValidator();
     }
 
     @Bean
-    DailyEntryContextualValidator dailyEntryContextualValidator(LoadWeeklyRankingPort loadWeeklyRankingPort,
-                                                                LoadDailyEntriesPort loadDailyEntriesPort) {
-        return new DailyEntryContextualValidator(loadWeeklyRankingPort, loadDailyEntriesPort);
+    DailyEntryContextualValidationManager dailyEntryContextualValidator(LoadWeeklyRankingPort loadWeeklyRankingPort,
+                                                                        DailyEntryWeekClosureValidator dailyEntryWeekClosureValidator) {
+        return new DailyEntryContextualValidationManager(loadWeeklyRankingPort, dailyEntryWeekClosureValidator);
+    }
+
+    @Bean
+    DailyEntryWeekClosureValidator dailyEntryWeekClosureValidator() {
+        return new DailyEntryWeekClosureValidator();
+    }
+
+    @Bean
+    DailyEntryDuplicatesResolver dailyEntryDuplicatesResolver(LoadDailyEntriesPort loadDailyEntriesPort) {
+        return new DailyEntryDuplicatesResolver(loadDailyEntriesPort);
     }
 }
