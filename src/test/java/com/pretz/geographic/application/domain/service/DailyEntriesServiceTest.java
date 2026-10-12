@@ -476,7 +476,7 @@ class DailyEntriesServiceTest {
         assertThat(savedCaptor.getValue().get(0).points()).isEqualTo(950);
     }
 
-    //TODO duplicates test
+    //TODO [GEOG-11] duplicates test
 
     private AddDailyEntryCommand command(Long gameId,
                                          String gameName,
