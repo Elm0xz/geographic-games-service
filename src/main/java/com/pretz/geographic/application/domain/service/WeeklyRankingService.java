@@ -42,7 +42,7 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
 
         weekValidator.validate(week);
 
-        //TODO only active games taken into account; game deactivation process will need intermediate state to be added
+        //TODO [GEOG-18] only active games taken into account; game deactivation process will need intermediate state to be added
         var activeGames = loadGamePort.loadActiveGames();
         var weeklyRankings = loadWeeklyRankingPort.loadWeeklyRankings(activeGames, week);
         var calculatedGames = weeklyRankings.stream().map(WeeklyRanking::game).toList();
@@ -68,7 +68,7 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
         return !rankings.stream().filter(it -> !it.positions().isEmpty()).toList().isEmpty();
     }
 
-    //TODO implement later
+    //TODO [GEOG-17] implement later
     @Override
     public WeeklyRanking getWeeklyRanking(Week week) {
         return null;

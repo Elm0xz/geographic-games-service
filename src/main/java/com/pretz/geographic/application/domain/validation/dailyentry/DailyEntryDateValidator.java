@@ -11,7 +11,7 @@ public class DailyEntryDateValidator implements DailyEntryReferenceValidator {
     @Override
     public ValidatedCommand validate(ValidatedCommand vc, ReferenceLookups lookups) {
         var command = vc.command();
-        //TODO implement offset
+        //TODO [GEOG-15] implement offset
         if (command.date().isAfter(LocalDate.now()) || (!LocalDate.ofInstant(command.submittedAt(), UTC).equals(command.date()))) {
             return new ValidatedCommand(command, Stream.concat(vc.rejectionResults().stream(), Stream.of(INVALID_DATE)).toList());
         } else return vc;
