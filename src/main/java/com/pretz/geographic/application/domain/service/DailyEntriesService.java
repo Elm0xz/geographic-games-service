@@ -58,13 +58,12 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         return saveDailyEntryPort.save(new DailyEntry(null, game, command.date(), player, command.points()));
     }
 
-
     @Override
     public AddDailyEntriesResult addDailyEntries(List<AddDailyEntryCommand> addDailyEntryCommands) {
 
         var referenceValidationResult = referenceValidator.validate(addDailyEntryCommands);
         var contextualValidationResult = contextualValidator.validate(referenceValidationResult);
-        var result = resolver.validateDuplicates(contextualValidationResult);
+        var result = resolver.resolveDuplicates(contextualValidationResult);
         var saved = saveDailyEntryPort.saveAll(getValidatedEntries(result));
 
         return new AddDailyEntriesResult(toSuccessList(saved, result), result.failureList());

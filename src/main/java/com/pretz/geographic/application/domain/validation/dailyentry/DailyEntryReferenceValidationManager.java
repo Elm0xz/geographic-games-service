@@ -45,7 +45,7 @@ public class DailyEntryReferenceValidationManager {
         return toIntermediateResult(validatedCommands, referenceLookups);
     }
 
-    private ValidationIntermediateResult toIntermediateResult(List<ValidatedCommand> commands,
+    private static ValidationIntermediateResult toIntermediateResult(List<ValidatedCommand> commands,
                                                               ReferenceLookups lookups) {
         var validationResults = commands.stream()
                 .collect(Collectors.partitioningBy(vc -> vc.rejectionResults().isEmpty()));
