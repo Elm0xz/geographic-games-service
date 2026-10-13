@@ -2,6 +2,7 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.dailyentry;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.Game;
+import com.pretz.geographic.application.domain.service.DailyRankingService;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.game.GameJpaRepository;
@@ -49,6 +50,16 @@ public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveD
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<DailyEntry> loadEntries(List<DailyRankingService.GameAndDate> gamesAndDates) {
+        return dailyEntryRepository.findByGame_IdInAndEntryDateIn((gamesAndDates.stream()
+                        .map(it -> it.game().gameId().id()).toList()), gamesAndDates.stream()
+                        .map(it -> it.date()).toList()).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public DailyEntry save(DailyEntry entry) {
 
@@ -56,8 +67,26 @@ public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveD
         var player = playerRepository.getReferenceById(entry.player().playerId().id());
 
         var saved = dailyEntryRepository.save(
-                new DailyEntryJpaEntity(game, player, entry.date(), entry.points()));
+                new DailyEntryJpaEntity(game, player, entry.date(), entry.points(), entry.submittedAt()));
 
         return mapper.toDomain(saved);
+    }
+
+    @Override
+    @Transactional
+    public List<DailyEntry> saveAll(List<DailyEntry> entries) {
+        var jpaEntities = entries.stream()
+                .map(entry -> new DailyEntryJpaEntity(
+                        entry.dailyEntryId() != null ? entry.dailyEntryId().id() : null,
+                        gameRepository.getReferenceById(entry.game().gameId().id()),
+                        playerRepository.getReferenceById(entry.player().playerId().id()),
+                        entry.date(),
+                        entry.points(),
+                        entry.submittedAt()))
+                .toList();
+
+        return dailyEntryRepository.saveAll(jpaEntities).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

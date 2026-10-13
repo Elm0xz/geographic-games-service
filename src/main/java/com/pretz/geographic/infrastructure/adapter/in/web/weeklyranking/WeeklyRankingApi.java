@@ -14,5 +14,5 @@ public interface WeeklyRankingApi {
     @GetMapping
     ResponseEntity<FullWeeklyRankingsResponseDto> getWeeklyRankings(@RequestParam Year year, @RequestParam int week);
 
-    //TODO single game weekly rankings
+    //TODO [GEOG-17] single game weekly rankings
 }

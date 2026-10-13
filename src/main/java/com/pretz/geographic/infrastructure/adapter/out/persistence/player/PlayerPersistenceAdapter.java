@@ -6,6 +6,10 @@ import com.pretz.geographic.application.port.out.exception.PlayerNotFoundExcepti
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 @Component
 public class PlayerPersistenceAdapter implements LoadPlayerPort {
 
@@ -32,5 +36,15 @@ public class PlayerPersistenceAdapter implements LoadPlayerPort {
         return playerJpaRepository.findByName(name)
                 .map(playerPersistenceMapper::toDomain)
                 .orElseThrow(() -> new PlayerNotFoundException(name));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Player> loadPlayers(List<Long> ids) {
+
+        return playerJpaRepository.findAllById(ids)
+                .stream()
+                .map(playerPersistenceMapper::toDomain)
+                .toList();
     }
 }

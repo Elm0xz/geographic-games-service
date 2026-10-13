@@ -16,7 +16,7 @@ public class WeekValidator {
         if (week.year() > LocalDate.now().getYear())
             throw new InvalidDateException(String.format(INVALID_RANKING_MESSAGE, YEAR, week.year()));
         else if (week.year() == LocalDate.now().getYear() && week.week() >= LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))
-            //TODO more expressive exception message
+            //TODO [GEOG- ] more expressive exception message
             throw new InvalidDateException(String.format(INVALID_RANKING_MESSAGE, WEEK, week.week()));
     }
 }

@@ -38,8 +38,8 @@ public class GamePersistenceAdapter implements LoadGamePort {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public List<Game> loadGames(List<Long> gameIds) {
         return gameJpaRepository.findAllById(gameIds)
                 .stream()

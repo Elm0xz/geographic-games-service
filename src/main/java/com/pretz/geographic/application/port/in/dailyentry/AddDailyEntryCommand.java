@@ -1,5 +1,6 @@
-package com.pretz.geographic.application.port.in;
+package com.pretz.geographic.application.port.in.dailyentry;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -7,18 +8,14 @@ public record AddDailyEntryCommand(
         GameRef game,
         PlayerRef player,
         LocalDate date,
-        int points
-) {
+        int points,
+        Instant submittedAt) {
 
     public AddDailyEntryCommand {
         Objects.requireNonNull(game, "Game reference must not be null");
         Objects.requireNonNull(player, "Player reference must not be null");
         Objects.requireNonNull(date, "Date must not be null");
-
-        //might need a slight refactor if we expect different time zones on the servers
-        if (date.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Date must not be in the future");
-        }
+        Objects.requireNonNull(submittedAt, "Submission timestamp must not be null");
 
         if (points < 0) {
             throw new IllegalArgumentException("Points must not be negative");
@@ -40,16 +37,12 @@ public record AddDailyEntryCommand(
     public record PlayerRef(Long id, String name) {
 
         public PlayerRef {
-            if (id != null && id <= 0) {
-                throw new IllegalArgumentException("Player id must be positive when provided");
+            if (id == null || id <= 0) {
+                throw new IllegalArgumentException("Player id must be positive");
             }
             if (name == null || name.isBlank()) {
                 throw new IllegalArgumentException("Player name must not be blank");
             }
-        }
-
-        public boolean hasId() {
-            return id != null;
         }
     }
 }

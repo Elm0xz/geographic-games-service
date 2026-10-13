@@ -19,11 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class WeeklyRankingIntegrationTest extends AbstractWebIntegrationTest {
@@ -61,11 +63,13 @@ public class WeeklyRankingIntegrationTest extends AbstractWebIntegrationTest {
         var savedPlayers = playerJpaRepository.saveAll(List.of(
                 new PlayerJpaEntity(player1.name()),
                 new PlayerJpaEntity(player2.name())));
+        var date1 = LocalDate.of(2025, 1, 6);
+        var date2 = LocalDate.of(2025, 1, 7);
         dailyEntryJpaRepository.saveAll(List.of(
-                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.getFirst(), LocalDate.of(2025, 1, 6), 900),
-                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.get(1), LocalDate.of(2025, 1, 6), 850),
-                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.getFirst(), LocalDate.of(2025, 1, 7), 920),
-                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.get(1), LocalDate.of(2025, 1, 7), 870)
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.getFirst(), date1, 900, date1.atStartOfDay().toInstant(UTC)),
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.get(1), date1, 850, date1.atStartOfDay().toInstant(UTC)),
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.getFirst(), date2, 920, date2.atStartOfDay().toInstant(UTC)),
+                new DailyEntryJpaEntity(savedGames.getFirst(), savedPlayers.get(1), date2, 870, date2.atStartOfDay().toInstant(UTC))
         ));
     }
 
