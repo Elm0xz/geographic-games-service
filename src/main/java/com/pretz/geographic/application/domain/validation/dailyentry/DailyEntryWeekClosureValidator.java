@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 import static com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure.Reason.WEEK_CLOSED;
 
-public class DailyEntryWeekClosureValidator implements DailyEntryContextualValidator{
+public class DailyEntryWeekClosureValidator implements DailyEntryContextualValidator {
 
     @Override
     public ValidationIntermediateResult validate(ValidationIntermediateResult validationIntermediateResult,
