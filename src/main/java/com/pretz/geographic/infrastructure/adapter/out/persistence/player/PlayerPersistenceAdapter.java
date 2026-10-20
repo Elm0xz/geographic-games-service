@@ -24,14 +24,6 @@ public class PlayerPersistenceAdapter implements LoadPlayerPort {
 
     @Override
     @Transactional(readOnly = true)
-    public Player loadPlayer(Long id) {
-        return playerJpaRepository.findById(id)
-                .map(playerPersistenceMapper::toDomain)
-                .orElseThrow(() -> new PlayerNotFoundException(id));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public Player loadPlayer(String name) {
         return playerJpaRepository.findByName(name)
                 .map(playerPersistenceMapper::toDomain)

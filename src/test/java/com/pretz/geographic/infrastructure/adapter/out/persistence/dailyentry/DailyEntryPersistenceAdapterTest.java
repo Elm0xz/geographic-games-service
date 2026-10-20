@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDate;
 import java.util.List;
 
+import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -78,7 +79,7 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var entry = new DailyEntry(null, getGame1(), date, getPlayer1(), 900);
 
         //when
-        var saved = adapter.save(entry);
+        var saved = adapter.saveAll(List.of(entry)).getFirst();
         var loaded = adapter.loadEntries(savedGames, date);
 
         //then
@@ -91,7 +92,7 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     void shouldNotLoadEntriesOutsideDateRange() {
 
         //given
-        adapter.save(new DailyEntry(null, getGame1(), date, getPlayer1(), 900));
+        adapter.saveAll(List.of(new DailyEntry(null, getGame1(), date, getPlayer1(), 900)));
 
         //when
         var loaded = adapter.loadEntries(savedGames, date.plusDays(1));
@@ -110,23 +111,17 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var entry4 = new DailyEntry(null, getGame2(), date, getPlayer2(), 930);
 
         //when
-        //TODO [GEOG-11] refactor this code to use saveAll after save endpoint expanded to batch mode
-        var saved1 = adapter.save(entry1);
-        var saved2 = adapter.save(entry2);
-        var saved3 = adapter.save(entry3);
-        var saved4 = adapter.save(entry4);
+        var saved = adapter.saveAll(List.of(entry1, entry2, entry3, entry4));
         var loaded = adapter.loadEntries(savedGames, date);
 
         //then
-        assertIdIsNotNull(saved1);
-        assertEqualsIgnoringId(saved1, entry1);
-        assertIdIsNotNull(saved2);
-        assertEqualsIgnoringId(saved2, entry2);
-        assertIdIsNotNull(saved3);
-        assertEqualsIgnoringId(saved3, entry3);
-        assertIdIsNotNull(saved4);
-        assertEqualsIgnoringId(saved4, entry4);
-        assertThat(loaded).contains(saved1, saved2, saved3, saved4);
+        assertThat(saved).hasSize(4);
+        saved.forEach(this::assertIdIsNotNull);
+        assertEqualsIgnoringId(saved.get(0), entry1);
+        assertEqualsIgnoringId(saved.get(1), entry2);
+        assertEqualsIgnoringId(saved.get(2), entry3);
+        assertEqualsIgnoringId(saved.get(3), entry4);
+        assertThat(loaded).containsExactlyInAnyOrderElementsOf(saved);
     }
 
     @Test
@@ -143,27 +138,39 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var entryAfterEnd = new DailyEntry(null, getGame1(), endDate.plusDays(1), getPlayer1(), 870);
 
         //when
-        adapter.save(entryBeforeStart);
-        var savedOnStart = adapter.save(entryOnStart);
-        var savedInMiddle1 = adapter.save(entryInMiddle1);
-        var savedInMiddle2 = adapter.save(entryInMiddle2);
-        var savedOnEnd = adapter.save(entryOnEnd);
-        adapter.save(entryAfterEnd);
+        var saved = adapter.saveAll(List.of(entryBeforeStart, entryOnStart, entryInMiddle1, entryInMiddle2, entryOnEnd, entryAfterEnd));
         var loaded = adapter.loadEntries(savedGames, startDate, endDate);
 
         //then
-        assertThat(loaded).containsExactlyInAnyOrder(savedOnStart, savedInMiddle1, savedInMiddle2, savedOnEnd);
+        assertThat(loaded).containsExactlyInAnyOrderElementsOf(saved.subList(1, 5));
         assertThat(loaded).doesNotContain(entryBeforeStart, entryAfterEnd);
+    }
+
+    @Test
+    void shouldUpdateExistingEntryWhenSavingEntryWithId() {
+
+        //given
+        var persisted = adapter.saveAll(List.of(new DailyEntry(null, getGame1(), date, getPlayer1(), 900))).getFirst();
+        var newSubmittedAt = date.atTime(12, 0).toInstant(UTC);
+        var correction = new DailyEntry(persisted.dailyEntryId(), getGame1(), date, getPlayer1(), 950, newSubmittedAt);
+
+        //when
+        var saved = adapter.saveAll(List.of(correction)).getFirst();
+        var loaded = adapter.loadEntries(savedGames, date);
+
+        //then
+        assertThat(saved).isEqualTo(correction);
+        assertThat(loaded).containsExactly(correction);
     }
 
     @Test
     void shouldFailWhenSavingTheSameEntryTwice() {
         // given
         var entry = new DailyEntry(null, getGame1(), date, getPlayer1(), 900);
-        adapter.save(entry);
+        adapter.saveAll(List.of(entry));
 
         // when / then
-        assertThatThrownBy(() -> adapter.save(entry))
+        assertThatThrownBy(() -> adapter.saveAll(List.of(entry)))
                 .isInstanceOf(DataAccessException.class);
     }
 
@@ -174,7 +181,7 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var entry = new DailyEntry(null, unknownGame, date, getPlayer1(), 900);
 
         // when / then
-        assertThatThrownBy(() -> adapter.save(entry))
+        assertThatThrownBy(() -> adapter.saveAll(List.of(entry)))
                 .isInstanceOf(DataAccessException.class);
     }
 
@@ -185,7 +192,7 @@ class DailyEntryPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var entry = new DailyEntry(null, getGame1(), date, unknownPlayer, 900);
 
         // when / then
-        assertThatThrownBy(() -> adapter.save(entry))
+        assertThatThrownBy(() -> adapter.saveAll(List.of(entry)))
                 .isInstanceOf(DataAccessException.class);
     }
 

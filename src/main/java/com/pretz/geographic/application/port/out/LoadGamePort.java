@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface LoadGamePort {
 
-    Game loadGame(Long id);
-
     List<Game> loadActiveGames();
 
     List<Game> loadGames(List<Long> gameIds);
