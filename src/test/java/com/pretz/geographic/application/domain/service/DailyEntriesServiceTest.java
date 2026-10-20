@@ -92,12 +92,12 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
         AddDailyEntryCommand command = command(
                 1L,
                 "Mapster",
-                2L,
+                1L,
                 "Player1",
                 date,
                 950
@@ -106,7 +106,7 @@ class DailyEntriesServiceTest {
 
         //when
         when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer(2L)).thenReturn(player);
+        when(loadPlayerPort.loadPlayer(1L)).thenReturn(player);
         when(saveDailyEntryPort.save(new DailyEntry(null, game, date, player, 950))).thenReturn(savedEntry);
 
         DailyEntry result = dailyEntriesService.addDailyEntry(command);
@@ -115,7 +115,7 @@ class DailyEntriesServiceTest {
         assertThat(result).isEqualTo(savedEntry);
 
         verify(loadGamePort).loadGame(1L);
-        verify(loadPlayerPort).loadPlayer(2L);
+        verify(loadPlayerPort).loadPlayer(1L);
         verify(saveDailyEntryPort).save(new DailyEntry(null, game, date, player, 950));
     }
 
@@ -124,12 +124,12 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
         AddDailyEntryCommand command = command(
                 1L,
                 "Mapster",
-                2L,
+                1L,
                 "Player1",
                 date,
                 930
@@ -138,7 +138,7 @@ class DailyEntriesServiceTest {
 
         //when
         when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer(2L)).thenReturn(player);
+        when(loadPlayerPort.loadPlayer(1L)).thenReturn(player);
         when(saveDailyEntryPort.save(any())).thenReturn(savedEntry);
 
         dailyEntriesService.addDailyEntry(command);
@@ -160,7 +160,7 @@ class DailyEntriesServiceTest {
         AddDailyEntryCommand command = command(
                 2L,
                 "WhenTaken",
-                2L,
+                1L,
                 "Player1",
                 LocalDate.now().minusDays(10),
                 950
@@ -175,7 +175,7 @@ class DailyEntriesServiceTest {
                 .hasMessage("Input game name: WhenTaken doesn't match persisted game name: Worldle");
 
         verify(loadGamePort).loadGame(2L);
-        verify(loadPlayerPort, never()).loadPlayer(2L);
+        verify(loadPlayerPort, never()).loadPlayer(1L);
         verify(saveDailyEntryPort, never()).save(any());
     }
 
@@ -186,11 +186,11 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         AddDailyEntryCommand command = command(
                 1L,
                 "Mapster",
-                2L,
+                1L,
                 "Andrzej",
                 LocalDate.now().minusDays(10),
                 950
@@ -198,7 +198,7 @@ class DailyEntriesServiceTest {
 
         //when
         when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer(2L)).thenReturn(player);
+        when(loadPlayerPort.loadPlayer(1L)).thenReturn(player);
 
         //when, then
         assertThatThrownBy(() -> dailyEntriesService.addDailyEntry(command))
@@ -206,7 +206,7 @@ class DailyEntriesServiceTest {
                 .hasMessage("Input player name: Andrzej doesn't match persisted player name: Player1");
 
         verify(loadGamePort).loadGame(1L);
-        verify(loadPlayerPort).loadPlayer(2L);
+        verify(loadPlayerPort).loadPlayer(1L);
         verify(saveDailyEntryPort, never()).save(any());
     }
 
@@ -215,12 +215,12 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player1 = new Player(new PlayerId(2L), "Player1");
-        Player player2 = new Player(new PlayerId(3L), "Player2");
+        Player player1 = new Player(new PlayerId(1L), "Player1");
+        Player player2 = new Player(new PlayerId(2L), "Player2");
         LocalDate date = LocalDate.now().minusDays(10);
 
-        AddDailyEntryCommand command1 = command(1L, "Mapster", 2L, "Player1", date, 950);
-        AddDailyEntryCommand command2 = command(1L, "Mapster", 3L, "Player2", date, 900);
+        AddDailyEntryCommand command1 = command(1L, "Mapster", 1L, "Player1", date, 950);
+        AddDailyEntryCommand command2 = command(1L, "Mapster", 2L, "Player2", date, 900);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
@@ -246,9 +246,9 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(99L, "UnknownGame", 2L, "Player1", date, 950);
+        AddDailyEntryCommand command = command(99L, "UnknownGame", 1L, "Player1", date, 950);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
@@ -271,9 +271,9 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(1L, "WrongGameName", 2L, "Player1", date, 950);
+        AddDailyEntryCommand command = command(1L, "WrongGameName", 1L, "Player1", date, 950);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
@@ -295,7 +295,7 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
         AddDailyEntryCommand command = command(1L, "Mapster", 99L, "UnknownPlayer", date, 950);
 
@@ -320,9 +320,9 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(1L, "Mapster", 2L, "WrongName", date, 950);
+        AddDailyEntryCommand command = command(1L, "Mapster", 1L, "WrongName", date, 950);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
@@ -344,9 +344,9 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate futureDate = LocalDate.now().plusDays(1);
-        AddDailyEntryCommand command = command(1L, "Mapster", 2L, "Player1", futureDate, 950);
+        AddDailyEntryCommand command = command(1L, "Mapster", 1L, "Player1", futureDate, 950);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
@@ -368,10 +368,10 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
         Instant submittedAtOnDifferentDay = date.minusDays(1).atStartOfDay().toInstant(UTC);
-        AddDailyEntryCommand command = command(1L, "Mapster", 2L, "Player1", date, 950, submittedAtOnDifferentDay);
+        AddDailyEntryCommand command = command(1L, "Mapster", 1L, "Player1", date, 950, submittedAtOnDifferentDay);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
@@ -393,7 +393,7 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
         Instant submittedAtOnDifferentDay = date.minusDays(1).atStartOfDay().toInstant(UTC);
         AddDailyEntryCommand command = command(3L, "Malpster", 3L, "Bonobo", date, 999, submittedAtOnDifferentDay);
@@ -421,9 +421,9 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(1L, "Mapster", 2L, "Player1", date, 950);
+        AddDailyEntryCommand command = command(1L, "Mapster", 1L, "Player1", date, 950);
 
         DailyEntry temp = new DailyEntry(null, game, date, player, 950);
         GameWeek closedWeek = new GameWeek(game.gameId(), temp.getWeek());
@@ -449,12 +449,12 @@ class DailyEntriesServiceTest {
 
         //given
         Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(2L), "Player1");
+        Player player = new Player(new PlayerId(1L), "Player1");
         LocalDate validDate = LocalDate.now().minusDays(10);
         LocalDate futureDate = LocalDate.now().plusDays(1);
 
-        AddDailyEntryCommand validCommand = command(1L, "Mapster", 2L, "Player1", validDate, 950);
-        AddDailyEntryCommand invalidCommand = command(1L, "Mapster", 2L, "Player1", futureDate, 900);
+        AddDailyEntryCommand validCommand = command(1L, "Mapster", 1L, "Player1", validDate, 950);
+        AddDailyEntryCommand invalidCommand = command(1L, "Mapster", 1L, "Player1", futureDate, 900);
 
         //when
         when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
@@ -476,7 +476,78 @@ class DailyEntriesServiceTest {
         assertThat(savedCaptor.getValue().get(0).points()).isEqualTo(950);
     }
 
-    //TODO [GEOG-11] duplicates test
+    @Test
+    void shouldSaveOnlyEarliestEntryWhenBatchContainsDuplicates() {
+
+        //given
+        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+        Player player = new Player(new PlayerId(1L), "Player1");
+        LocalDate date = LocalDate.now().minusDays(10);
+        Instant early = date.atTime(8, 0).toInstant(UTC);
+        Instant late = date.atTime(18, 0).toInstant(UTC);
+
+        AddDailyEntryCommand laterCommand = command(1L, "Mapster", 1L, "Player1", date, 900, late);
+        AddDailyEntryCommand earlierCommand = command(1L, "Mapster", 1L, "Player1", date, 950, early);
+
+        //when
+        when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
+        when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player));
+        stubLookups();
+        stubSaveAll();
+
+        AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(laterCommand, earlierCommand));
+
+        //then
+        assertThat(result.successList()).hasSize(1);
+        assertThat(result.successList().get(0).successCode()).isEqualTo(AddDailyEntrySuccess.DailyEntrySuccess.NEW);
+        assertThat(result.successList().get(0).entry().points()).isEqualTo(950);
+        assertThat(result.failureList()).hasSize(1);
+        assertThat(result.failureList().get(0).failedCommand()).isEqualTo(laterCommand);
+        assertThat(result.failureList().get(0).reasons()).containsExactly(AddDailyEntryFailure.Reason.SUPERSEDED);
+
+        ArgumentCaptor<List<DailyEntry>> savedCaptor = ArgumentCaptor.forClass(List.class);
+        verify(saveDailyEntryPort).saveAll(savedCaptor.capture());
+        assertThat(savedCaptor.getValue()).containsExactly(new DailyEntry(null, game, date, player, 950, early));
+    }
+
+    @Test
+    void shouldCorrectPersistedEntryAndSupersedeLaterOneInBatch() {
+
+        //given
+        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+        Player player1 = new Player(new PlayerId(1L), "Player1");
+        Player player2 = new Player(new PlayerId(2L), "Player2");
+        LocalDate date = LocalDate.now().minusDays(10);
+        Instant early = date.atTime(8, 0).toInstant(UTC);
+        Instant middle = date.atTime(12, 0).toInstant(UTC);
+        Instant late = date.atTime(18, 0).toInstant(UTC);
+
+        DailyEntry persistedPlayer1Entry = new DailyEntry(new DailyEntryId(10L), game, date, player1, 800, middle);
+        DailyEntry persistedPlayer2Entry = new DailyEntry(new DailyEntryId(11L), game, date, player2, 700, middle);
+
+        AddDailyEntryCommand correctingCommand = command(1L, "Mapster", 1L, "Player1", date, 950, early);
+        AddDailyEntryCommand supersededCommand = command(1L, "Mapster", 2L, "Player2", date, 900, late);
+
+        //when
+        when(loadGamePort.loadGames(any())).thenReturn(List.of(game));
+        when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(player1, player2));
+        when(loadWeeklyRankingPort.loadCalculatedWeeks(any())).thenReturn(Set.of());
+        when(loadDailyEntriesPort.loadEntries(anyList())).thenReturn(List.of(persistedPlayer1Entry, persistedPlayer2Entry));
+        when(saveDailyEntryPort.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AddDailyEntriesResult result = dailyEntriesService.addDailyEntries(List.of(correctingCommand, supersededCommand));
+
+        //then
+        DailyEntry correctedEntry = new DailyEntry(new DailyEntryId(10L), game, date, player1, 950, early);
+        assertThat(result.successList()).containsExactly(new AddDailyEntrySuccess(
+                correctedEntry,
+                AddDailyEntrySuccess.DailyEntrySuccess.CORRECTED));
+        assertThat(result.failureList()).hasSize(1);
+        assertThat(result.failureList().get(0).failedCommand()).isEqualTo(supersededCommand);
+        assertThat(result.failureList().get(0).reasons()).containsExactly(AddDailyEntryFailure.Reason.SUPERSEDED);
+
+        verify(saveDailyEntryPort).saveAll(List.of(correctedEntry));
+    }
 
     private AddDailyEntryCommand command(Long gameId,
                                          String gameName,

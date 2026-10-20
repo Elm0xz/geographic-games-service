@@ -5,7 +5,7 @@ import com.pretz.geographic.application.domain.model.DailyEntry;
 public record AddDailyEntrySuccess(DailyEntry entry, DailyEntrySuccess successCode) {
 
     public enum DailyEntrySuccess {
-        NEW,
-        CORRECTED //entry timestamp was earlier than incumbent entry, becoming a new incumbent
+        NEW, //no entry was persisted before, this entry is now persisted
+        CORRECTED //an entry was already persisted, this one replaced it because it was submitted earlier
     }
 }
