@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -36,13 +38,13 @@ class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
-    void shouldLoadPlayerById() {
+    void shouldLoadPlayersByIds() {
         //given
-        var id = player.playerId().id();
+        var otherPlayer = mapper.toDomain(repository.save(new PlayerJpaEntity("Ferdynand")));
         //when
-        var result = adapter.loadPlayer(id);
+        var result = adapter.loadPlayers(List.of(player.playerId().id(), otherPlayer.playerId().id()));
         //then
-        assertThat(result).isEqualTo(player);
+        assertThat(result).containsExactlyInAnyOrder(player, otherPlayer);
     }
 
     @Test
@@ -56,13 +58,13 @@ class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
-    void shouldFailWhenTryingToLoadPlayerWithUnknownId() {
+    void shouldSkipUnknownIdsWhenLoadingPlayersByIds() {
         //given
-        var id = 999L;
-        //when / then
-        assertThatThrownBy(() -> adapter.loadPlayer(id))
-                .isInstanceOf(PlayerNotFoundException.class)
-                .hasMessage("Player not found for id: " + id);
+        var unknownId = 999L;
+        //when
+        var result = adapter.loadPlayers(List.of(player.playerId().id(), unknownId));
+        //then
+        assertThat(result).containsExactly(player);
     }
 
     @Test

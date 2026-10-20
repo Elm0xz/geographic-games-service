@@ -1,18 +1,23 @@
-### Send create daily entry POST request
+### Send create daily entries POST request
 POST http://localhost:8080/api/daily-entries
 Content-Type: application/json
 
 {
-  "game": {
-    "id" : 1,
-    "name": "TestGame1"
-  },
-  "player": {
-    "id" : 1,
-    "name": "Testplayer"
-  },
-  "date": "2026-08-17",
-  "points" : 568
+  "createDailyEntryRequestDtos": [
+    {
+      "game": {
+        "id" : 1,
+        "name": "TestGame1"
+      },
+      "player": {
+        "id" : 1,
+        "name": "Testplayer"
+      },
+      "date": "2026-08-17",
+      "points" : 568,
+      "submittedAt": "2026-08-17T10:00:00Z"
+    }
+  ]
 }
 
 ### Send get daily ranking GET request

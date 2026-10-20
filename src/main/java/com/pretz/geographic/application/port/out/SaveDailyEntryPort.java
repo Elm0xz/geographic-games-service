@@ -6,11 +6,5 @@ import java.util.List;
 
 public interface SaveDailyEntryPort {
 
-    /**
-     * Persists a single daily entry, creating the referenced game and player on demand,
-     * and returns the stored entry.
-     */
-    DailyEntry save(DailyEntry entry);
-
     List<DailyEntry> saveAll(List<DailyEntry> entries);
 }

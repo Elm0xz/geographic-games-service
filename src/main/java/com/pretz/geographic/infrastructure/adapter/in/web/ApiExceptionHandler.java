@@ -1,10 +1,6 @@
 package com.pretz.geographic.infrastructure.adapter.in.web;
 
 import com.pretz.geographic.application.domain.validation.InvalidDateException;
-import com.pretz.geographic.application.domain.validation.InvalidGameNameException;
-import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
-import com.pretz.geographic.application.port.out.exception.GameNotFoundException;
-import com.pretz.geographic.application.port.out.exception.PlayerNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -56,34 +52,6 @@ public class ApiExceptionHandler {
                 .body(new ApiErrorResponse(ApiErrorCode.INVALID_DATE, exception.getMessage()));
     }
 
-    @ExceptionHandler(InvalidPlayerNameException.class)
-    ResponseEntity<ApiErrorResponse> handleInvalidPlayerName(InvalidPlayerNameException exception) {
-        log.warn(exception.getMessage());
-        return ResponseEntity.badRequest()
-                .body(new ApiErrorResponse(ApiErrorCode.INVALID_PLAYER_NAME, exception.getMessage()));
-    }
-
-    @ExceptionHandler(InvalidGameNameException.class)
-    ResponseEntity<ApiErrorResponse> handleInvalidGameName(InvalidGameNameException exception) {
-        log.warn(exception.getMessage());
-        return ResponseEntity.badRequest()
-                .body(new ApiErrorResponse(ApiErrorCode.INVALID_GAME_NAME, exception.getMessage()));
-    }
-
-    @ExceptionHandler(GameNotFoundException.class)
-    ResponseEntity<ApiErrorResponse> handleGameNotFound(GameNotFoundException exception) {
-        log.warn(exception.getMessage());
-        return ResponseEntity.badRequest()
-                .body(new ApiErrorResponse(ApiErrorCode.GAME_NOT_FOUND, exception.getMessage()));
-    }
-
-    @ExceptionHandler(PlayerNotFoundException.class)
-    ResponseEntity<ApiErrorResponse> handlePlayerNotFound(PlayerNotFoundException exception) {
-        log.warn(exception.getMessage());
-        return ResponseEntity.badRequest()
-                .body(new ApiErrorResponse(ApiErrorCode.PLAYER_NOT_FOUND, exception.getMessage()));
-    }
-
     //TODO [GEOG- ] improve this exception handler
     @ExceptionHandler(DataIntegrityViolationException.class)
     ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
@@ -99,10 +67,6 @@ public class ApiExceptionHandler {
         VALIDATION_ERROR,
         MALFORMED_REQUEST,
         INVALID_DATE,
-        INVALID_PLAYER_NAME,
-        INVALID_GAME_NAME,
-        GAME_NOT_FOUND,
-        PLAYER_NOT_FOUND,
         DAILY_ENTRY_ALREADY_EXISTS
     }
 }

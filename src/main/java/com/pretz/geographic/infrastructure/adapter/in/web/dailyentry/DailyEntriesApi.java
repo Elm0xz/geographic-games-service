@@ -2,8 +2,6 @@ package com.pretz.geographic.infrastructure.adapter.in.web.dailyentry;
 
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntriesRequestDto;
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntriesResponseDto;
-import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntryRequestDto;
-import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntryResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +12,5 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface DailyEntriesApi {
 
     @PostMapping
-    ResponseEntity<CreateDailyEntryResponseDto> createDailyEntry(@Valid @RequestBody CreateDailyEntryRequestDto createDailyEntryRequestDto);
-
-    @PostMapping("/batch")
     ResponseEntity<CreateDailyEntriesResponseDto> createDailyEntries(@Valid @RequestBody CreateDailyEntriesRequestDto createDailyEntriesRequestDto);
 }

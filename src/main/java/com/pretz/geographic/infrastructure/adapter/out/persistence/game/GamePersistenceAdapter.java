@@ -2,7 +2,6 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.game;
 
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.port.out.LoadGamePort;
-import com.pretz.geographic.application.port.out.exception.GameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +17,6 @@ public class GamePersistenceAdapter implements LoadGamePort {
                                   GamePersistenceMapper gamePersistenceMapper) {
         this.gameJpaRepository = gameJpaRepository;
         this.gamePersistenceMapper = gamePersistenceMapper;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Game loadGame(Long id) {
-        return gameJpaRepository.findById(id)
-                .map(gamePersistenceMapper::toDomain)
-                .orElseThrow(() -> new GameNotFoundException(id));
     }
 
     //for now, we assume all games are active; soon we will add a boolean activity status field in schema

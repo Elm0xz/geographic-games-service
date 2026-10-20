@@ -13,8 +13,6 @@ import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryG
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryPlayerValidator;
 import com.pretz.geographic.application.domain.service.WeeklyRankingCalculator;
 import com.pretz.geographic.application.domain.service.WeeklyRankingService;
-import com.pretz.geographic.application.domain.validation.GameNameValidator;
-import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.domain.validation.WeekValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryWeekClosureValidator;
@@ -38,19 +36,11 @@ public class GeographicGamesConfig {
 
     @Bean
     AddDailyEntriesUseCase addDailyEntriesUseCase(SaveDailyEntryPort saveDailyEntryPort,
-                                                  LoadGamePort loadGamePort,
-                                                  LoadPlayerPort loadPlayerPort,
-                                                  GameNameValidator gameNameValidator,
-                                                  PlayerNameValidator playerNameValidator,
                                                   DailyEntryReferenceValidationManager dailyEntryReferenceValidationManager,
                                                   DailyEntryContextualValidationManager dailyEntryContextualValidationManager,
                                                   DailyEntryDuplicatesResolver dailyEntryDuplicatesResolver) {
         return new DailyEntriesService(
                 saveDailyEntryPort,
-                loadGamePort,
-                loadPlayerPort,
-                gameNameValidator,
-                playerNameValidator,
                 dailyEntryReferenceValidationManager,
                 dailyEntryContextualValidationManager,
                 dailyEntryDuplicatesResolver);
@@ -80,16 +70,6 @@ public class GeographicGamesConfig {
                 weekValidator,
                 weeklyRankingCalculator,
                 getDailyRankingUseCase);
-    }
-
-    @Bean
-    GameNameValidator gameNameValidator() {
-        return new GameNameValidator();
-    }
-
-    @Bean
-    PlayerNameValidator playerNameValidator() {
-        return new PlayerNameValidator();
     }
 
     @Bean

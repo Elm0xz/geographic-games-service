@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
 
     private static final String ENDPOINT = "/api/daily-entries";
-    private static final String BATCH_ENDPOINT = "/api/daily-entries/batch";
 
     @Autowired
     private MockMvc mockMvc;
@@ -74,57 +73,53 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
         playerJpaRepository.save(new PlayerJpaEntity(player2.name()));
     }
 
-    @Test
-    void shouldReturnCreatedForValidCreateDailyEntryRequest() throws Exception {
-
-        mockMvc.perform(post(ENDPOINT)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "game": {
-                                    "id": 1,
-                                    "name": "Mapster"
-                                  },
-                                  "player": {
-                                    "id": 1,
-                                    "name": "Player1"
-                                  },
-                                  "date": "2026-07-29",
-                                  "points": 990,
-                                  "submittedAt": "2026-07-29T00:00:00Z"
-                                }
-                                """))
-                .andExpect(status().isCreated());
-    }
-
     @ParameterizedTest
-    @MethodSource("structurallyInvalidRequests")
-    void shouldReturnBadRequestForStructurallyInvalidRequest(String invalidRequest, String errorCode) throws Exception {
+    @MethodSource("structurallyInvalidEntries")
+    void shouldReturnBadRequestAndSaveNothingWhenAnyEntryIsStructurallyInvalid(String invalidEntry, String errorCode) throws Exception {
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidRequest))
+                        .content(batchJson(
+                                entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"),
+                                invalidEntry)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith("application/json"))
                 .andExpect(jsonPath("$.code").value(errorCode));
+
+        assertThat(dailyEntryJpaRepository.findAll()).isEmpty();
     }
 
     @ParameterizedTest
-    @MethodSource("semanticallyIncorrectRequests")
-    void shouldReturnBadRequestForSemanticAndBusinessValidationFailure(String incorrectRequest, String errorCode) throws Exception {
+    @MethodSource("invalidBatchBodies")
+    void shouldReturnBadRequestForMissingOrEmptyEntryList(String invalidBody) throws Exception {
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(incorrectRequest))
+                        .content(invalidBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith("application/json"))
-                .andExpect(jsonPath("$.code").value(errorCode));
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("entriesWithUnknownReferences")
+    void shouldReturnFailureForEntryWithUnknownReference(String entry, String failureCode) throws Exception {
+
+        mockMvc.perform(post(ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(batchJson(entry)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(0)))
+                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(1)))
+                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].failureCode", contains(failureCode)));
+
+        assertThat(dailyEntryJpaRepository.findAll()).isEmpty();
     }
 
     @Test
     void shouldReturnCreatedWithNewEntriesForValidBatchRequest() throws Exception {
 
-        mockMvc.perform(post(BATCH_ENDPOINT)
+        mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"),
@@ -133,6 +128,8 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(2)))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].player.name", contains("Player1", "Player2")))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].points", contains(990, 950)))
+                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].submittedAt",
+                        contains("2026-07-29T10:00:00Z", "2026-07-29T11:00:00Z")))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].successCode", contains("NEW", "NEW")))
                 .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(0)));
 
@@ -144,7 +141,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
     @Test
     void shouldSaveOnlyEarliestOfDuplicatedEntriesInBatch() throws Exception {
 
-        mockMvc.perform(post(BATCH_ENDPOINT)
+        mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 900, "2026-07-29T18:00:00Z"),
@@ -152,8 +149,11 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(1)))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].points").value(990))
+                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].submittedAt").value("2026-07-29T08:00:00Z"))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].successCode").value("NEW"))
                 .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(1)))
+                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].points").value(900))
+                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].submittedAt").value("2026-07-29T18:00:00Z"))
                 .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].failureCode", contains("SUPERSEDED")));
 
         var entries = dailyEntryJpaRepository.findAll();
@@ -169,7 +169,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
         var persisted = dailyEntryJpaRepository.save(
                 new DailyEntryJpaEntity(savedGame, savedPlayer, date, 800, Instant.parse("2026-07-29T12:00:00Z")));
 
-        mockMvc.perform(post(BATCH_ENDPOINT)
+        mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T08:00:00Z"))))
@@ -177,6 +177,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(1)))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].id").value(persisted.getId()))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].points").value(990))
+                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].submittedAt").value("2026-07-29T08:00:00Z"))
                 .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].successCode").value("CORRECTED"))
                 .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(0)));
 
@@ -194,7 +195,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
         dailyEntryJpaRepository.save(
                 new DailyEntryJpaEntity(savedGame, savedPlayer, date, 800, Instant.parse("2026-07-29T08:00:00Z")));
 
-        mockMvc.perform(post(BATCH_ENDPOINT)
+        mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T12:00:00Z"))))
@@ -211,7 +212,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
     @Test
     void shouldSaveValidEntriesAndReturnFailuresForInvalidOnesInBatch() throws Exception {
 
-        mockMvc.perform(post(BATCH_ENDPOINT)
+        mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"),
@@ -240,7 +241,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                 closedWeekDate.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR),
                 List.of()));
 
-        mockMvc.perform(post(BATCH_ENDPOINT)
+        mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"),
@@ -255,17 +256,6 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
         assertThat(dailyEntryJpaRepository.findAll())
                 .extracting(DailyEntryJpaEntity::getEntryDate)
                 .containsExactly(LocalDate.of(2026, 8, 5));
-    }
-
-    @Test
-    void shouldReturnBadRequestForEmptyBatchRequest() throws Exception {
-
-        mockMvc.perform(post(BATCH_ENDPOINT)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(batchJson()))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentTypeCompatibleWith("application/json"))
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     private static String batchJson(String... entries) {
@@ -295,7 +285,7 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                 """.formatted(gameId, gameName, playerId, playerName, date, points, submittedAt);
     }
 
-    private static Stream<Arguments> structurallyInvalidRequests() {
+    private static Stream<Arguments> structurallyInvalidEntries() {
         return Stream.of(
                 Arguments.of("""
                         {
@@ -410,82 +400,19 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
         );
     }
 
-    private static Stream<Arguments> semanticallyIncorrectRequests() {
+    private static Stream<Arguments> invalidBatchBodies() {
         return Stream.of(
-                Arguments.of("""
-                        {
-                          "game": {
-                            "id": 1,
-                            "name": "Wrong Name"
-                          },
-                          "player": {
-                            "id": 1,
-                            "name": "Player1"
-                          },
-                          "date": "2026-07-29",
-                          "points": 990,
-                          "submittedAt": "2026-07-29T00:00:00Z"
-                        }
-                        """, "INVALID_GAME_NAME"),
-                Arguments.of("""
-                        {
-                          "game": {
-                            "id": 1,
-                            "name": "Mapster"
-                          },
-                          "player": {
-                            "id": 1,
-                            "name": "Wrong Name"
-                          },
-                          "date": "2026-07-29",
-                          "points": 990,
-                          "submittedAt": "2026-07-29T00:00:00Z"
-                        }
-                        """, "INVALID_PLAYER_NAME"),
-                Arguments.of("""
-                        {
-                          "game": {
-                            "id": 999,
-                            "name": "Mapster"
-                          },
-                          "player": {
-                            "id": 1,
-                            "name": "Player1"
-                          },
-                          "date": "2026-07-29",
-                          "points": 990,
-                          "submittedAt": "2026-07-29T00:00:00Z"
-                        }
-                        """, "GAME_NOT_FOUND"),
-                Arguments.of("""
-                        {
-                          "game": {
-                            "id": 1,
-                            "name": "Mapster"
-                          },
-                          "player": {
-                            "id": 999,
-                            "name": "Player1"
-                          },
-                          "date": "2026-07-29",
-                          "points": 990,
-                          "submittedAt": "2026-07-29T00:00:00Z"
-                        }
-                        """, "PLAYER_NOT_FOUND")/*,
-                Arguments.of("""
-                        {
-                          "game": {
-                            "id": 1,
-                            "name": "Mapster"
-                          },
-                          "player": {
-                            "name": "Unknown"
-                          },
-                          "date": "2026-07-29",
-                          "points": 990,
-                          "submittedAt": "2026-07-29T00:00:00Z"
-                        }
-                        """, "PLAYER_NOT_FOUND")*/
+                Arguments.of("{}"),
+                Arguments.of(batchJson())
+        );
+    }
+
+    private static Stream<Arguments> entriesWithUnknownReferences() {
+        return Stream.of(
+                Arguments.of(entryJson(1, "Wrong Name", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"), "UNKNOWN_GAME"),
+                Arguments.of(entryJson(999, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"), "UNKNOWN_GAME"),
+                Arguments.of(entryJson(1, "Mapster", 1, "Wrong Name", "2026-07-29", 990, "2026-07-29T10:00:00Z"), "UNKNOWN_PLAYER"),
+                Arguments.of(entryJson(1, "Mapster", 999, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"), "UNKNOWN_PLAYER")
         );
     }
 }

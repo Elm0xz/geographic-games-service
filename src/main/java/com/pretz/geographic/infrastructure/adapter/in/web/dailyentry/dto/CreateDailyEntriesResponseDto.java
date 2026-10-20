@@ -5,6 +5,7 @@ import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntrie
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntrySuccess;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,7 +20,8 @@ public record CreateDailyEntriesResponseDto(
         );
     }
 
-    record CreateDailyEntrySuccessResponseDto(Long id, GameSummaryDto game, PlayerSummaryDto player, LocalDate date, int points, String successCode) {
+    record CreateDailyEntrySuccessResponseDto(Long id, GameSummaryDto game, PlayerSummaryDto player, LocalDate date, int points,
+                                              Instant submittedAt, String successCode) {
 
         CreateDailyEntrySuccessResponseDto(AddDailyEntrySuccess success) {
             this(
@@ -28,18 +30,22 @@ public record CreateDailyEntriesResponseDto(
                     new PlayerSummaryDto(success.entry().player().playerId().id(), success.entry().player().name()),
                     success.entry().date(),
                     success.entry().points(),
+                    success.entry().submittedAt(),
                     success.successCode().name()
             );
         }
     }
 
-    record CreateDailyEntryFailureResponseDto(GameSummaryDto game, PlayerSummaryDto player, LocalDate date, List<String> failureCode) {
+    record CreateDailyEntryFailureResponseDto(GameSummaryDto game, PlayerSummaryDto player, LocalDate date, int points,
+                                              Instant submittedAt, List<String> failureCode) {
 
         CreateDailyEntryFailureResponseDto(AddDailyEntryFailure failure) {
             this(
                     new GameSummaryDto(failure.failedCommand().game().id(), failure.failedCommand().game().name()),
                     new PlayerSummaryDto(failure.failedCommand().player().id(), failure.failedCommand().player().name()),
                     failure.failedCommand().date(),
+                    failure.failedCommand().points(),
+                    failure.failedCommand().submittedAt(),
                     failure.reasons().stream().map(Enum::name).toList()
             );
         }

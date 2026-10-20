@@ -8,10 +8,6 @@ import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
-import com.pretz.geographic.application.domain.validation.GameNameValidator;
-import com.pretz.geographic.application.domain.validation.InvalidGameNameException;
-import com.pretz.geographic.application.domain.validation.InvalidPlayerNameException;
-import com.pretz.geographic.application.domain.validation.PlayerNameValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryContextualValidationManager;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceChainValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
@@ -43,10 +39,8 @@ import java.util.stream.IntStream;
 
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -74,10 +68,6 @@ class DailyEntriesServiceTest {
     void setUp() {
         dailyEntriesService = new DailyEntriesService(
                 saveDailyEntryPort,
-                loadGamePort,
-                loadPlayerPort,
-                new GameNameValidator(),
-                new PlayerNameValidator(),
                 new DailyEntryReferenceValidationManager(loadGamePort, loadPlayerPort,
                         new DailyEntryReferenceChainValidator(
                                 List.of(new DailyEntryDateValidator(), new DailyEntryGameValidator(), new DailyEntryPlayerValidator())
@@ -87,128 +77,7 @@ class DailyEntriesServiceTest {
         );
     }
 
-    @Test
-    void shouldAddDailyEntryWhenGameAndPlayerNamesMatchPersistedOnes() {
-
-        //given
-        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(1L), "Player1");
-        LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(
-                1L,
-                "Mapster",
-                1L,
-                "Player1",
-                date,
-                950
-        );
-        DailyEntry savedEntry = new DailyEntry(new DailyEntryId(10L), game, date, player, 950);
-
-        //when
-        when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer(1L)).thenReturn(player);
-        when(saveDailyEntryPort.save(new DailyEntry(null, game, date, player, 950))).thenReturn(savedEntry);
-
-        DailyEntry result = dailyEntriesService.addDailyEntry(command);
-
-        //then
-        assertThat(result).isEqualTo(savedEntry);
-
-        verify(loadGamePort).loadGame(1L);
-        verify(loadPlayerPort).loadPlayer(1L);
-        verify(saveDailyEntryPort).save(new DailyEntry(null, game, date, player, 950));
-    }
-
-    @Test
-    void shouldAddNewDailyEntryWithoutDailyEntryId() {
-
-        //given
-        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(1L), "Player1");
-        LocalDate date = LocalDate.now().minusDays(10);
-        AddDailyEntryCommand command = command(
-                1L,
-                "Mapster",
-                1L,
-                "Player1",
-                date,
-                930
-        );
-        DailyEntry savedEntry = new DailyEntry(new DailyEntryId(10L), game, date, player, 930);
-
-        //when
-        when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer(1L)).thenReturn(player);
-        when(saveDailyEntryPort.save(any())).thenReturn(savedEntry);
-
-        dailyEntriesService.addDailyEntry(command);
-
-        //then
-        ArgumentCaptor<DailyEntry> dailyEntryCaptor = ArgumentCaptor.forClass(DailyEntry.class);
-        verify(saveDailyEntryPort).save(dailyEntryCaptor.capture());
-
-        assertThat(dailyEntryCaptor.getValue())
-                .isEqualTo(new DailyEntry(null, game, date, player, 930));
-        assertThat(dailyEntryCaptor.getValue().dailyEntryId()).isNull();
-    }
-
-    @Test
-    void shouldThrowInvalidGameNameExceptionWhenInputGameNameDoesNotMatchPersistedOne() {
-
-        //given
-        Game game = new Game(new GameId(2L), "Worldle", ScoringSystem.STANDARD);
-        AddDailyEntryCommand command = command(
-                2L,
-                "WhenTaken",
-                1L,
-                "Player1",
-                LocalDate.now().minusDays(10),
-                950
-        );
-
-        //when
-        when(loadGamePort.loadGame(2L)).thenReturn(game);
-
-        //when, then
-        assertThatThrownBy(() -> dailyEntriesService.addDailyEntry(command))
-                .isInstanceOf(InvalidGameNameException.class)
-                .hasMessage("Input game name: WhenTaken doesn't match persisted game name: Worldle");
-
-        verify(loadGamePort).loadGame(2L);
-        verify(loadPlayerPort, never()).loadPlayer(1L);
-        verify(saveDailyEntryPort, never()).save(any());
-    }
-
     //TODO [GEOG-12] should not allow duplicate players names?
-
-    @Test
-    void shouldThrowInvalidPlayerNameExceptionWhenInputPlayerNameDoesNotMatchPersistedOne() {
-
-        //given
-        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
-        Player player = new Player(new PlayerId(1L), "Player1");
-        AddDailyEntryCommand command = command(
-                1L,
-                "Mapster",
-                1L,
-                "Andrzej",
-                LocalDate.now().minusDays(10),
-                950
-        );
-
-        //when
-        when(loadGamePort.loadGame(1L)).thenReturn(game);
-        when(loadPlayerPort.loadPlayer(1L)).thenReturn(player);
-
-        //when, then
-        assertThatThrownBy(() -> dailyEntriesService.addDailyEntry(command))
-                .isInstanceOf(InvalidPlayerNameException.class)
-                .hasMessage("Input player name: Andrzej doesn't match persisted player name: Player1");
-
-        verify(loadGamePort).loadGame(1L);
-        verify(loadPlayerPort).loadPlayer(1L);
-        verify(saveDailyEntryPort, never()).save(any());
-    }
 
     @Test
     void shouldAddAllValidEntriesInBatchAsNewEntries() {

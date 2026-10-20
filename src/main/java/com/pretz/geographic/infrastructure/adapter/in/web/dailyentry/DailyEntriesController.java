@@ -4,7 +4,6 @@ import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCas
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntriesRequestDto;
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntriesResponseDto;
 import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntryRequestDto;
-import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateDailyEntryResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,12 +16,6 @@ public class DailyEntriesController implements DailyEntriesApi {
 
     public DailyEntriesController(AddDailyEntriesUseCase addDailyEntriesUseCase) {
         this.addDailyEntriesUseCase = addDailyEntriesUseCase;
-    }
-
-    @Override
-    public ResponseEntity<CreateDailyEntryResponseDto> createDailyEntry(CreateDailyEntryRequestDto createDailyEntryRequestDto) {
-        var result = addDailyEntriesUseCase.addDailyEntry(createDailyEntryRequestDto.toCommand());
-        return ResponseEntity.status(CREATED).body(new CreateDailyEntryResponseDto(result));
     }
 
     @Override

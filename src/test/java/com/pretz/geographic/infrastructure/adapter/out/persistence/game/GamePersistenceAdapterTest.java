@@ -2,7 +2,6 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.game;
 
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
-import com.pretz.geographic.application.port.out.exception.GameNotFoundException;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.AbstractPostgresDataJpaTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Import({GamePersistenceAdapter.class, GamePersistenceMapper.class})
 class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
@@ -39,13 +37,13 @@ class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
-    void shouldLoadGameById() {
+    void shouldLoadGamesByIds() {
         //given
-        var id = game.gameId().id();
+        var otherGame = mapper.toDomain(repository.save(new GameJpaEntity("WhenTaken", ScoringSystem.STANDARD)));
         //when
-        var result = adapter.loadGame(id);
+        var result = adapter.loadGames(List.of(game.gameId().id(), otherGame.gameId().id()));
         //then
-        assertThat(result).isEqualTo(game);
+        assertThat(result).containsExactlyInAnyOrder(game, otherGame);
     }
 
     @Test
@@ -64,12 +62,12 @@ class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
-    void shouldFailWhenTryingToLoadGameWithUnknownId() {
+    void shouldSkipUnknownIdsWhenLoadingGamesByIds() {
         //given
-        var id = 999L;
-        //when / then
-        assertThatThrownBy(() -> adapter.loadGame(id))
-                .isInstanceOf(GameNotFoundException.class)
-                .hasMessage("Game not found for id: " + id);
+        var unknownId = 999L;
+        //when
+        var result = adapter.loadGames(List.of(game.gameId().id(), unknownId));
+        //then
+        assertThat(result).containsExactly(game);
     }
 }
