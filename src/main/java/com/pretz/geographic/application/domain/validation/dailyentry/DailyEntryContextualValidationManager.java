@@ -4,6 +4,8 @@ import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.service.ValidationIntermediateResult;
 import com.pretz.geographic.application.port.out.LoadWeeklyRankingPort;
 
+import java.util.Set;
+
 public class DailyEntryContextualValidationManager {
 
     private final LoadWeeklyRankingPort loadWeeklyRankingPort;
@@ -15,8 +17,9 @@ public class DailyEntryContextualValidationManager {
     }
 
     public ValidationIntermediateResult validate(ValidationIntermediateResult intermediateResult) {
-        var contextualLookup = new ContextualLookups(loadWeeklyRankingPort.loadCalculatedWeeks(intermediateResult.entriesPassed().stream()
-                .map(it -> new GameWeek(it.game().gameId(), it.getWeek())).toList()));
+        Set<GameWeek> gameWeeks = loadWeeklyRankingPort.loadCalculatedWeeks(intermediateResult.entriesPassed().stream()
+                .map(it -> new GameWeek(it.game().gameId(), it.getWeek())).toList());
+        var contextualLookup = new ContextualLookups(gameWeeks);
 
         return validator.validate(intermediateResult, contextualLookup);
     }

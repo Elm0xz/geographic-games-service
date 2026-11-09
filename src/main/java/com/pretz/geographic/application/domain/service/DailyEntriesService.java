@@ -35,19 +35,19 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
 
         var referenceValidationResult = referenceValidator.validate(addDailyEntryCommands);
         var contextualValidationResult = contextualValidator.validate(referenceValidationResult);
-        var result = resolver.resolveDuplicates(contextualValidationResult);
-        var saved = saveDailyEntryPort.saveAll(getValidatedEntries(result));
+        var duplicateResolutionResult = resolver.resolveDuplicates(contextualValidationResult);
+        var saved = saveDailyEntryPort.saveAll(getValidatedEntries(duplicateResolutionResult));
 
-        return new AddDailyEntriesResult(toSuccessList(saved, result), result.failureList());
+        return new AddDailyEntriesResult(toSuccessList(saved, duplicateResolutionResult), duplicateResolutionResult.failureList());
     }
 
-    private List<DailyEntry> getValidatedEntries(AddDailyEntriesResult contextualValidationResult) {
-        return contextualValidationResult.successList().stream().map(AddDailyEntrySuccess::entry).toList();
+    private List<DailyEntry> getValidatedEntries(AddDailyEntriesResult result) {
+        return result.successList().stream().map(AddDailyEntrySuccess::entry).toList();
     }
 
-    private List<AddDailyEntrySuccess> toSuccessList(List<DailyEntry> saved, AddDailyEntriesResult contextualValidationResult) {
+    private List<AddDailyEntrySuccess> toSuccessList(List<DailyEntry> saved, AddDailyEntriesResult result) {
         return IntStream.range(0, saved.size())
-                .mapToObj(i -> new AddDailyEntrySuccess(saved.get(i), contextualValidationResult.successList().get(i).successCode()))
+                .mapToObj(i -> new AddDailyEntrySuccess(saved.get(i), result.successList().get(i).successCode()))
                 .toList();
     }
 }
