@@ -1,9 +1,9 @@
 package com.pretz.geographic.infrastructure.adapter.in.web;
 
 import com.pretz.geographic.application.domain.validation.InvalidDateException;
+import com.pretz.geographic.application.port.out.exception.ConcurrentModificationConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +11,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -52,12 +54,12 @@ public class ApiExceptionHandler {
                 .body(new ApiErrorResponse(ApiErrorCode.INVALID_DATE, exception.getMessage()));
     }
 
-    //TODO [GEOG- ] improve this exception handler
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
-        log.warn("Daily entry could not be saved due to data integrity violation");
-        return ResponseEntity.badRequest()
-                .body(new ApiErrorResponse(ApiErrorCode.DAILY_ENTRY_ALREADY_EXISTS, "Daily entry already exists"));
+    @ExceptionHandler(ConcurrentModificationConflictException.class)
+    ResponseEntity<ApiErrorResponse> handleConcurrentModificationConflict(ConcurrentModificationConflictException exception) {
+        log.warn("Concurrent modification conflict: {}", exception.getMessage());
+        return ResponseEntity.status(CONFLICT)
+                .body(new ApiErrorResponse(ApiErrorCode.CONCURRENT_MODIFICATION,
+                        "Request conflicted with a concurrent modification and was not saved; retry it"));
     }
 
     record ApiErrorResponse(ApiErrorCode code, String message) {
@@ -67,6 +69,6 @@ public class ApiExceptionHandler {
         VALIDATION_ERROR,
         MALFORMED_REQUEST,
         INVALID_DATE,
-        DAILY_ENTRY_ALREADY_EXISTS
+        CONCURRENT_MODIFICATION
     }
 }

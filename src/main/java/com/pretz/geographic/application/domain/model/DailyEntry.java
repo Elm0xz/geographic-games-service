@@ -5,9 +5,8 @@ import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.Objects;
 
-import static java.time.ZoneOffset.UTC;
-
-public record DailyEntry(DailyEntryId dailyEntryId, Game game, LocalDate date, Player player, int points, Instant submittedAt) {
+public record DailyEntry(DailyEntryId dailyEntryId, Game game, LocalDate date, Player player, int points,
+                         Instant submittedAt) {
 
     public DailyEntry {
         Objects.requireNonNull(game, "DailyEntry game must not be null");
@@ -16,14 +15,12 @@ public record DailyEntry(DailyEntryId dailyEntryId, Game game, LocalDate date, P
         Objects.requireNonNull(submittedAt, "DailyEntry timestamp must not be null");
     }
 
-    //TODO [GEOG-11] get rid of this constructor -> move to test cases
-    public DailyEntry(DailyEntryId dailyEntryId, Game game, LocalDate date, Player player, int points) {
-        this(dailyEntryId,game, date, player, points, date.atStartOfDay().toInstant(UTC));
-
-    }
-
     public Week getWeek() {
         return Week.of(date.get(WeekFields.ISO.weekBasedYear()),
                 date.get(WeekFields.ISO.weekOfWeekBasedYear()));
+    }
+
+    public DailyEntryKey dailyEntryKey() {
+        return new DailyEntryKey(game, player, date);
     }
 }

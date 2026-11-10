@@ -6,13 +6,18 @@ import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryR
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
+import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntrySuccess;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
 public class DailyEntriesService implements AddDailyEntriesUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(DailyEntriesService.class);
 
     private final SaveDailyEntryPort saveDailyEntryPort;
 
@@ -38,16 +43,30 @@ public class DailyEntriesService implements AddDailyEntriesUseCase {
         var duplicateResolutionResult = resolver.resolveDuplicates(contextualValidationResult);
         var saved = saveDailyEntryPort.saveAll(getValidatedEntries(duplicateResolutionResult));
 
-        return new AddDailyEntriesResult(toSuccessList(saved, duplicateResolutionResult), duplicateResolutionResult.failureList());
+        logRejections(duplicateResolutionResult.failureList());
+
+        return new AddDailyEntriesResult(toSuccessList(saved, duplicateResolutionResult.successList()), duplicateResolutionResult.failureList());
     }
 
     private List<DailyEntry> getValidatedEntries(AddDailyEntriesResult result) {
         return result.successList().stream().map(AddDailyEntrySuccess::entry).toList();
     }
 
-    private List<AddDailyEntrySuccess> toSuccessList(List<DailyEntry> saved, AddDailyEntriesResult result) {
-        return IntStream.range(0, saved.size())
-                .mapToObj(i -> new AddDailyEntrySuccess(saved.get(i), result.successList().get(i).successCode()))
+    private List<AddDailyEntrySuccess> toSuccessList(List<DailyEntry> saved, List<AddDailyEntrySuccess> successList) {
+
+        var successCodes = successList.stream()
+                .collect(Collectors.toMap(it -> it.entry().dailyEntryKey(), AddDailyEntrySuccess::successCode));
+
+        return saved.stream()
+                .map(it -> new AddDailyEntrySuccess(it, successCodes.get(it.dailyEntryKey())))
                 .toList();
+    }
+
+    private void logRejections(List<AddDailyEntryFailure> failureList) {
+        failureList.forEach(failure -> {
+            var command = failure.failedCommand();
+            log.info("Daily entry rejected: game={}, player={}, date={}, reasons={}",
+                    command.game(), command.player(), command.date(), failure.reasons());
+        });
     }
 }

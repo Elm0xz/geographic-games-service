@@ -15,6 +15,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.List;
@@ -176,7 +177,7 @@ class BaseWeeklyRankingCalculatorTest {
     }
 
     private DailyEntry entry(Game game, LocalDate date, Player player, int points) {
-        return new DailyEntry(new DailyEntryId(nextDailyEntryId++), game, date, player, points);
+        return new DailyEntry(new DailyEntryId(nextDailyEntryId++), game, date, player, points, Instant.parse("2026-04-12T10:00:00Z"));
     }
 
     private int numberOfEntriesCheckedForWinner(WeeklyRanking ranking) {

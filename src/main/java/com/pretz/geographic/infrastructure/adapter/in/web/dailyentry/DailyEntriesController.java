@@ -7,8 +7,6 @@ import com.pretz.geographic.infrastructure.adapter.in.web.dailyentry.dto.CreateD
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.http.HttpStatus.CREATED;
-
 @RestController
 public class DailyEntriesController implements DailyEntriesApi {
 
@@ -22,6 +20,6 @@ public class DailyEntriesController implements DailyEntriesApi {
     public ResponseEntity<CreateDailyEntriesResponseDto> createDailyEntries(CreateDailyEntriesRequestDto createDailyEntriesRequestDto) {
         var result = addDailyEntriesUseCase.addDailyEntries(createDailyEntriesRequestDto.createDailyEntryRequestDtos().stream()
                 .map(CreateDailyEntryRequestDto::toCommand).toList());
-        return ResponseEntity.status(CREATED).body(new CreateDailyEntriesResponseDto(result));
+        return ResponseEntity.ok(new CreateDailyEntriesResponseDto(result));
     }
 }
