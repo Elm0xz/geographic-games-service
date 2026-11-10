@@ -3,6 +3,7 @@ package com.pretz.geographic.application.domain.service;
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyRanking;
 import com.pretz.geographic.application.domain.model.Game;
+import com.pretz.geographic.application.domain.model.DailyRankingKey;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
@@ -53,7 +54,7 @@ public class DailyRankingService implements GetDailyRankingUseCase {
 
         return loadDailyEntriesPort.loadEntries(loadGamePort.loadGames(
                         games.stream().map(it -> it.gameId().id()).toList()), from, to).stream()
-                .collect(Collectors.groupingBy(it -> new GameAndDate(it.game(), it.date())))
+                .collect(Collectors.groupingBy(it -> new DailyRankingKey(it.game(), it.date())))
                 .entrySet().stream().map(it -> DailyRanking.of(it.getKey().game(), it.getKey().date(), it.getValue()))
                 .sorted(BY_GAME_NAME_AND_DATE)
                 .toList();
@@ -63,8 +64,5 @@ public class DailyRankingService implements GetDailyRankingUseCase {
     @Override
     public DailyRanking getDailyRanking(LocalDate date, Game game) {
         return null;
-    }
-
-    public record GameAndDate(Game game, LocalDate date) {
     }
 }

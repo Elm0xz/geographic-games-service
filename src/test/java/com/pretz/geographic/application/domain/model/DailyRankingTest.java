@@ -6,12 +6,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
 class DailyRankingTest {
 
+    private static final Instant SUBMITTED_AT = Instant.parse("2026-04-12T10:00:00Z");
     private static final String RANKING_ENTRY_VALIDATION_ERROR = "DailyRanking entries must match ranking game and date";
     private static final String NO_ENTRIES_VALIDATION_ERROR = "DailyRanking entries list can't be empty";
 
@@ -22,9 +24,9 @@ class DailyRankingTest {
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 830);
-        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Player2"), 990);
-        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Player3"), 560);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 830, SUBMITTED_AT);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Player2"), 990, SUBMITTED_AT);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Player3"), 560, SUBMITTED_AT);
 
         var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry));
 
@@ -44,10 +46,10 @@ class DailyRankingTest {
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Roman"), 900);
-        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Ferdynand"), 900);
-        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Maria"), 920);
-        DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Andrzej"), 920);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Roman"), 900, SUBMITTED_AT);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Ferdynand"), 900, SUBMITTED_AT);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Maria"), 920, SUBMITTED_AT);
+        DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Andrzej"), 920, SUBMITTED_AT);
 
         var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry, player4Entry));
 
@@ -67,9 +69,9 @@ class DailyRankingTest {
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Player2"), 970);
-        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Player3"), 900);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990, SUBMITTED_AT);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Player2"), 970, SUBMITTED_AT);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Player3"), 900, SUBMITTED_AT);
 
         var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry));
 
@@ -89,10 +91,10 @@ class DailyRankingTest {
         Game game = new Game(new GameId(1L), "game1", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Mark"), 990);
-        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Anne"), 990);
-        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Andrew"), 990);
-        DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Zheng"), 900);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Mark"), 990, SUBMITTED_AT);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, date, new Player(new PlayerId(2L), "Anne"), 990, SUBMITTED_AT);
+        DailyEntry player3Entry = new DailyEntry(new DailyEntryId(3L), game, date, new Player(new PlayerId(3L), "Andrew"), 990, SUBMITTED_AT);
+        DailyEntry player4Entry = new DailyEntry(new DailyEntryId(4L), game, date, new Player(new PlayerId(4L), "Zheng"), 900, SUBMITTED_AT);
 
         var dailyRanking = DailyRanking.of(game, date, List.of(player1Entry, player2Entry, player3Entry, player4Entry));
 
@@ -113,8 +115,8 @@ class DailyRankingTest {
         Game otherGame = new Game(new GameId(2L), "game2", ScoringSystem.STANDARD);
         LocalDate date = LocalDate.of(2026, 4, 12);
 
-        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, date, new Player(new PlayerId(2L), "Player2"), 970);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990, SUBMITTED_AT);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, date, new Player(new PlayerId(2L), "Player2"), 970, SUBMITTED_AT);
 
         //when //then
         Assertions.assertThatThrownBy(() -> DailyRanking.of(game, date, List.of(player1Entry, player2Entry)))
@@ -130,8 +132,8 @@ class DailyRankingTest {
         LocalDate date = LocalDate.of(2026, 4, 12);
         LocalDate otherDate = date.minusDays(1);
 
-        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, otherDate, new Player(new PlayerId(2L), "Player2"), 970);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990, SUBMITTED_AT);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), game, otherDate, new Player(new PlayerId(2L), "Player2"), 970, SUBMITTED_AT);
 
         //when //then
         Assertions.assertThatThrownBy(() -> DailyRanking.of(game, date, List.of(player1Entry, player2Entry)))
@@ -148,8 +150,8 @@ class DailyRankingTest {
         LocalDate date = LocalDate.of(2026, 4, 12);
         LocalDate otherDate = date.minusDays(1);
 
-        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990);
-        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, otherDate, new Player(new PlayerId(2L), "Player2"), 970);
+        DailyEntry player1Entry = new DailyEntry(new DailyEntryId(1L), game, date, new Player(new PlayerId(1L), "Player1"), 990, SUBMITTED_AT);
+        DailyEntry player2Entry = new DailyEntry(new DailyEntryId(2L), otherGame, otherDate, new Player(new PlayerId(2L), "Player2"), 970, SUBMITTED_AT);
 
         //when //then
         Assertions.assertThatThrownBy(() -> DailyRanking.of(game, date, List.of(player1Entry, player2Entry)))
@@ -166,7 +168,7 @@ class DailyRankingTest {
 
         var dailyRanking = DailyRanking.of(game, inputDate, List.of(
                 new DailyEntry(new DailyEntryId(1L), game, inputDate,
-                        new Player(new PlayerId(1L), "Player1"), 990)));
+                        new Player(new PlayerId(1L), "Player1"), 990, SUBMITTED_AT)));
 
         //when
         Week result = dailyRanking.getWeek();

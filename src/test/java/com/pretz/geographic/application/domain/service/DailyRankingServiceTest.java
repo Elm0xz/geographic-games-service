@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DailyRankingServiceTest {
 
+    private static final Instant SUBMITTED_AT = Instant.parse("2026-04-01T10:00:00Z");
     @Mock
     private LoadGamePort loadGamePort;
 
@@ -55,10 +57,10 @@ class DailyRankingServiceTest {
 
         Player player1 = new Player(new PlayerId(1L), "Player1");
         Player player2 = new Player(new PlayerId(2L), "Player2");
-        DailyEntry entry1 = new DailyEntry(new DailyEntryId(1L), game1, pastDate, player1, 950);
-        DailyEntry entry2 = new DailyEntry(new DailyEntryId(2L), game1, pastDate, player2, 970);
-        DailyEntry entry3 = new DailyEntry(new DailyEntryId(3L), game2, pastDate, player1, 888);
-        DailyEntry entry4 = new DailyEntry(new DailyEntryId(4L), game2, pastDate, player2, 864);
+        DailyEntry entry1 = new DailyEntry(new DailyEntryId(1L), game1, pastDate, player1, 950, SUBMITTED_AT);
+        DailyEntry entry2 = new DailyEntry(new DailyEntryId(2L), game1, pastDate, player2, 970, SUBMITTED_AT);
+        DailyEntry entry3 = new DailyEntry(new DailyEntryId(3L), game2, pastDate, player1, 888, SUBMITTED_AT);
+        DailyEntry entry4 = new DailyEntry(new DailyEntryId(4L), game2, pastDate, player2, 864, SUBMITTED_AT);
         DailyRanking ranking1 = DailyRanking.of(game1, pastDate, List.of(entry2, entry1));
         DailyRanking ranking2 = DailyRanking.of(game2, pastDate, List.of(entry3, entry4));
 
@@ -91,26 +93,26 @@ class DailyRankingServiceTest {
         Player player3 = new Player(new PlayerId(3L), "Charlie");
 
         // Game 1 (WhenTaken) entries
-        DailyEntry e1Mon1 = new DailyEntry(new DailyEntryId(21L), game1, monday, player1, 950);
-        DailyEntry e1Mon2 = new DailyEntry(new DailyEntryId(22L), game1, monday, player2, 870);
-        DailyEntry e1Mon3 = new DailyEntry(new DailyEntryId(23L), game1, monday, player3, 910);
-        DailyEntry e1Tue1 = new DailyEntry(new DailyEntryId(24L), game1, tuesday, player1, 880);
-        DailyEntry e1Tue2 = new DailyEntry(new DailyEntryId(25L), game1, tuesday, player2, 930);
-        DailyEntry e1Fri1 = new DailyEntry(new DailyEntryId(26L), game1, friday, player2, 900);
-        DailyEntry e1Fri2 = new DailyEntry(new DailyEntryId(27L), game1, friday, player3, 860);
-        DailyEntry e1Sun1 = new DailyEntry(new DailyEntryId(28L), game1, sunday, player1, 920);
-        DailyEntry e1Sun2 = new DailyEntry(new DailyEntryId(29L), game1, sunday, player3, 975);
+        DailyEntry e1Mon1 = new DailyEntry(new DailyEntryId(21L), game1, monday, player1, 950, SUBMITTED_AT);
+        DailyEntry e1Mon2 = new DailyEntry(new DailyEntryId(22L), game1, monday, player2, 870, SUBMITTED_AT);
+        DailyEntry e1Mon3 = new DailyEntry(new DailyEntryId(23L), game1, monday, player3, 910, SUBMITTED_AT);
+        DailyEntry e1Tue1 = new DailyEntry(new DailyEntryId(24L), game1, tuesday, player1, 880, SUBMITTED_AT);
+        DailyEntry e1Tue2 = new DailyEntry(new DailyEntryId(25L), game1, tuesday, player2, 930, SUBMITTED_AT);
+        DailyEntry e1Fri1 = new DailyEntry(new DailyEntryId(26L), game1, friday, player2, 900, SUBMITTED_AT);
+        DailyEntry e1Fri2 = new DailyEntry(new DailyEntryId(27L), game1, friday, player3, 860, SUBMITTED_AT);
+        DailyEntry e1Sun1 = new DailyEntry(new DailyEntryId(28L), game1, sunday, player1, 920, SUBMITTED_AT);
+        DailyEntry e1Sun2 = new DailyEntry(new DailyEntryId(29L), game1, sunday, player3, 975, SUBMITTED_AT);
 
         // Game 2 (GeoSplit) entries
-        DailyEntry e2Mon1 = new DailyEntry(new DailyEntryId(31L), game2, monday, player1, 800);
-        DailyEntry e2Mon2 = new DailyEntry(new DailyEntryId(32L), game2, monday, player3, 840);
-        DailyEntry e2Tue1 = new DailyEntry(new DailyEntryId(33L), game2, tuesday, player2, 810);
-        DailyEntry e2Tue2 = new DailyEntry(new DailyEntryId(34L), game2, tuesday, player3, 795);
-        DailyEntry e2Fri1 = new DailyEntry(new DailyEntryId(35L), game2, friday, player1, 860);
-        DailyEntry e2Fri2 = new DailyEntry(new DailyEntryId(36L), game2, friday, player2, 825);
-        DailyEntry e2Fri3 = new DailyEntry(new DailyEntryId(37L), game2, friday, player3, 845);
-        DailyEntry e2Sun1 = new DailyEntry(new DailyEntryId(38L), game2, sunday, player1, 790);
-        DailyEntry e2Sun2 = new DailyEntry(new DailyEntryId(39L), game2, sunday, player2, 830);
+        DailyEntry e2Mon1 = new DailyEntry(new DailyEntryId(31L), game2, monday, player1, 800, SUBMITTED_AT);
+        DailyEntry e2Mon2 = new DailyEntry(new DailyEntryId(32L), game2, monday, player3, 840, SUBMITTED_AT);
+        DailyEntry e2Tue1 = new DailyEntry(new DailyEntryId(33L), game2, tuesday, player2, 810, SUBMITTED_AT);
+        DailyEntry e2Tue2 = new DailyEntry(new DailyEntryId(34L), game2, tuesday, player3, 795, SUBMITTED_AT);
+        DailyEntry e2Fri1 = new DailyEntry(new DailyEntryId(35L), game2, friday, player1, 860, SUBMITTED_AT);
+        DailyEntry e2Fri2 = new DailyEntry(new DailyEntryId(36L), game2, friday, player2, 825, SUBMITTED_AT);
+        DailyEntry e2Fri3 = new DailyEntry(new DailyEntryId(37L), game2, friday, player3, 845, SUBMITTED_AT);
+        DailyEntry e2Sun1 = new DailyEntry(new DailyEntryId(38L), game2, sunday, player1, 790, SUBMITTED_AT);
+        DailyEntry e2Sun2 = new DailyEntry(new DailyEntryId(39L), game2, sunday, player2, 830, SUBMITTED_AT);
 
         DailyRanking rankG2Mon = DailyRanking.of(game2, monday, List.of(e2Mon1, e2Mon2));
         DailyRanking rankG2Tue = DailyRanking.of(game2, tuesday, List.of(e2Tue1, e2Tue2));

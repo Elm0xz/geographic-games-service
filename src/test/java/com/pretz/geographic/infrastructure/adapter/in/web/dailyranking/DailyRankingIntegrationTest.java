@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DailyRankingIntegrationTest extends AbstractWebIntegrationTest {
 
+    private static final Instant SUBMITTED_AT = Instant.parse("2026-04-04T10:00:00Z");
     private static final String ENDPOINT = "/api/daily-ranking";
 
     @Autowired
@@ -49,10 +51,10 @@ public class DailyRankingIntegrationTest extends AbstractWebIntegrationTest {
     private final Game game2 = new Game(null, "WhenTaken", ScoringSystem.STANDARD);
     private final Player player1 = new Player(null, "Andrzej");
     private final Player player2 = new Player(null, "Ferdynand");
-    private final DailyEntry dailyEntry1 = new DailyEntry(null, game1, LocalDate.of(2026, 4, 4), player1, 836);
-    private final DailyEntry dailyEntry2 = new DailyEntry(null, game1, LocalDate.of(2026, 4, 4), player2, 911);
-    private final DailyEntry dailyEntry3 = new DailyEntry(null, game2, LocalDate.of(2026, 4, 4), player1, 777);
-    private final DailyEntry dailyEntry4 = new DailyEntry(null, game2, LocalDate.of(2026, 4, 4), player2, 734);
+    private final DailyEntry dailyEntry1 = new DailyEntry(null, game1, LocalDate.of(2026, 4, 4), player1, 836, SUBMITTED_AT);
+    private final DailyEntry dailyEntry2 = new DailyEntry(null, game1, LocalDate.of(2026, 4, 4), player2, 911, SUBMITTED_AT);
+    private final DailyEntry dailyEntry3 = new DailyEntry(null, game2, LocalDate.of(2026, 4, 4), player1, 777, SUBMITTED_AT);
+    private final DailyEntry dailyEntry4 = new DailyEntry(null, game2, LocalDate.of(2026, 4, 4), player2, 734, SUBMITTED_AT);
 
     @BeforeEach
     void initEntities() {

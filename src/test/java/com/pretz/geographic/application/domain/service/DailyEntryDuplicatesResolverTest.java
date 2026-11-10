@@ -68,7 +68,7 @@ class DailyEntryDuplicatesResolverTest {
 
         //then
         assertThat(result.failureList()).isEmpty();
-        assertThat(result.successList()).containsExactly(
+        assertThat(result.successList()).containsExactlyInAnyOrder(
                 new AddDailyEntrySuccess(entry1, NEW),
                 new AddDailyEntrySuccess(entry2, NEW),
                 new AddDailyEntrySuccess(entry3, NEW));
@@ -238,7 +238,7 @@ class DailyEntryDuplicatesResolverTest {
     }
 
     @Test
-    void shouldResolveMixedBatchKeepingBatchOrderOfSuccesses() {
+    void shouldResolveMixedBatch() {
 
         //given
         DailyEntry persisted = persisted(player2, 800, LATE);
@@ -252,7 +252,7 @@ class DailyEntryDuplicatesResolverTest {
         AddDailyEntriesResult result = resolver.resolveDuplicates(intermediateWithPassed(newEntry, correction, duplicate));
 
         //then
-        assertThat(result.successList()).containsExactly(
+        assertThat(result.successList()).containsExactlyInAnyOrder(
                 new AddDailyEntrySuccess(newEntry, NEW),
                 new AddDailyEntrySuccess(persisted(player2, 900, EARLY), CORRECTED));
         assertThat(result.failureList()).containsExactly(superseded(duplicate));

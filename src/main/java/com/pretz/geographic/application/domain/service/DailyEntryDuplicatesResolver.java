@@ -2,8 +2,8 @@ package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyEntryId;
-import com.pretz.geographic.application.domain.model.Game;
-import com.pretz.geographic.application.domain.model.Player;
+import com.pretz.geographic.application.domain.model.DailyEntryKey;
+import com.pretz.geographic.application.domain.model.DailyRankingKey;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntriesResult;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
@@ -11,7 +11,6 @@ import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryS
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,14 +44,14 @@ public class DailyEntryDuplicatesResolver {
 
         var resolutionStateMap = getPersistedEntries(arrivingEntries).stream()
                 .collect(Collectors.toMap(
-                        it -> new GamePlayerDate(it.game(), it.player(), it.date()),
+                        it -> new DailyEntryKey(it.game(), it.player(), it.date()),
                         it -> new EntryResolutionState(-1, it.submittedAt(), null, it.dailyEntryId())));
 
         List<AddDailyEntryFailure> detectedFailures = new ArrayList<>();
 
         for (int batchId = 0; batchId < arrivingEntries.size(); batchId++) {
             var arriving = arrivingEntries.get(batchId);
-            GamePlayerDate key = new GamePlayerDate(arriving.game(), arriving.player(), arriving.date());
+            DailyEntryKey key = new DailyEntryKey(arriving.game(), arriving.player(), arriving.date());
             if (resolutionStateMap.containsKey(key)) {
                 EntryResolutionState incumbent = resolutionStateMap.get(key);
                 if (arriving.submittedAt().isBefore(incumbent.submittedAt())) {
@@ -76,7 +75,7 @@ public class DailyEntryDuplicatesResolver {
 
     private List<DailyEntry> getPersistedEntries(List<DailyEntry> arrivingEntries) {
         return loadDailyEntriesPort.loadEntries(arrivingEntries.stream()
-                .map(it -> new DailyRankingService.GameAndDate(it.game(), it.date())).toList());
+                .map(it -> new DailyRankingKey(it.game(), it.date())).toList());
     }
 
     private void addToFailures(List<AddDailyEntryFailure> detectedFailures, DailyEntry entry) {
@@ -88,7 +87,7 @@ public class DailyEntryDuplicatesResolver {
                 entry.submittedAt()), List.of(SUPERSEDED)));
     }
 
-    private List<AddDailyEntrySuccess> prepareEntriesToSave(Map<GamePlayerDate, EntryResolutionState> entriesAndTimestamps,
+    private List<AddDailyEntrySuccess> prepareEntriesToSave(Map<DailyEntryKey, EntryResolutionState> entriesAndTimestamps,
                                                             List<DailyEntry> entries) {
         var entryIdsToSave = entriesAndTimestamps.values().stream()
                 .filter(this::isNotAlreadyPersisted)
@@ -123,8 +122,5 @@ public class DailyEntryDuplicatesResolver {
     private record EntryResolutionState(int batchId, Instant submittedAt,
                                         AddDailyEntrySuccess.DailyEntrySuccess successType,
                                         DailyEntryId dbId) {
-    }
-
-    private record GamePlayerDate(Game game, Player player, LocalDate date) {
     }
 }

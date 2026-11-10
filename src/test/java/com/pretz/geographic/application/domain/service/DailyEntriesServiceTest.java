@@ -1,5 +1,10 @@
 package com.pretz.geographic.application.domain.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyEntryId;
 import com.pretz.geographic.application.domain.model.Game;
@@ -30,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -294,7 +300,7 @@ class DailyEntriesServiceTest {
         LocalDate date = LocalDate.now().minusDays(10);
         AddDailyEntryCommand command = command(1L, "Mapster", 1L, "Player1", date, 950);
 
-        DailyEntry temp = new DailyEntry(null, game, date, player, 950);
+        DailyEntry temp = new DailyEntry(null, game, date, player, 950, Instant.parse("2026-04-12T10:00:00Z"));
         GameWeek closedWeek = new GameWeek(game.gameId(), temp.getWeek());
 
         //when
@@ -418,6 +424,44 @@ class DailyEntriesServiceTest {
         verify(saveDailyEntryPort).saveAll(List.of(correctedEntry));
     }
 
+    @Test
+    void shouldLogEachRejectionWithItsKeyAndReasons() {
+
+        //given
+        var date = LocalDate.now().minusDays(2);
+        var futureDate = date.plusDays(7);
+
+        var unknownGame = command(99L, "UnknownGame", 1L, "Player1", date, 950);
+        var unknownPlayer = command(1L, "Mapster", 99L, "UnknownPlayer", date, 900);
+        var unknownGameUnknownPlayerFutureDate = command(1L, "UnknownGame", 99L, "UnknownPlayer", futureDate, 900);
+
+        //when
+        when(loadGamePort.loadGames(any())).thenReturn(List.of(new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD)));
+        when(loadPlayerPort.loadPlayers(any())).thenReturn(List.of(new Player(new PlayerId(1L), "Player1")));
+        stubLookups();
+
+        var logger = (Logger) LoggerFactory.getLogger(DailyEntriesService.class);
+        var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            var result = dailyEntriesService.addDailyEntries(List.of(unknownGame, unknownPlayer, unknownGameUnknownPlayerFutureDate));
+
+            //then
+            assertThat(result.failureList()).hasSize(3);
+            assertThat(appender.list).hasSize(3).allMatch(event -> event.getLevel() == Level.INFO);
+            assertThat(appender.list.get(0).getFormattedMessage())
+                    .contains("UnknownGame", "Player1", date.toString(), "UNKNOWN_GAME");
+            assertThat(appender.list.get(1).getFormattedMessage())
+                    .contains("Mapster", "UnknownPlayer", date.toString(), "UNKNOWN_PLAYER");
+            assertThat(appender.list.get(2).getFormattedMessage())
+                    .contains("UnknownGame", "UnknownPlayer", futureDate.toString(), List.of("INVALID_DATE", "UNKNOWN_GAME", "UNKNOWN_PLAYER").toString());
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
     private AddDailyEntryCommand command(Long gameId,
                                          String gameName,
                                          Long playerId,
@@ -463,4 +507,3 @@ class DailyEntriesServiceTest {
         });
     }
 }
-

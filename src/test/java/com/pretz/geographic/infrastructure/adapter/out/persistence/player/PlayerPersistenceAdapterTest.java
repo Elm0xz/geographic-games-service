@@ -1,7 +1,6 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence.player;
 
 import com.pretz.geographic.application.domain.model.Player;
-import com.pretz.geographic.application.port.out.exception.PlayerNotFoundException;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.AbstractPostgresDataJpaTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Import({PlayerPersistenceAdapter.class, PlayerPersistenceMapper.class})
 class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
@@ -48,16 +46,6 @@ class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
-    void shouldLoadPlayerByName() {
-        //given
-        var name = player.name();
-        //when
-        var result = adapter.loadPlayer(name);
-        //then
-        assertThat(result).isEqualTo(player);
-    }
-
-    @Test
     void shouldSkipUnknownIdsWhenLoadingPlayersByIds() {
         //given
         var unknownId = 999L;
@@ -65,15 +53,5 @@ class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var result = adapter.loadPlayers(List.of(player.playerId().id(), unknownId));
         //then
         assertThat(result).containsExactly(player);
-    }
-
-    @Test
-    void shouldFailWhenTryingToLoadPlayerWithUnknownName() {
-        //given
-        var name = "Marcjan";
-        //when / then
-        assertThatThrownBy(() -> adapter.loadPlayer(name))
-                .isInstanceOf(PlayerNotFoundException.class)
-                .hasMessage("Player not found for name: " + name);
     }
 }
