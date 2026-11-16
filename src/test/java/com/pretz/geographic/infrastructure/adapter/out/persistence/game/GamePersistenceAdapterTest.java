@@ -47,6 +47,16 @@ class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
+    void shouldLoadAllGames() {
+        //given
+        var otherGame = mapper.toDomain(repository.save(new GameJpaEntity("WhenTaken", ScoringSystem.STANDARD)));
+        //when
+        var result = adapter.loadAllGames();
+        //then
+        assertThat(result).containsExactlyInAnyOrder(game, otherGame);
+    }
+
+    @Test
     void shouldLoadAllActiveGames() {
         //given
         repository.deleteAllInBatch();

@@ -19,6 +19,15 @@ public class GamePersistenceAdapter implements LoadGamePort {
         this.gamePersistenceMapper = gamePersistenceMapper;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Game> loadAllGames() {
+        return gameJpaRepository.findAll()
+                .stream()
+                .map(gamePersistenceMapper::toDomain)
+                .toList();
+    }
+
     //for now, we assume all games are active; soon we will add a boolean activity status field in schema
     @Override
     @Transactional(readOnly = true)

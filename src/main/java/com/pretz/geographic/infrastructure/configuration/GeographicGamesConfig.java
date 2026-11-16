@@ -8,6 +8,8 @@ import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryR
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidationManager;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryReferenceValidator;
 import com.pretz.geographic.application.domain.service.DailyRankingService;
+import com.pretz.geographic.application.domain.service.GameService;
+import com.pretz.geographic.application.domain.service.PlayerService;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryDateValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryGameValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryPlayerValidator;
@@ -17,6 +19,8 @@ import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.domain.validation.WeekValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryWeekClosureValidator;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
+import com.pretz.geographic.application.port.in.GetGamesUseCase;
+import com.pretz.geographic.application.port.in.GetPlayersUseCase;
 import com.pretz.geographic.application.port.in.GetWeeklyRankingUseCase;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
@@ -70,6 +74,16 @@ public class GeographicGamesConfig {
                 weekValidator,
                 weeklyRankingCalculator,
                 getDailyRankingUseCase);
+    }
+
+    @Bean
+    GetGamesUseCase getGamesUseCase(LoadGamePort loadGamePort) {
+        return new GameService(loadGamePort);
+    }
+
+    @Bean
+    GetPlayersUseCase getPlayersUseCase(LoadPlayerPort loadPlayerPort) {
+        return new PlayerService(loadPlayerPort);
     }
 
     @Bean
