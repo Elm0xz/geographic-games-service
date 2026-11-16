@@ -1,11 +1,13 @@
 package com.pretz.geographic.application.domain.validation.dailyentry;
 
+import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.service.ValidationIntermediateResult;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntryCommand;
 import com.pretz.geographic.application.port.in.dailyentry.result.AddDailyEntryFailure;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,15 +20,19 @@ public class DailyEntryWeekClosureValidator implements DailyEntryContextualValid
                                                  ContextualLookups contextualLookups) {
 
         var calculatedWeeks = contextualLookups.gameWeeks();
-        var result = validationIntermediateResult.entriesPassed().stream().collect(Collectors.partitioningBy(
-                it -> !calculatedWeeks.contains(new GameWeek(it.game().gameId(), it.getWeek()))));
-        var successes = result.get(true);
-        var newFailures = result.get(false).stream().map(it -> new AddDailyEntryFailure(new AddDailyEntryCommand(
+        var entriesPartitionedByClosure = validationIntermediateResult.entriesPassed().stream().collect(Collectors.partitioningBy(
+                it -> isNotAlreadyClosed(it, calculatedWeeks)));
+        var successes = entriesPartitionedByClosure.get(true);
+        var newFailures = entriesPartitionedByClosure.get(false).stream().map(it -> new AddDailyEntryFailure(new AddDailyEntryCommand(
                 new AddDailyEntryCommand.GameRef(it.game().gameId().id(), it.game().name()),
                 new AddDailyEntryCommand.PlayerRef(it.player().playerId().id(), it.player().name()),
                 it.date(),
                 it.points(),
                 it.submittedAt()), List.of(WEEK_CLOSED)));
         return new ValidationIntermediateResult(successes, Stream.concat(validationIntermediateResult.failures().stream(), newFailures).toList());
+    }
+
+    private boolean isNotAlreadyClosed(DailyEntry entry, Set<GameWeek> calculatedWeeks) {
+        return !calculatedWeeks.contains(new GameWeek(entry.game().gameId(), entry.getWeek()));
     }
 }
