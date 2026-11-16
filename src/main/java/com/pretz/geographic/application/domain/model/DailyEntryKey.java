@@ -1,5 +1,7 @@
 package com.pretz.geographic.application.domain.model;
 
+import org.jspecify.annotations.NonNull;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 
@@ -11,7 +13,7 @@ public record DailyEntryKey(Game game, Player player, LocalDate date) implements
             .thenComparing(DailyEntryKey::date);
 
     @Override
-    public int compareTo(DailyEntryKey o) {
-        return COMPARATOR.compare(this, o);
+    public int compareTo(@NonNull DailyEntryKey otherKey) {
+        return COMPARATOR.compare(this, otherKey);
     }
 }

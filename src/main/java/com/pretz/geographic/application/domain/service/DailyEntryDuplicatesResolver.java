@@ -37,12 +37,13 @@ public class DailyEntryDuplicatesResolver {
         var resolutionResult = resolveEntryDuplicates(arrivingEntries);
 
         return new AddDailyEntriesResult(resolutionResult.successes(),
-                Stream.concat(intermediateResult.failures().stream(), resolutionResult.detectedFailures().stream()).toList());
+                Stream.concat(intermediateResult.failures().stream(),
+                        resolutionResult.failure().stream()).toList());
     }
 
     private ResolutionResult resolveEntryDuplicates(List<DailyEntry> arrivingEntries) {
 
-        var resolutionStateMap = getPersistedEntries(arrivingEntries).stream()
+        var duplicateResolutionMap = getPersistedEntries(arrivingEntries).stream()
                 .collect(Collectors.toMap(
                         it -> new DailyEntryKey(it.game(), it.player(), it.date()),
                         it -> new EntryResolutionState(-1, it.submittedAt(), null, it.dailyEntryId())));
@@ -52,25 +53,25 @@ public class DailyEntryDuplicatesResolver {
         for (int batchId = 0; batchId < arrivingEntries.size(); batchId++) {
             var arriving = arrivingEntries.get(batchId);
             DailyEntryKey key = new DailyEntryKey(arriving.game(), arriving.player(), arriving.date());
-            if (resolutionStateMap.containsKey(key)) {
-                EntryResolutionState incumbent = resolutionStateMap.get(key);
+            if (duplicateResolutionMap.containsKey(key)) {
+                EntryResolutionState incumbent = duplicateResolutionMap.get(key);
                 if (arriving.submittedAt().isBefore(incumbent.submittedAt())) {
                     if (isNotAlreadyPersisted(incumbent)) {
                         addToFailures(detectedFailures, arrivingEntries.get(incumbent.batchId()));
-                        resolutionStateMap.put(key, new EntryResolutionState(batchId, arriving.submittedAt(), incumbent.successType(), incumbent.dbId()));
+                        duplicateResolutionMap.put(key, new EntryResolutionState(batchId, arriving.submittedAt(), incumbent.successType(), incumbent.dbId()));
                     } else {
-                        resolutionStateMap.put(key, new EntryResolutionState(batchId, arriving.submittedAt(), CORRECTED, incumbent.dbId()));
+                        duplicateResolutionMap.put(key, new EntryResolutionState(batchId, arriving.submittedAt(), CORRECTED, incumbent.dbId()));
                     }
 
                 } else {
                     addToFailures(detectedFailures, arriving);
                 }
             } else {
-                resolutionStateMap.put(key, new EntryResolutionState(batchId, arriving.submittedAt(), NEW, null));
+                duplicateResolutionMap.put(key, new EntryResolutionState(batchId, arriving.submittedAt(), NEW, null));
             }
         }
 
-        return new ResolutionResult(prepareEntriesToSave(resolutionStateMap, arrivingEntries), detectedFailures);
+        return new ResolutionResult(buildEntriesToSave(duplicateResolutionMap, arrivingEntries), detectedFailures);
     }
 
     private List<DailyEntry> getPersistedEntries(List<DailyEntry> arrivingEntries) {
@@ -87,8 +88,8 @@ public class DailyEntryDuplicatesResolver {
                 entry.submittedAt()), List.of(SUPERSEDED)));
     }
 
-    private List<AddDailyEntrySuccess> prepareEntriesToSave(Map<DailyEntryKey, EntryResolutionState> entriesAndTimestamps,
-                                                            List<DailyEntry> entries) {
+    private List<AddDailyEntrySuccess> buildEntriesToSave(Map<DailyEntryKey, EntryResolutionState> entriesAndTimestamps,
+                                                          List<DailyEntry> entries) {
         var entryIdsToSave = entriesAndTimestamps.values().stream()
                 .filter(this::isNotAlreadyPersisted)
                 .sorted(Comparator.comparingInt(EntryResolutionState::batchId))
@@ -116,7 +117,7 @@ public class DailyEntryDuplicatesResolver {
     }
 
     private record ResolutionResult(List<AddDailyEntrySuccess> successes,
-                                    List<AddDailyEntryFailure> detectedFailures) {
+                                    List<AddDailyEntryFailure> failure) {
     }
 
     private record EntryResolutionState(int batchId, Instant submittedAt,
