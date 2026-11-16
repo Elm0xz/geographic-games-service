@@ -21,6 +21,15 @@ public class PlayerPersistenceAdapter implements LoadPlayerPort {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Player> loadAllPlayers() {
+        return playerJpaRepository.findAll()
+                .stream()
+                .map(playerPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Player> loadPlayers(List<Long> ids) {
 
         return playerJpaRepository.findAllById(ids)

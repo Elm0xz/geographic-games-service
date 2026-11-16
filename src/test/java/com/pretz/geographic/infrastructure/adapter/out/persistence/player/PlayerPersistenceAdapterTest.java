@@ -36,6 +36,16 @@ class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
     }
 
     @Test
+    void shouldLoadAllPlayers() {
+        //given
+        var otherPlayer = mapper.toDomain(repository.save(new PlayerJpaEntity("Ferdynand")));
+        //when
+        var result = adapter.loadAllPlayers();
+        //then
+        assertThat(result).containsExactlyInAnyOrder(player, otherPlayer);
+    }
+
+    @Test
     void shouldLoadPlayersByIds() {
         //given
         var otherPlayer = mapper.toDomain(repository.save(new PlayerJpaEntity("Ferdynand")));

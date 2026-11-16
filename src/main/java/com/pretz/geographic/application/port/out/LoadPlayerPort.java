@@ -6,5 +6,7 @@ import java.util.List;
 
 public interface LoadPlayerPort {
 
+    List<Player> loadAllPlayers();
+
     List<Player> loadPlayers(List<Long> ids);
 }
