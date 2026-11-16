@@ -31,6 +31,7 @@ Backend service for calculating results of geographic quizzes played on a daily 
     - Outbound ports: `LoadXxxPort` / `SaveXxxPort` interfaces, implemented by `XxxPersistenceAdapter` classes
     - Persistence trio per aggregate: `XxxJpaEntity`, `XxxJpaRepository` (Spring Data), `XxxPersistenceAdapter`, `XxxPersistenceMapper` (domain <-> entity mapping)
     - Web layer: `XxxApi` interface (holds `@RequestMapping`/Javadoc contract) + `XxxController` implementation; request/response DTOs live in a nested `dto` package
+    - Git branches: `GEOG_XX_YY` (Where `XX` is task number and `YY` short name)
 - **Testing**: unit tests use JUnit 5 + Mockito + AssertJ, follow `given/when/then` comment structure and `shouldXxx...` method names. Integration tests extend `AbstractIntegrationTest` (tagged `@Tag("integration")`, Testcontainers-backed PostgreSQL) or `AbstractPostgresDataJpaTest`/`AbstractWebIntegrationTest` for narrower slices.
 - - **Error handling**: domain/validation exceptions are translated into HTTP responses centrally in `ApiExceptionHandler` (`@RestControllerAdvice`), which maps each exception type to an `ApiErrorCode` and a JSON `{code, message}` body. New failure cases should be added as a handler there rather than handled ad hoc in controllers.
 - **Domain identifiers**: entity IDs use typed wrapper records (e.g. `DailyEntryId`, `GameId`, `PlayerId`) instead of raw `Long`/`String`, to keep references type-safe across the domain model.
