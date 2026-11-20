@@ -7,7 +7,7 @@ import java.time.temporal.IsoFields;
 
 public class WeekValidator {
 
-    private static final String INVALID_RANKING_MESSAGE = "Weekly ranking is available only for past dates while input %s %s doesn't fulfill this condition";
+    private static final String INVALID_RANKING_MESSAGE = "Weekly ranking is available only for past weeks, but %s %s is current or in the future";
     private static final String INVALID_INTERVAL_MESSAGE = "Start week %d-W%02d of the interval must not be after its end week %d-W%02d";
     private static final String YEAR = "year";
     private static final String WEEK = "week";
@@ -24,7 +24,6 @@ public class WeekValidator {
         if (week.year() > LocalDate.now().getYear())
             throw new InvalidDateException(String.format(INVALID_RANKING_MESSAGE, YEAR, week.year()));
         else if (week.year() == LocalDate.now().getYear() && week.week() >= LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))
-            //TODO [GEOG- ] more expressive exception message
             throw new InvalidDateException(String.format(INVALID_RANKING_MESSAGE, WEEK, week.week()));
     }
 }

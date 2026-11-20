@@ -85,7 +85,7 @@ class WeeklyRankingServiceTest {
         WeeklyRanking ranking2 = rankingFor(GAME_2, week);
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
                 .thenReturn(List.of(ranking1, ranking2));
 
         //when
@@ -108,7 +108,7 @@ class WeeklyRankingServiceTest {
         List<DailyRanking> dailyRankingsForGame2 = List.of(); // no daily entries needed for unit scope
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
                 .thenReturn(List.of(existingRanking));
         when(getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), List.of(GAME_2)))
                 .thenReturn(dailyRankingsForGame2);
@@ -135,7 +135,7 @@ class WeeklyRankingServiceTest {
         List<DailyRanking> dailyRankingsForGame2 = List.of();
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
                 .thenReturn(List.of());
         when(getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), List.of(GAME_1, GAME_2)))
                 .thenReturn(dailyRankingsForGame2);
@@ -160,7 +160,7 @@ class WeeklyRankingServiceTest {
         WeeklyRanking emptyRanking2 = emptyRanking(GAME_2, week);
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
                 .thenReturn(List.of());
         when(getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), List.of(GAME_1, GAME_2)))
                 .thenReturn(List.of());
@@ -180,7 +180,7 @@ class WeeklyRankingServiceTest {
     void shouldThrowInvalidDateExceptionOnInvalidWeeks(LocalDate wrongDate) {
 
         //given
-        Week currentWeek = weekFromDate(wrongDate);
+        Week currentWeek = Week.of(wrongDate);
 
         //when, then
         assertThatThrownBy(() -> weeklyRankingService.calculateWeeklyRankings(currentWeek))
@@ -188,7 +188,7 @@ class WeeklyRankingServiceTest {
     }
 
     @Test
-    void shouldReturnOnlyPersistedRankingsOfAllGamesSortedByWeekAndGameForWeekInterval() {
+    void shouldReturnRankingsOfAllGamesSortedByWeekAndGameForWeekInterval() {
 
         //given
         Week from = weeksAgo(3);
@@ -210,7 +210,7 @@ class WeeklyRankingServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoRankingsArePersistedForWeekInterval() {
+    void shouldReturnEmptyListWhenNoRankingsExistForWeekInterval() {
 
         //given
         Week from = weeksAgo(3);
@@ -228,7 +228,7 @@ class WeeklyRankingServiceTest {
     }
 
     @Test
-    void shouldReturnOnlyPersistedRankingsOfSingleGameForWeekInterval() {
+    void shouldReturnRankingsOfSingleGameForWeekInterval() {
 
         //given
         Week from = weeksAgo(3);
@@ -281,7 +281,7 @@ class WeeklyRankingServiceTest {
 
         //given
         Week from = weeksAgo(2);
-        Week to = weekFromDate(wrongDate);
+        Week to = Week.of(wrongDate);
 
         //when, then
         assertThatThrownBy(() -> weeklyRankingService.getWeeklyRankings(from, to))
@@ -291,7 +291,7 @@ class WeeklyRankingServiceTest {
     }
 
     private static Week weeksAgo(int weeks) {
-        return weekFromDate(LocalDate.now().minusWeeks(weeks));
+        return Week.of(LocalDate.now().minusWeeks(weeks));
     }
 
     private static WeeklyRanking rankingFor(Game game, Week week) {
@@ -304,15 +304,9 @@ class WeeklyRankingServiceTest {
         return WeeklyRanking.of(game, week, List.of());
     }
 
-    private static Week weekFromDate(LocalDate date) {
-        int year = date.get(WeekFields.ISO.weekBasedYear());
-        int week = date.get(WeekFields.ISO.weekOfWeekBasedYear());
-        return Week.of(year, week);
-    }
-
     private static Week pastWeek() {
         LocalDate lastWeekMonday = LocalDate.now().minusWeeks(1).with(WeekFields.ISO.dayOfWeek(), 1);
-        return weekFromDate(lastWeekMonday);
+        return Week.of(lastWeekMonday);
     }
 
     private static Stream<Arguments> invalidWeeks() {

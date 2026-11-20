@@ -13,11 +13,10 @@ import java.time.Year;
 public interface WeeklyRankingReportApi {
 
     /**
-     * Returns already persisted weekly rankings of all games for ISO weeks between {@code fromYear-W fromWeek} and
-     * {@code toYear-W toWeek}, both inclusive, sorted by week and game name. Read-only: weeks without a persisted
-     * ranking are omitted and never calculated, so reporting doesn't close weeks for new daily entries. Responds
-     * with {@code 400 INVALID_DATE} when a week doesn't exist, the start week is after the end week or the end week
-     * is not in the past.
+     * Returns weekly rankings of all games for ISO weeks between {@code fromYear-W fromWeek} and
+     * {@code toYear-W toWeek}, both inclusive, sorted by week and game name. Weeks without a calculated ranking are
+     * omitted. Responds with {@code 400 INVALID_DATE} when a week doesn't exist, the start week is after the end week
+     * or the end week is not in the past.
      */
     @GetMapping
     ResponseEntity<WeeklyRankingsReportResponseDto> getWeeklyRankings(@RequestParam Year fromYear,
@@ -26,7 +25,7 @@ public interface WeeklyRankingReportApi {
                                                                       @RequestParam int toWeek);
 
     /**
-     * Returns already persisted weekly rankings of a single game in the week interval, sorted by week. Behaves like
+     * Returns weekly rankings of a single game in the week interval, sorted by week. Behaves like
      * {@link #getWeeklyRankings(Year, int, Year, int)} and additionally responds with {@code 404 NOT_FOUND} when
      * the game doesn't exist.
      */

@@ -13,9 +13,10 @@ import java.time.LocalDate;
 public interface DailyRankingReportApi {
 
     /**
-     * Returns daily rankings of all active games for every day in the interval {@code [from, to]}, sorted by game name
-     * and date. Days on which a game has no results are omitted. Responds with {@code 400 INVALID_DATE} when
-     * {@code from} is after {@code to} or {@code to} is not in the past.
+     * Returns daily rankings of all games for every day in the interval {@code [from, to]}, sorted by game name
+     * and date. A game has a ranking only for days on which it has results, so a day is omitted only when no game
+     * has results on it. Responds with {@code 400 INVALID_DATE} when {@code from} is after {@code to} or {@code to}
+     * is not in the past.
      */
     @GetMapping
     ResponseEntity<DailyRankingsReportResponseDto> getDailyRankings(@RequestParam LocalDate from,

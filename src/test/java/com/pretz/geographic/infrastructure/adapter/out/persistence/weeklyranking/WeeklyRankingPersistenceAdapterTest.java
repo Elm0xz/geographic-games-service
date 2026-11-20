@@ -2,6 +2,7 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.weeklyrankin
 
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.GameId;
+import com.pretz.geographic.application.domain.model.GameWeek;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -77,7 +79,7 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         weeklyRankingRepository.save(mapper.toEntity(ranking, gameRepository::getReferenceById, playerRepository::getReferenceById));
 
         //when
-        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week, week);
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week);
 
         //then
         assertThat(result).hasSize(1);
@@ -89,7 +91,7 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         //given - no ranking persisted
 
         //when
-        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week, week);
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week);
 
         //then
         assertThat(result).isEmpty();
@@ -102,7 +104,7 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         weeklyRankingRepository.save(mapper.toEntity(ranking1, gameRepository::getReferenceById, playerRepository::getReferenceById));
 
         //when
-        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1, game2), week, week);
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1, game2), week);
 
         //then
         assertThat(result).hasSize(1);
@@ -146,6 +148,30 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
 
         //then
         assertThat(result).containsExactly(game2Ranking);
+    }
+
+    @Test
+    void shouldLoadOnlyRequestedCalculatedWeeksWhenGameWeeksSpanYearBoundary() {
+        //given
+        Week lastWeekOf2020 = Week.of(2020, 53);
+        Week firstWeekOf2021 = Week.of(2021, 1);
+        List.of(rankingWithPositions(game1, lastWeekOf2020, player1, player2),
+                        rankingWithPositions(game1, firstWeekOf2021, player1, player2),
+                        // matches requested game, year and week independently, but wasn't requested
+                        rankingWithPositions(game1, Week.of(2020, 1), player1, player2))
+                .forEach(it -> weeklyRankingRepository.save(
+                        mapper.toEntity(it, gameRepository::getReferenceById, playerRepository::getReferenceById)));
+
+        //when
+        Set<GameWeek> result = adapter.loadCalculatedWeeks(List.of(
+                new GameWeek(game1.gameId(), lastWeekOf2020),
+                new GameWeek(game1.gameId(), firstWeekOf2021),
+                new GameWeek(game2.gameId(), firstWeekOf2021)));
+
+        //then
+        assertThat(result).containsExactlyInAnyOrder(
+                new GameWeek(game1.gameId(), lastWeekOf2020),
+                new GameWeek(game1.gameId(), firstWeekOf2021));
     }
 
     @Test

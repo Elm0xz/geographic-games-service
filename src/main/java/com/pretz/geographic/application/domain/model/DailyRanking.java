@@ -1,7 +1,6 @@
 package com.pretz.geographic.application.domain.model;
 
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -51,8 +50,7 @@ public final class DailyRanking {
     }
 
     public Week getWeek() {
-        return Week.of(date.get(WeekFields.ISO.weekBasedYear()),
-                date.get(WeekFields.ISO.weekOfWeekBasedYear()));
+        return Week.of(date);
     }
 
     public List<Player> getWinner() {

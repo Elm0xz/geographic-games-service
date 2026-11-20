@@ -10,6 +10,8 @@ import java.util.Set;
 
 public interface LoadWeeklyRankingPort {
 
+    List<WeeklyRanking> loadWeeklyRankings(List<Game> games, Week week);
+
     /**
      * Loads persisted weekly rankings of given games for all weeks between {@code from} and {@code to}, both inclusive.
      */

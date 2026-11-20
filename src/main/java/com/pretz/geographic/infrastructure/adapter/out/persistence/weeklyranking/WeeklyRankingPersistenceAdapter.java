@@ -35,6 +35,12 @@ public class WeeklyRankingPersistenceAdapter implements LoadWeeklyRankingPort, S
 
     @Override
     @Transactional(readOnly = true)
+    public List<WeeklyRanking> loadWeeklyRankings(List<Game> games, Week week) {
+        return loadWeeklyRankings(games, week, week);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<WeeklyRanking> loadWeeklyRankings(List<Game> games, Week from, Week to) {
         return weeklyRankingRepository.findByGameIdsAndWeekInterval(
                         games.stream().map(g -> g.gameId().id()).toList(),
@@ -50,12 +56,16 @@ public class WeeklyRankingPersistenceAdapter implements LoadWeeklyRankingPort, S
     @Override
     @Transactional(readOnly = true)
     public Set<GameWeek> loadCalculatedWeeks(List<GameWeek> gameWeeks) {
+        // the query matches games, years and weeks independently, so for game weeks spanning several years it also
+        // returns combinations that weren't requested; those are filtered out
+        var requested = Set.copyOf(gameWeeks);
         return weeklyRankingRepository.findByGame_IdInAndYearInAndWeekIn(
                         gameWeeks.stream().map(it -> it.gameId().id()).toList(),
                         gameWeeks.stream().map(it -> it.week().year()).toList(),
                         gameWeeks.stream().map(it -> it.week().week()).toList())
                 .stream()
                 .map(mapper::toGameWeek)
+                .filter(requested::contains)
                 .collect(Collectors.toSet());
     }
 
