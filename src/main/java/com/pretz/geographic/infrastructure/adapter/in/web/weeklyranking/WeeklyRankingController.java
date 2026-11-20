@@ -20,7 +20,7 @@ public class WeeklyRankingController implements WeeklyRankingApi {
     @Override
     public ResponseEntity<FullWeeklyRankingsResponseDto> getWeeklyRankings(Year year, int week) {
         return ResponseEntity.ok(new FullWeeklyRankingsResponseDto(year, week,
-                getWeeklyRankingUseCase.getWeeklyRankings(Week.of(year.getValue(), week))));
+                getWeeklyRankingUseCase.calculateWeeklyRankings(Week.of(year.getValue(), week))));
     }
 
     //TODO [GEOG-12] unified exception handlers in different task

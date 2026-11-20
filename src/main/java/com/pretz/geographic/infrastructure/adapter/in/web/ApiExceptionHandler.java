@@ -1,5 +1,6 @@
 package com.pretz.geographic.infrastructure.adapter.in.web;
 
+import com.pretz.geographic.application.domain.validation.GameNotFoundException;
 import com.pretz.geographic.application.domain.validation.InvalidDateException;
 import com.pretz.geographic.application.port.out.exception.ConcurrentModificationConflictException;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -54,6 +56,13 @@ public class ApiExceptionHandler {
                 .body(new ApiErrorResponse(ApiErrorCode.INVALID_DATE, exception.getMessage()));
     }
 
+    @ExceptionHandler(GameNotFoundException.class)
+    ResponseEntity<ApiErrorResponse> handleGameNotFound(GameNotFoundException exception) {
+        log.warn(exception.getMessage());
+        return ResponseEntity.status(NOT_FOUND)
+                .body(new ApiErrorResponse(ApiErrorCode.NOT_FOUND, exception.getMessage()));
+    }
+
     @ExceptionHandler(ConcurrentModificationConflictException.class)
     ResponseEntity<ApiErrorResponse> handleConcurrentModificationConflict(ConcurrentModificationConflictException exception) {
         log.warn("Concurrent modification conflict: {}", exception.getMessage());
@@ -69,6 +78,7 @@ public class ApiExceptionHandler {
         VALIDATION_ERROR,
         MALFORMED_REQUEST,
         INVALID_DATE,
+        NOT_FOUND,
         CONCURRENT_MODIFICATION
     }
 }

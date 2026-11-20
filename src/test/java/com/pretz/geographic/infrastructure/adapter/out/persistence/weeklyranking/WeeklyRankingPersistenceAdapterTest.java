@@ -77,7 +77,7 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         weeklyRankingRepository.save(mapper.toEntity(ranking, gameRepository::getReferenceById, playerRepository::getReferenceById));
 
         //when
-        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week);
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week, week);
 
         //then
         assertThat(result).hasSize(1);
@@ -89,7 +89,7 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         //given - no ranking persisted
 
         //when
-        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week);
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1), week, week);
 
         //then
         assertThat(result).isEmpty();
@@ -102,11 +102,50 @@ class WeeklyRankingPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         weeklyRankingRepository.save(mapper.toEntity(ranking1, gameRepository::getReferenceById, playerRepository::getReferenceById));
 
         //when
-        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1, game2), week);
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1, game2), week, week);
 
         //then
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().game()).isEqualTo(game1);
+    }
+
+    @Test
+    void shouldLoadOnlyRankingsWithinWeekIntervalSpanningYearBoundary() {
+        //given
+        Week beforeInterval = Week.of(2020, 51);
+        Week intervalStart = Week.of(2020, 52);
+        Week lastWeekOf2020 = Week.of(2020, 53);
+        Week intervalEnd = Week.of(2021, 1);
+        Week afterInterval = Week.of(2021, 2);
+        WeeklyRanking startRanking = rankingWithPositions(game1, intervalStart, player1, player2);
+        WeeklyRanking middleRanking = rankingWithPositions(game2, lastWeekOf2020, player1, player2);
+        WeeklyRanking endRanking = rankingWithPositions(game1, intervalEnd, player1, player2);
+        List.of(rankingWithPositions(game1, beforeInterval, player1, player2), startRanking, middleRanking, endRanking,
+                        rankingWithPositions(game1, afterInterval, player1, player2))
+                .forEach(it -> weeklyRankingRepository.save(
+                        mapper.toEntity(it, gameRepository::getReferenceById, playerRepository::getReferenceById)));
+
+        //when
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game1, game2), intervalStart, intervalEnd);
+
+        //then
+        assertThat(result).containsExactlyInAnyOrder(startRanking, middleRanking, endRanking);
+    }
+
+    @Test
+    void shouldLoadRankingsOnlyForRequestedGamesWithinWeekInterval() {
+        //given
+        Week from = Week.of(2026, 3);
+        WeeklyRanking game1Ranking = rankingWithPositions(game1, from, player1, player2);
+        WeeklyRanking game2Ranking = rankingWithPositions(game2, week, player1, player2);
+        List.of(game1Ranking, game2Ranking).forEach(it -> weeklyRankingRepository.save(
+                mapper.toEntity(it, gameRepository::getReferenceById, playerRepository::getReferenceById)));
+
+        //when
+        List<WeeklyRanking> result = adapter.loadWeeklyRankings(List.of(game2), from, week);
+
+        //then
+        assertThat(result).containsExactly(game2Ranking);
     }
 
     @Test

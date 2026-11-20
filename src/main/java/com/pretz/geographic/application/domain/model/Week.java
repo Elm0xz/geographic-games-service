@@ -8,9 +8,13 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.IsoFields;
+import java.util.Comparator;
 import java.util.Objects;
 
-public final class Week {
+public final class Week implements Comparable<Week> {
+
+    private static final Comparator<Week> CHRONOLOGICAL =
+            Comparator.comparingInt(Week::year).thenComparingInt(Week::week);
 
     private static final DateTimeFormatter ISO_WEEK_STRICT =
             DateTimeFormatter.ISO_WEEK_DATE.withResolverStyle(ResolverStyle.STRICT);
@@ -36,6 +40,20 @@ public final class Week {
         } catch (DateTimeParseException e) {
             throw new InvalidDateException("Invalid week number: " + number);
         }
+    }
+
+    public static Week of(LocalDate date) {
+        Objects.requireNonNull(date, "Week date must not be null");
+        return new Week(date.get(IsoFields.WEEK_BASED_YEAR), date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+    }
+
+    public boolean isAfter(Week other) {
+        return compareTo(other) > 0;
+    }
+
+    @Override
+    public int compareTo(Week other) {
+        return CHRONOLOGICAL.compare(this, other);
     }
 
     public LocalDate monday() {

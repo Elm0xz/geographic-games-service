@@ -2,8 +2,10 @@ package com.pretz.geographic.application.domain.service;
 
 import com.pretz.geographic.application.domain.model.DailyEntry;
 import com.pretz.geographic.application.domain.model.DailyRanking;
-import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.DailyRankingKey;
+import com.pretz.geographic.application.domain.model.Game;
+import com.pretz.geographic.application.domain.model.GameId;
+import com.pretz.geographic.application.domain.validation.GameNotFoundException;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
@@ -48,21 +50,37 @@ public class DailyRankingService implements GetDailyRankingUseCase {
     }
 
     @Override
+    public List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to) {
+
+        rankingDateValidator.validatePastInterval(from, to);
+
+        return calculateRankings(loadGamePort.loadAllGames(), from, to);
+    }
+
+    @Override
+    public List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to, GameId gameId) {
+
+        rankingDateValidator.validatePastInterval(from, to);
+
+        var game = loadGamePort.loadGames(List.of(gameId.id())).stream()
+                .findFirst()
+                .orElseThrow(() -> new GameNotFoundException(gameId));
+        return calculateRankings(List.of(game), from, to);
+    }
+
+    @Override
     public List<DailyRanking> getDailyRankings(LocalDate from, LocalDate to, List<Game> games) {
 
-        rankingDateValidator.validatePastDate(to);
+        rankingDateValidator.validatePastInterval(from, to);
 
-        return loadDailyEntriesPort.loadEntries(loadGamePort.loadGames(
-                        games.stream().map(it -> it.gameId().id()).toList()), from, to).stream()
+        return calculateRankings(loadGamePort.loadGames(games.stream().map(it -> it.gameId().id()).toList()), from, to);
+    }
+
+    private List<DailyRanking> calculateRankings(List<Game> games, LocalDate from, LocalDate to) {
+        return loadDailyEntriesPort.loadEntries(games, from, to).stream()
                 .collect(Collectors.groupingBy(it -> new DailyRankingKey(it.game(), it.date())))
                 .entrySet().stream().map(it -> DailyRanking.of(it.getKey().game(), it.getKey().date(), it.getValue()))
                 .sorted(BY_GAME_NAME_AND_DATE)
                 .toList();
-    }
-
-    //TODO [GEOG-17] implement later
-    @Override
-    public DailyRanking getDailyRanking(LocalDate date, Game game) {
-        return null;
     }
 }
