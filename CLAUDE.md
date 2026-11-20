@@ -36,6 +36,7 @@ Backend service for calculating results of geographic quizzes played on a daily 
 - **Testing**: unit tests use JUnit 5 + Mockito + AssertJ, follow `given/when/then` comment structure and `shouldXxx...` method names. Integration tests extend `AbstractIntegrationTest` (tagged `@Tag("integration")`, Testcontainers-backed PostgreSQL) or `AbstractPostgresDataJpaTest`/`AbstractWebIntegrationTest` for narrower slices.
 - - **Error handling**: domain/validation exceptions are translated into HTTP responses centrally in `ApiExceptionHandler` (`@RestControllerAdvice`), which maps each exception type to an `ApiErrorCode` and a JSON `{code, message}` body. New failure cases should be added as a handler there rather than handled ad hoc in controllers.
 - **Domain identifiers**: entity IDs use typed wrapper records (e.g. `DailyEntryId`, `GameId`, `PlayerId`) instead of raw `Long`/`String`, to keep references type-safe across the domain model.
+- **Javadocs**: keep them concise — describe the contract (inputs, ordering, error responses) and skip what is self-evident or standard behaviour (e.g. that reporting endpoints don't modify data).
 - All endpoints use `/api/` prefix.
 
 ## Common Commands
