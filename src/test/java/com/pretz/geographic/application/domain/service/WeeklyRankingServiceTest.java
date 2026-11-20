@@ -9,6 +9,7 @@ import com.pretz.geographic.application.domain.model.ScoringSystem;
 import com.pretz.geographic.application.domain.model.Week;
 import com.pretz.geographic.application.domain.model.WeeklyPosition;
 import com.pretz.geographic.application.domain.model.WeeklyRanking;
+import com.pretz.geographic.application.domain.validation.GameNotFoundException;
 import com.pretz.geographic.application.domain.validation.InvalidDateException;
 import com.pretz.geographic.application.domain.validation.WeekValidator;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
@@ -35,6 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,11 +85,11 @@ class WeeklyRankingServiceTest {
         WeeklyRanking ranking2 = rankingFor(GAME_2, week);
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
                 .thenReturn(List.of(ranking1, ranking2));
 
         //when
-        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(week);
+        List<WeeklyRanking> result = weeklyRankingService.calculateWeeklyRankings(week);
 
         //then
         assertThat(result).containsExactlyInAnyOrder(ranking1, ranking2);
@@ -106,7 +108,7 @@ class WeeklyRankingServiceTest {
         List<DailyRanking> dailyRankingsForGame2 = List.of(); // no daily entries needed for unit scope
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
                 .thenReturn(List.of(existingRanking));
         when(getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), List.of(GAME_2)))
                 .thenReturn(dailyRankingsForGame2);
@@ -115,7 +117,7 @@ class WeeklyRankingServiceTest {
         when(saveWeeklyRankingPort.save(List.of(newRanking))).thenReturn(List.of(newRanking));
 
         //when
-        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(week);
+        List<WeeklyRanking> result = weeklyRankingService.calculateWeeklyRankings(week);
 
         //then
         assertThat(result).containsExactlyInAnyOrder(existingRanking, newRanking);
@@ -133,7 +135,7 @@ class WeeklyRankingServiceTest {
         List<DailyRanking> dailyRankingsForGame2 = List.of();
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
                 .thenReturn(List.of());
         when(getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), List.of(GAME_1, GAME_2)))
                 .thenReturn(dailyRankingsForGame2);
@@ -142,7 +144,7 @@ class WeeklyRankingServiceTest {
         when(saveWeeklyRankingPort.save(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         //when
-        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(week);
+        List<WeeklyRanking> result = weeklyRankingService.calculateWeeklyRankings(week);
 
         //then
         assertThat(result).containsExactlyInAnyOrder(newRanking1, newRanking2);
@@ -158,7 +160,7 @@ class WeeklyRankingServiceTest {
         WeeklyRanking emptyRanking2 = emptyRanking(GAME_2, week);
 
         when(loadGamePort.loadActiveGames()).thenReturn(List.of(GAME_1, GAME_2));
-        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week))
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), week, week))
                 .thenReturn(List.of());
         when(getDailyRankingUseCase.getDailyRankings(week.monday(), week.sunday(), List.of(GAME_1, GAME_2)))
                 .thenReturn(List.of());
@@ -166,7 +168,7 @@ class WeeklyRankingServiceTest {
         when(weeklyRankingCalculator.calculateWeeklyRanking(List.of(), GAME_2, week)).thenReturn(emptyRanking2);
 
         //when
-        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(week);
+        List<WeeklyRanking> result = weeklyRankingService.calculateWeeklyRankings(week);
 
         //then
         assertThat(result).containsExactlyInAnyOrder(emptyRanking1, emptyRanking2);
@@ -181,8 +183,115 @@ class WeeklyRankingServiceTest {
         Week currentWeek = weekFromDate(wrongDate);
 
         //when, then
-        assertThatThrownBy(() -> weeklyRankingService.getWeeklyRankings(currentWeek))
+        assertThatThrownBy(() -> weeklyRankingService.calculateWeeklyRankings(currentWeek))
                 .isInstanceOf(InvalidDateException.class);
+    }
+
+    @Test
+    void shouldReturnOnlyPersistedRankingsOfAllGamesSortedByWeekAndGameForWeekInterval() {
+
+        //given
+        Week from = weeksAgo(3);
+        Week to = weeksAgo(1);
+        WeeklyRanking g1From = rankingFor(GAME_1, from);
+        WeeklyRanking g2From = rankingFor(GAME_2, from);
+        WeeklyRanking g1To = rankingFor(GAME_1, to);
+
+        when(loadGamePort.loadAllGames()).thenReturn(List.of(GAME_1, GAME_2));
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), from, to))
+                .thenReturn(List.of(g1To, g2From, g1From));
+
+        //when
+        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(from, to);
+
+        //then
+        assertThat(result).containsExactly(g1From, g2From, g1To);
+        verifyNoInteractions(getDailyRankingUseCase, weeklyRankingCalculator, saveWeeklyRankingPort);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoRankingsArePersistedForWeekInterval() {
+
+        //given
+        Week from = weeksAgo(3);
+        Week to = weeksAgo(1);
+
+        when(loadGamePort.loadAllGames()).thenReturn(List.of(GAME_1, GAME_2));
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_1, GAME_2), from, to)).thenReturn(List.of());
+
+        //when
+        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(from, to);
+
+        //then
+        assertThat(result).isEmpty();
+        verifyNoInteractions(getDailyRankingUseCase, weeklyRankingCalculator, saveWeeklyRankingPort);
+    }
+
+    @Test
+    void shouldReturnOnlyPersistedRankingsOfSingleGameForWeekInterval() {
+
+        //given
+        Week from = weeksAgo(3);
+        Week to = weeksAgo(1);
+        WeeklyRanking g2From = rankingFor(GAME_2, from);
+        WeeklyRanking g2To = rankingFor(GAME_2, to);
+
+        when(loadGamePort.loadGames(List.of(2L))).thenReturn(List.of(GAME_2));
+        when(loadWeeklyRankingPort.loadWeeklyRankings(List.of(GAME_2), from, to)).thenReturn(List.of(g2To, g2From));
+
+        //when
+        List<WeeklyRanking> result = weeklyRankingService.getWeeklyRankings(from, to, new GameId(2L));
+
+        //then
+        assertThat(result).containsExactly(g2From, g2To);
+        verifyNoInteractions(getDailyRankingUseCase, weeklyRankingCalculator, saveWeeklyRankingPort);
+    }
+
+    @Test
+    void shouldThrowGameNotFoundExceptionWhenGameDoesNotExist() {
+
+        //given
+        when(loadGamePort.loadGames(List.of(99L))).thenReturn(List.of());
+
+        //when, then
+        assertThatThrownBy(() -> weeklyRankingService.getWeeklyRankings(weeksAgo(2), weeksAgo(1), new GameId(99L)))
+                .isInstanceOf(GameNotFoundException.class)
+                .hasMessageContaining("99");
+        verifyNoInteractions(loadWeeklyRankingPort, saveWeeklyRankingPort, getDailyRankingUseCase);
+    }
+
+    @Test
+    void shouldThrowInvalidDateExceptionWhenIntervalStartIsAfterItsEnd() {
+
+        //given
+        Week from = weeksAgo(1);
+        Week to = weeksAgo(2);
+
+        //when, then
+        assertThatThrownBy(() -> weeklyRankingService.getWeeklyRankings(from, to))
+                .isInstanceOf(InvalidDateException.class);
+        assertThatThrownBy(() -> weeklyRankingService.getWeeklyRankings(from, to, new GameId(1L)))
+                .isInstanceOf(InvalidDateException.class);
+        verifyNoInteractions(loadGamePort, loadWeeklyRankingPort);
+    }
+
+    @MethodSource("invalidWeeks")
+    @ParameterizedTest
+    void shouldThrowInvalidDateExceptionWhenIntervalEndIsNotInPast(LocalDate wrongDate) {
+
+        //given
+        Week from = weeksAgo(2);
+        Week to = weekFromDate(wrongDate);
+
+        //when, then
+        assertThatThrownBy(() -> weeklyRankingService.getWeeklyRankings(from, to))
+                .isInstanceOf(InvalidDateException.class);
+        assertThatThrownBy(() -> weeklyRankingService.getWeeklyRankings(from, to, new GameId(1L)))
+                .isInstanceOf(InvalidDateException.class);
+    }
+
+    private static Week weeksAgo(int weeks) {
+        return weekFromDate(LocalDate.now().minusWeeks(weeks));
     }
 
     private static WeeklyRanking rankingFor(Game game, Week week) {

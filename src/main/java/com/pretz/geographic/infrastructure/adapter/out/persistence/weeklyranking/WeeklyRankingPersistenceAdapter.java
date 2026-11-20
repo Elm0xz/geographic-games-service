@@ -35,11 +35,13 @@ public class WeeklyRankingPersistenceAdapter implements LoadWeeklyRankingPort, S
 
     @Override
     @Transactional(readOnly = true)
-    public List<WeeklyRanking> loadWeeklyRankings(List<Game> games, Week week) {
-        return weeklyRankingRepository.findByGame_IdInAndYearAndWeek(
+    public List<WeeklyRanking> loadWeeklyRankings(List<Game> games, Week from, Week to) {
+        return weeklyRankingRepository.findByGameIdsAndWeekInterval(
                         games.stream().map(g -> g.gameId().id()).toList(),
-                        week.year(),
-                        week.week())
+                        from.year(),
+                        from.week(),
+                        to.year(),
+                        to.week())
                 .stream()
                 .map(mapper::toDomain)
                 .toList();

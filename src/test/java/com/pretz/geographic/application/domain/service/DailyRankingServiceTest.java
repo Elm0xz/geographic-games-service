@@ -8,6 +8,7 @@ import com.pretz.geographic.application.domain.model.GameId;
 import com.pretz.geographic.application.domain.model.Player;
 import com.pretz.geographic.application.domain.model.PlayerId;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
+import com.pretz.geographic.application.domain.validation.GameNotFoundException;
 import com.pretz.geographic.application.domain.validation.InvalidDateException;
 import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
@@ -28,6 +29,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -177,6 +179,125 @@ class DailyRankingServiceTest {
 
         //when, then
         assertThatThrownBy(() -> dailyRankingService.getDailyRankings(from, to, inputGames))
+                .isInstanceOf(InvalidDateException.class)
+                .hasMessageContaining(to.toString());
+    }
+
+    @Test
+    void shouldReturnDailyRankingsOfActiveGamesForDateInterval() {
+
+        //given
+        LocalDate from = LocalDate.now().minusDays(5);
+        LocalDate to = from.plusDays(2);
+        Game game1 = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+        Game game2 = new Game(new GameId(2L), "WhenTaken", ScoringSystem.STANDARD);
+        Player player1 = new Player(new PlayerId(1L), "Player1");
+        Player player2 = new Player(new PlayerId(2L), "Player2");
+        DailyEntry g1FromEntry = new DailyEntry(new DailyEntryId(1L), game1, from, player1, 950, SUBMITTED_AT);
+        DailyEntry g1ToEntry1 = new DailyEntry(new DailyEntryId(2L), game1, to, player1, 800, SUBMITTED_AT);
+        DailyEntry g1ToEntry2 = new DailyEntry(new DailyEntryId(3L), game1, to, player2, 900, SUBMITTED_AT);
+        DailyEntry g2FromEntry = new DailyEntry(new DailyEntryId(4L), game2, from, player2, 700, SUBMITTED_AT);
+
+        when(loadGamePort.loadActiveGames()).thenReturn(List.of(game1, game2));
+        when(loadDailyEntriesPort.loadEntries(List.of(game1, game2), from, to))
+                .thenReturn(List.of(g2FromEntry, g1ToEntry1, g1FromEntry, g1ToEntry2));
+
+        //when
+        List<DailyRanking> result = dailyRankingService.getDailyRankings(from, to);
+
+        //then
+        assertThat(result).containsExactly(
+                DailyRanking.of(game1, from, List.of(g1FromEntry)),
+                DailyRanking.of(game1, to, List.of(g1ToEntry1, g1ToEntry2)),
+                DailyRanking.of(game2, from, List.of(g2FromEntry)));
+    }
+
+    @Test
+    void shouldReturnDailyRankingsOfSingleGameForDateInterval() {
+
+        //given
+        LocalDate from = LocalDate.now().minusDays(5);
+        LocalDate to = from.plusDays(2);
+        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+        Player player = new Player(new PlayerId(1L), "Player1");
+        DailyEntry toEntry = new DailyEntry(new DailyEntryId(1L), game, to, player, 950, SUBMITTED_AT);
+        DailyEntry fromEntry = new DailyEntry(new DailyEntryId(2L), game, from, player, 850, SUBMITTED_AT);
+
+        when(loadGamePort.loadGames(List.of(1L))).thenReturn(List.of(game));
+        when(loadDailyEntriesPort.loadEntries(List.of(game), from, to)).thenReturn(List.of(toEntry, fromEntry));
+
+        //when
+        List<DailyRanking> result = dailyRankingService.getDailyRankings(from, to, new GameId(1L));
+
+        //then
+        assertThat(result).containsExactly(
+                DailyRanking.of(game, from, List.of(fromEntry)),
+                DailyRanking.of(game, to, List.of(toEntry)));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenSingleGameHasNoEntriesInDateInterval() {
+
+        //given
+        LocalDate from = LocalDate.now().minusDays(5);
+        LocalDate to = from.plusDays(2);
+        Game game = new Game(new GameId(1L), "Mapster", ScoringSystem.STANDARD);
+
+        when(loadGamePort.loadGames(List.of(1L))).thenReturn(List.of(game));
+        when(loadDailyEntriesPort.loadEntries(List.of(game), from, to)).thenReturn(List.of());
+
+        //when
+        List<DailyRanking> result = dailyRankingService.getDailyRankings(from, to, new GameId(1L));
+
+        //then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void shouldThrowGameNotFoundExceptionWhenGameDoesNotExist() {
+
+        //given
+        LocalDate from = LocalDate.now().minusDays(5);
+        LocalDate to = from.plusDays(2);
+
+        when(loadGamePort.loadGames(List.of(99L))).thenReturn(List.of());
+
+        //when, then
+        assertThatThrownBy(() -> dailyRankingService.getDailyRankings(from, to, new GameId(99L)))
+                .isInstanceOf(GameNotFoundException.class)
+                .hasMessageContaining("99");
+        verifyNoInteractions(loadDailyEntriesPort);
+    }
+
+    @Test
+    void shouldThrowInvalidDateExceptionWhenIntervalStartIsAfterItsEnd() {
+
+        //given
+        LocalDate to = LocalDate.now().minusDays(5);
+        LocalDate from = to.plusDays(1);
+
+        //when, then
+        assertThatThrownBy(() -> dailyRankingService.getDailyRankings(from, to))
+                .isInstanceOf(InvalidDateException.class)
+                .hasMessageContaining(from.toString());
+        assertThatThrownBy(() -> dailyRankingService.getDailyRankings(from, to, new GameId(1L)))
+                .isInstanceOf(InvalidDateException.class)
+                .hasMessageContaining(from.toString());
+        verifyNoInteractions(loadGamePort, loadDailyEntriesPort);
+    }
+
+    @MethodSource("invalidDates")
+    @ParameterizedTest
+    void shouldThrowInvalidDateExceptionForReportIntervalWhenEndDateIsNotInPast(LocalDate to) {
+
+        //given
+        LocalDate from = to.minusDays(7);
+
+        //when, then
+        assertThatThrownBy(() -> dailyRankingService.getDailyRankings(from, to))
+                .isInstanceOf(InvalidDateException.class)
+                .hasMessageContaining(to.toString());
+        assertThatThrownBy(() -> dailyRankingService.getDailyRankings(from, to, new GameId(1L)))
                 .isInstanceOf(InvalidDateException.class)
                 .hasMessageContaining(to.toString());
     }

@@ -8,8 +8,16 @@ import java.time.temporal.IsoFields;
 public class WeekValidator {
 
     private static final String INVALID_RANKING_MESSAGE = "Weekly ranking is available only for past dates while input %s %s doesn't fulfill this condition";
+    private static final String INVALID_INTERVAL_MESSAGE = "Start week %d-W%02d of the interval must not be after its end week %d-W%02d";
     private static final String YEAR = "year";
     private static final String WEEK = "week";
+
+    public void validateInterval(Week from, Week to) {
+        if (from.isAfter(to)) {
+            throw new InvalidDateException(String.format(INVALID_INTERVAL_MESSAGE, from.year(), from.week(), to.year(), to.week()));
+        }
+        validate(to);
+    }
 
     public void validate(Week week) {
 
