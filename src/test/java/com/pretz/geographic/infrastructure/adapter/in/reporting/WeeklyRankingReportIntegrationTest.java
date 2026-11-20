@@ -78,7 +78,7 @@ public class WeeklyRankingReportIntegrationTest extends AbstractWebIntegrationTe
     }
 
     @Test
-    void shouldReturnOnlyPersistedWeeklyRankingsOfAllGamesForIntervalSpanningYearBoundary() {
+    void shouldReturnWeeklyRankingsOfAllGamesForIntervalSpanningYearBoundary() {
 
         assertThat(mockMvc.get().uri(ENDPOINT)
                 .param("fromYear", "2024").param("fromWeek", "52")
@@ -119,7 +119,7 @@ public class WeeklyRankingReportIntegrationTest extends AbstractWebIntegrationTe
     }
 
     @Test
-    void shouldReturnOnlyPersistedWeeklyRankingsOfSingleGameForWeekInterval() {
+    void shouldReturnWeeklyRankingsOfSingleGameForWeekInterval() {
 
         assertThat(mockMvc.get().uri(GAME_ENDPOINT, 2)
                 .param("fromYear", YEAR).param("fromWeek", FROM_WEEK)

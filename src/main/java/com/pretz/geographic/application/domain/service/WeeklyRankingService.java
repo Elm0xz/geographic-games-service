@@ -43,6 +43,10 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
         this.getDailyRankingUseCase = getDailyRankingUseCase;
     }
 
+    /**
+     * Returns weekly rankings of all active games for the week, calculating and persisting the missing ones. Once
+     * persisted, a ranking closes its week for new daily entries of the game.
+     */
     @Override
     public List<WeeklyRanking> calculateWeeklyRankings(Week week) {
 
@@ -50,7 +54,7 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
 
         //TODO [GEOG-18] only active games taken into account; game deactivation process will need intermediate state to be added
         var activeGames = loadGamePort.loadActiveGames();
-        var weeklyRankings = loadWeeklyRankingPort.loadWeeklyRankings(activeGames, week, week);
+        var weeklyRankings = loadWeeklyRankingPort.loadWeeklyRankings(activeGames, week);
         var calculatedGames = weeklyRankings.stream().map(WeeklyRanking::game).toList();
         var gamesToCalculate = activeGames.stream().filter(it -> !calculatedGames.contains(it)).toList();
         if (gamesToCalculate.isEmpty()) return weeklyRankings;
@@ -65,9 +69,6 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
         }
     }
 
-    /**
-     * Read-only: returns only weekly rankings already persisted, so reporting never closes a week for new daily entries.
-     */
     @Override
     public List<WeeklyRanking> getWeeklyRankings(Week from, Week to) {
 
@@ -76,10 +77,6 @@ public class WeeklyRankingService implements GetWeeklyRankingUseCase {
         return loadPersistedRankings(loadGamePort.loadAllGames(), from, to);
     }
 
-    /**
-     * Read-only: returns only weekly rankings of the game already persisted, so reporting never closes a week for new
-     * daily entries.
-     */
     @Override
     public List<WeeklyRanking> getWeeklyRankings(Week from, Week to, GameId gameId) {
 

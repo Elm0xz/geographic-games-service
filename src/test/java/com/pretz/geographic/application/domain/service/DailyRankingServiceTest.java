@@ -184,7 +184,7 @@ class DailyRankingServiceTest {
     }
 
     @Test
-    void shouldReturnDailyRankingsOfActiveGamesForDateInterval() {
+    void shouldReturnDailyRankingsOfAllGamesForDateInterval() {
 
         //given
         LocalDate from = LocalDate.now().minusDays(5);
@@ -198,7 +198,7 @@ class DailyRankingServiceTest {
         DailyEntry g1ToEntry2 = new DailyEntry(new DailyEntryId(3L), game1, to, player2, 900, SUBMITTED_AT);
         DailyEntry g2FromEntry = new DailyEntry(new DailyEntryId(4L), game2, from, player2, 700, SUBMITTED_AT);
 
-        when(loadGamePort.loadActiveGames()).thenReturn(List.of(game1, game2));
+        when(loadGamePort.loadAllGames()).thenReturn(List.of(game1, game2));
         when(loadDailyEntriesPort.loadEntries(List.of(game1, game2), from, to))
                 .thenReturn(List.of(g2FromEntry, g1ToEntry1, g1FromEntry, g1ToEntry2));
 
