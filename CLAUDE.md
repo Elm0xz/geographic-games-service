@@ -37,6 +37,7 @@ Backend service for calculating results of geographic quizzes played on a daily 
 - - **Error handling**: domain/validation exceptions are translated into HTTP responses centrally in `ApiExceptionHandler` (`@RestControllerAdvice`), which maps each exception type to an `ApiErrorCode` and a JSON `{code, message}` body. New failure cases should be added as a handler there rather than handled ad hoc in controllers.
 - **Domain identifiers**: entity IDs use typed wrapper records (e.g. `DailyEntryId`, `GameId`, `PlayerId`) instead of raw `Long`/`String`, to keep references type-safe across the domain model.
 - **Javadocs**: keep them concise — describe the contract (inputs, ordering, error responses) and skip what is self-evident or standard behaviour (e.g. that reporting endpoints don't modify data).
+- **MR descriptions**: keep them reasonably concise, describing the change in general terms as needed by a reviewer.
 - All endpoints use `/api/` prefix.
 
 ## Common Commands
