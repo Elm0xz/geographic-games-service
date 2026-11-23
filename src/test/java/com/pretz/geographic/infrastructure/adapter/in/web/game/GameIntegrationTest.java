@@ -46,9 +46,9 @@ public class GameIntegrationTest extends AbstractWebIntegrationTest {
                 .bodyJson()
                 .isStrictlyEqualTo("""
                         [
-                          { "gameId": 3, "name": "Geogrid" },
-                          { "gameId": 2, "name": "Mapster" },
-                          { "gameId": 1, "name": "WhenTaken" }
+                          { "id": 3, "name": "Geogrid" },
+                          { "id": 2, "name": "Mapster" },
+                          { "id": 1, "name": "WhenTaken" }
                         ]
                         """);
     }

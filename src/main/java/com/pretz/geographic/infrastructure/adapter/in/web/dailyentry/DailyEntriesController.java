@@ -18,7 +18,7 @@ public class DailyEntriesController implements DailyEntriesApi {
 
     @Override
     public ResponseEntity<CreateDailyEntriesResponseDto> createDailyEntries(CreateDailyEntriesRequestDto createDailyEntriesRequestDto) {
-        var result = addDailyEntriesUseCase.addDailyEntries(createDailyEntriesRequestDto.createDailyEntryRequestDtos().stream()
+        var result = addDailyEntriesUseCase.addDailyEntries(createDailyEntriesRequestDto.dailyEntries().stream()
                 .map(CreateDailyEntryRequestDto::toCommand).toList());
         return ResponseEntity.ok(new CreateDailyEntriesResponseDto(result));
     }

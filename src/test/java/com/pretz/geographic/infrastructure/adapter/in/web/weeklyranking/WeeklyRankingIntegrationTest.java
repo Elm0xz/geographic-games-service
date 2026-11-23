@@ -83,14 +83,13 @@ public class WeeklyRankingIntegrationTest extends AbstractWebIntegrationTest {
                 .bodyJson()
                 .isEqualTo("""
                         {
-                          "year": 2025,
-                          "week": 2,
+                          "week": { "year": 2025, "week": 2 },
                           "weeklyRankings": [
                             {
-                              "game": { "gameId": 1, "name": "Mapster" },
+                              "game": { "id": 1, "name": "Mapster" },
                               "playerResults": [
-                                { "player": { "playerId": 1, "name": "Andrzej" },   "wins": 2, "points": 1820.0 },
-                                { "player": { "playerId": 2, "name": "Ferdynand" }, "wins": 0, "points": 1720.0 }
+                                { "player": { "id": 1, "name": "Andrzej" },   "wins": 2, "points": 1820.0 },
+                                { "player": { "id": 2, "name": "Ferdynand" }, "wins": 0, "points": 1720.0 }
                               ]
                             }
                           ]

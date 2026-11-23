@@ -44,8 +44,8 @@ public class PlayerIntegrationTest extends AbstractWebIntegrationTest {
                 .bodyJson()
                 .isStrictlyEqualTo("""
                         [
-                          { "playerId": 2, "name": "Andrzej" },
-                          { "playerId": 1, "name": "Ferdynand" }
+                          { "id": 2, "name": "Andrzej" },
+                          { "id": 1, "name": "Ferdynand" }
                         ]
                         """);
     }
