@@ -2,13 +2,20 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.game;
 
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.port.out.LoadGamePort;
+import com.pretz.geographic.application.port.out.SaveGamePort;
+import com.pretz.geographic.application.port.out.exception.GameAlreadyExistsException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.pretz.geographic.infrastructure.adapter.out.persistence.UniqueViolations.isUniqueViolationOf;
+
 @Component
-public class GamePersistenceAdapter implements LoadGamePort {
+public class GamePersistenceAdapter implements LoadGamePort, SaveGamePort {
+
+    private static final String UNIQUE_NAME_CONSTRAINT = "uq_game_name";
 
     private final GameJpaRepository gameJpaRepository;
     private final GamePersistenceMapper gamePersistenceMapper;
@@ -45,5 +52,18 @@ public class GamePersistenceAdapter implements LoadGamePort {
                 .stream()
                 .map(gamePersistenceMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public Game save(Game game) {
+        try {
+            return gamePersistenceMapper.toDomain(gameJpaRepository.saveAndFlush(new GameJpaEntity(game.name(), game.scoringSystem())));
+        } catch (DataIntegrityViolationException exception) {
+            if (isUniqueViolationOf(exception, UNIQUE_NAME_CONSTRAINT)) {
+                throw new GameAlreadyExistsException(game.name(), exception);
+            }
+            throw exception;
+        }
     }
 }

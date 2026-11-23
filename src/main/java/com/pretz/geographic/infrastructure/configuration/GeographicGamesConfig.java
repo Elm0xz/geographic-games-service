@@ -19,8 +19,6 @@ import com.pretz.geographic.application.domain.validation.RankingDateValidator;
 import com.pretz.geographic.application.domain.validation.WeekValidator;
 import com.pretz.geographic.application.domain.validation.dailyentry.DailyEntryWeekClosureValidator;
 import com.pretz.geographic.application.port.in.GetDailyRankingUseCase;
-import com.pretz.geographic.application.port.in.GetGamesUseCase;
-import com.pretz.geographic.application.port.in.GetPlayersUseCase;
 import com.pretz.geographic.application.port.in.GetWeeklyRankingUseCase;
 import com.pretz.geographic.application.port.in.dailyentry.AddDailyEntriesUseCase;
 import com.pretz.geographic.application.port.out.LoadDailyEntriesPort;
@@ -28,6 +26,8 @@ import com.pretz.geographic.application.port.out.LoadGamePort;
 import com.pretz.geographic.application.port.out.LoadPlayerPort;
 import com.pretz.geographic.application.port.out.LoadWeeklyRankingPort;
 import com.pretz.geographic.application.port.out.SaveDailyEntryPort;
+import com.pretz.geographic.application.port.out.SaveGamePort;
+import com.pretz.geographic.application.port.out.SavePlayerPort;
 import com.pretz.geographic.application.port.out.SaveWeeklyRankingPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,13 +77,13 @@ public class GeographicGamesConfig {
     }
 
     @Bean
-    GetGamesUseCase getGamesUseCase(LoadGamePort loadGamePort) {
-        return new GameService(loadGamePort);
+    GameService gameService(LoadGamePort loadGamePort, SaveGamePort saveGamePort) {
+        return new GameService(loadGamePort, saveGamePort);
     }
 
     @Bean
-    GetPlayersUseCase getPlayersUseCase(LoadPlayerPort loadPlayerPort) {
-        return new PlayerService(loadPlayerPort);
+    PlayerService playerService(LoadPlayerPort loadPlayerPort, SavePlayerPort savePlayerPort) {
+        return new PlayerService(loadPlayerPort, savePlayerPort);
     }
 
     @Bean

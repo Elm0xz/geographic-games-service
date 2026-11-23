@@ -2,6 +2,7 @@ package com.pretz.geographic.infrastructure.adapter.out.persistence.game;
 
 import com.pretz.geographic.application.domain.model.Game;
 import com.pretz.geographic.application.domain.model.ScoringSystem;
+import com.pretz.geographic.application.port.out.exception.GameAlreadyExistsException;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.AbstractPostgresDataJpaTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Import({GamePersistenceAdapter.class, GamePersistenceMapper.class})
 class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
@@ -79,5 +81,30 @@ class GamePersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var result = adapter.loadGames(List.of(game.gameId().id(), unknownId));
         //then
         assertThat(result).containsExactly(game);
+    }
+
+    @Test
+    void shouldSaveGameWithGeneratedId() {
+        //when
+        var result = adapter.save(new Game(null, "Geogrid", ScoringSystem.STANDARD));
+        //then
+        assertThat(result.gameId().id()).isNotNull();
+        assertThat(repository.findById(result.gameId().id()))
+                .hasValueSatisfying(it -> assertThat(it.getName()).isEqualTo(result.name()));
+    }
+
+    @Test
+    void shouldThrowAlreadyExistsWhenSavingGameWithTakenName() {
+        //when, then
+        assertThatThrownBy(() -> adapter.save(new Game(null, "Mapster", ScoringSystem.STANDARD)))
+                .isInstanceOf(GameAlreadyExistsException.class);
+    }
+
+    @Test
+    void shouldSaveGameWhoseNameDiffersOnlyInCase() {
+        //when
+        var result = adapter.save(new Game(null, "mapster", ScoringSystem.STANDARD));
+        //then
+        assertThat(result.gameId().id()).isNotNull();
     }
 }

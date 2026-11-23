@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import java.time.Instant;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@WithMockUser(roles = "USER_READ")
 public class DailyRankingReportIntegrationTest extends AbstractWebIntegrationTest {
 
     private static final Instant SUBMITTED_AT = Instant.parse("2026-04-08T10:00:00Z");
