@@ -33,6 +33,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
@@ -243,7 +244,9 @@ class DailyEntriesConcurrencyIntegrationTest extends AbstractWebIntegrationTest 
     }
 
     private Outcome send(String body) throws Exception {
+        // Requests run on executor threads, which don't see the test's security context, so authenticate each one
         var response = mockMvc.perform(post(ENDPOINT)
+                        .with(user("writer").roles("USER_WRITE"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andReturn()

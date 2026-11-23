@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequestBuilder;
 
@@ -31,6 +32,7 @@ import java.util.stream.Stream;
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@WithMockUser(roles = "USER_READ")
 public class WeeklyRankingReportIntegrationTest extends AbstractWebIntegrationTest {
 
     private static final String ENDPOINT = "/api/reports/weekly-rankings";

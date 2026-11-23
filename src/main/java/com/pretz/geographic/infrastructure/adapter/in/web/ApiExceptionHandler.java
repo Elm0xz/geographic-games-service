@@ -2,7 +2,10 @@ package com.pretz.geographic.infrastructure.adapter.in.web;
 
 import com.pretz.geographic.application.domain.validation.GameNotFoundException;
 import com.pretz.geographic.application.domain.validation.InvalidDateException;
+import com.pretz.geographic.application.domain.validation.PlayerNotFoundException;
 import com.pretz.geographic.application.port.out.exception.ConcurrentModificationConflictException;
+import com.pretz.geographic.application.port.out.exception.GameAlreadyExistsException;
+import com.pretz.geographic.application.port.out.exception.PlayerAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +59,8 @@ public class ApiExceptionHandler {
                 .body(new ApiErrorResponse(ApiErrorCode.INVALID_DATE, exception.getMessage()));
     }
 
-    @ExceptionHandler(GameNotFoundException.class)
-    ResponseEntity<ApiErrorResponse> handleGameNotFound(GameNotFoundException exception) {
+    @ExceptionHandler({GameNotFoundException.class, PlayerNotFoundException.class})
+    ResponseEntity<ApiErrorResponse> handleNotFound(RuntimeException exception) {
         log.warn(exception.getMessage());
         return ResponseEntity.status(NOT_FOUND)
                 .body(new ApiErrorResponse(ApiErrorCode.NOT_FOUND, exception.getMessage()));
@@ -71,6 +74,13 @@ public class ApiExceptionHandler {
                         "Request conflicted with a concurrent modification and was not saved; retry it"));
     }
 
+    @ExceptionHandler({GameAlreadyExistsException.class, PlayerAlreadyExistsException.class})
+    ResponseEntity<ApiErrorResponse> handleAlreadyExists(RuntimeException exception) {
+        log.warn(exception.getMessage());
+        return ResponseEntity.status(CONFLICT)
+                .body(new ApiErrorResponse(ApiErrorCode.RESOURCE_ALREADY_EXISTS, exception.getMessage()));
+    }
+
     record ApiErrorResponse(ApiErrorCode code, String message) {
     }
 
@@ -79,6 +89,7 @@ public class ApiExceptionHandler {
         MALFORMED_REQUEST,
         INVALID_DATE,
         NOT_FOUND,
-        CONCURRENT_MODIFICATION
+        CONCURRENT_MODIFICATION,
+        RESOURCE_ALREADY_EXISTS
     }
 }

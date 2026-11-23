@@ -14,17 +14,17 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static com.pretz.geographic.infrastructure.adapter.out.persistence.UniqueViolations.isUniqueViolation;
+
 @Component
 public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveDailyEntryPort {
 
-    private static final String UNIQUE_VIOLATION_SQL_STATE = "23505";
     private static final String CONFLICT_MESSAGE = "Concurrent modification conflict while saving daily entries";
 
     private final DailyEntryJpaRepository dailyEntryRepository;
@@ -125,14 +125,5 @@ public class DailyEntryPersistenceAdapter implements LoadDailyEntriesPort, SaveD
 
     private static DailyEntry withId(DailyEntry entry, Long id) {
         return new DailyEntry(new DailyEntryId(id), entry.game(), entry.date(), entry.player(), entry.points(), entry.submittedAt());
-    }
-
-    private static boolean isUniqueViolation(DataIntegrityViolationException exception) {
-        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
-            if (cause instanceof SQLException sqlException && sqlException.getSQLState() != null) {
-                return UNIQUE_VIOLATION_SQL_STATE.equals(sqlException.getSQLState());
-            }
-        }
-        return false;
     }
 }

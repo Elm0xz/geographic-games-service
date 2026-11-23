@@ -1,6 +1,7 @@
 package com.pretz.geographic.infrastructure.adapter.out.persistence.player;
 
 import com.pretz.geographic.application.domain.model.Player;
+import com.pretz.geographic.application.port.out.exception.PlayerAlreadyExistsException;
 import com.pretz.geographic.infrastructure.adapter.out.persistence.AbstractPostgresDataJpaTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Import({PlayerPersistenceAdapter.class, PlayerPersistenceMapper.class})
 class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
@@ -63,5 +65,30 @@ class PlayerPersistenceAdapterTest extends AbstractPostgresDataJpaTest {
         var result = adapter.loadPlayers(List.of(player.playerId().id(), unknownId));
         //then
         assertThat(result).containsExactly(player);
+    }
+
+    @Test
+    void shouldSavePlayerWithGeneratedId() {
+        //when
+        var result = adapter.save(new Player(null, "Łucja"));
+        //then
+        assertThat(result.playerId().id()).isNotNull();
+        assertThat(repository.findById(result.playerId().id()))
+                .hasValueSatisfying(it -> assertThat(it.getName()).isEqualTo(result.name()));
+    }
+
+    @Test
+    void shouldThrowAlreadyExistsWhenSavingPlayerWithTakenName() {
+        //when, then
+        assertThatThrownBy(() -> adapter.save(new Player(null, "Andrzej")))
+                .isInstanceOf(PlayerAlreadyExistsException.class);
+    }
+
+    @Test
+    void shouldSavePlayerWhoseNameDiffersOnlyInCase() {
+        //when
+        var result = adapter.save(new Player(null, "andrzej"));
+        //then
+        assertThat(result.playerId().id()).isNotNull();
     }
 }

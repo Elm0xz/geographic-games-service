@@ -1,5 +1,8 @@
+# Users (local profile only, username = password): admin (ADMIN), writer (USER_WRITE), reader (USER_READ)
+
 ### Send create daily entries POST request
 POST http://localhost:8080/api/daily-entries
+Authorization: Basic writer writer
 Content-Type: application/json
 
 {
@@ -22,24 +25,59 @@ Content-Type: application/json
 
 ### Send get daily ranking GET request
 GET http://localhost:8080/api/daily-ranking?date=2026-08-17
+Authorization: Basic reader reader
 
 ### Send get weekly ranking GET request
 GET http://localhost:8080/api/weekly-ranking?year=2026&week=37
+Authorization: Basic writer writer
 
 ### Send get all games GET request
 GET http://localhost:8080/api/games
+Authorization: Basic reader reader
 
 ### Send get all players GET request
 GET http://localhost:8080/api/players
+Authorization: Basic reader reader
 
 ### Send get daily rankings report (all games) GET request
 GET http://localhost:8080/api/reports/daily-rankings?from=2026-09-01&to=2026-09-30
+Authorization: Basic reader reader
 
 ### Send get daily rankings report (single game) GET request
 GET http://localhost:8080/api/reports/daily-rankings/games/1?from=2026-08-01&to=2026-08-31
+Authorization: Basic reader reader
 
 ### Send get weekly rankings report (all games) GET request
 GET http://localhost:8080/api/reports/weekly-rankings?fromYear=2026&fromWeek=30&toYear=2026&toWeek=40
+Authorization: Basic reader reader
 
 ### Send get weekly rankings report (single game) GET request
 GET http://localhost:8080/api/reports/weekly-rankings/games/1?fromYear=2026&fromWeek=30&toYear=2026&toWeek=40
+Authorization: Basic reader reader
+
+### Send create game POST request
+POST http://localhost:8080/api/games
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "name": "Geogrid",
+  "scoringSystem": "STANDARD"
+}
+
+### Send get game by id GET request
+GET http://localhost:8080/api/games/1
+Authorization: Basic reader reader
+
+### Send create player POST request
+POST http://localhost:8080/api/players
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "name": "Łucja"
+}
+
+### Send get player by id GET request
+GET http://localhost:8080/api/players/1
+Authorization: Basic reader reader
