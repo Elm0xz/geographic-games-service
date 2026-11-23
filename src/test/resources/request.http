@@ -15,7 +15,7 @@ Content-Type: application/json
       },
       "date": "2026-09-04",
       "points" : 568,
-      "submittedAt": "2026-09-04T10:00:00Z"
+      "submittedAt": "2026-09-04T07:00:00Z"
     }
   ]
 }
@@ -24,8 +24,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/daily-ranking?date=2026-08-17
 
 ### Send get weekly ranking GET request
-GET http://localhost:8080/api/weekly-ranking?year=2026&week=36
-
+GET http://localhost:8080/api/weekly-ranking?year=2026&week=37
 
 ### Send get all games GET request
 GET http://localhost:8080/api/games
@@ -40,7 +39,7 @@ GET http://localhost:8080/api/reports/daily-rankings?from=2026-09-01&to=2026-09-
 GET http://localhost:8080/api/reports/daily-rankings/games/1?from=2026-08-01&to=2026-08-31
 
 ### Send get weekly rankings report (all games) GET request
-GET http://localhost:8080/api/reports/weekly-rankings?fromYear=2026&fromWeek=30&toYear=2026&toWeek=35
+GET http://localhost:8080/api/reports/weekly-rankings?fromYear=2026&fromWeek=30&toYear=2026&toWeek=40
 
 ### Send get weekly rankings report (single game) GET request
-GET http://localhost:8080/api/reports/weekly-rankings/games/1?fromYear=2026&fromWeek=30&toYear=2026&toWeek=35
+GET http://localhost:8080/api/reports/weekly-rankings/games/1?fromYear=2026&fromWeek=30&toYear=2026&toWeek=40

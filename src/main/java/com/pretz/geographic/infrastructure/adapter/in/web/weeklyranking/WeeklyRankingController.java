@@ -23,6 +23,4 @@ public class WeeklyRankingController implements WeeklyRankingApi {
         return ResponseEntity.ok(new FullWeeklyRankingsResponseDto(requestedWeek,
                 getWeeklyRankingUseCase.calculateWeeklyRankings(requestedWeek)));
     }
-
-    //TODO [GEOG-12] unified exception handlers in different task
 }
