@@ -244,7 +244,7 @@ class DailyEntriesConcurrencyIntegrationTest extends AbstractWebIntegrationTest 
     }
 
     private Outcome send(String body) throws Exception {
-        // Requests run on executor threads, which don't see the test's security context, so authenticate each one
+        // Authentication goes on the request itself: @WithMockUser is thread-bound and requests run on executor threads
         var response = mockMvc.perform(post(ENDPOINT)
                         .with(user("writer").roles("USER_WRITE"))
                         .contentType(MediaType.APPLICATION_JSON)

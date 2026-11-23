@@ -158,16 +158,17 @@ public class GameIntegrationTest extends AbstractWebIntegrationTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void shouldRejectGameWithoutScoringSystem() {
+    void shouldCreateGameWithStandardScoringSystemWhenNoneGiven() {
 
         assertThat(mockMvc.post().uri(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         { "name": "Geogrid" }
                         """))
-                .hasStatus(HttpStatus.BAD_REQUEST)
-                .bodyJson()
-                .extractingPath("$.code").isEqualTo("VALIDATION_ERROR");
+                .hasStatus(HttpStatus.CREATED);
+        assertThat(gameJpaRepository.findAll())
+                .singleElement()
+                .satisfies(it -> assertThat(it.getScoringSystem()).isEqualTo(ScoringSystem.STANDARD));
     }
 
     @Test

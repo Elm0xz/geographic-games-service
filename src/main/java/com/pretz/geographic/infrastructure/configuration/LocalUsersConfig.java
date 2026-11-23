@@ -12,7 +12,7 @@ import static com.pretz.geographic.infrastructure.configuration.SecurityConfig.U
 import static com.pretz.geographic.infrastructure.configuration.SecurityConfig.USER_WRITE;
 
 /**
- * Dev-only stub users for manual testing (username = password). To be replaced by OAuth.
+ * Hardcoded users for local deployments and manual testing (username = password).
  */
 @Configuration
 @Profile("local")

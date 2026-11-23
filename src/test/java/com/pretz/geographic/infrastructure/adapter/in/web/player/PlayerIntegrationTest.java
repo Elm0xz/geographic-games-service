@@ -90,7 +90,7 @@ public class PlayerIntegrationTest extends AbstractWebIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Geogrid", "Łódź Quiz", "Geo-Guess 2", "O'Brien", "map_ster.v2", "Ä"})
+    @ValueSource(strings = {"Łucja", "Jan Kowalski", "Anna-Maria 2", "O'Brien", "jan_kowalski.v2", "Ä"})
     @WithMockUser(roles = "ADMIN")
     void shouldCreatePlayerWithValidName(String name) {
 
@@ -128,7 +128,7 @@ public class PlayerIntegrationTest extends AbstractWebIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "   ", " Mapster", "Mapster ", "-Mapster", "Map$ter", "Map<b>ster", "Mapster!",
+    @ValueSource(strings = {"", "   ", " Andrzej", "Andrzej ", "-Andrzej", "Andrz$ej", "Andrz<b>ej", "Andrzej!",
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"})
     @WithMockUser(roles = "ADMIN")
     void shouldRejectInvalidPlayerName(String name) {
@@ -143,7 +143,7 @@ public class PlayerIntegrationTest extends AbstractWebIntegrationTest {
     @WithMockUser(roles = "USER_WRITE")
     void shouldForbidCreatingPlayerForNonAdmin() {
 
-        assertThat(create("Geogrid"))
+        assertThat(create("Łucja"))
                 .hasStatus(HttpStatus.FORBIDDEN);
     }
 
@@ -151,7 +151,7 @@ public class PlayerIntegrationTest extends AbstractWebIntegrationTest {
     @WithAnonymousUser
     void shouldRejectCreatingPlayerForAnonymousUser() {
 
-        assertThat(create("Geogrid"))
+        assertThat(create("Łucja"))
                 .hasStatus(HttpStatus.UNAUTHORIZED);
     }
 

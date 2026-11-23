@@ -99,4 +99,15 @@ class GameServiceTest {
         assertThatThrownBy(() -> gameService.createGame(new CreateGameCommand("Geogrid", ScoringSystem.STANDARD)))
                 .isInstanceOf(GameAlreadyExistsException.class);
     }
+
+    @Test
+    void shouldCreateGameWithStandardScoringSystemWhenNoneGiven() {
+        //given
+        var saved = new Game(new GameId(4L), "Geogrid", ScoringSystem.STANDARD);
+        when(saveGamePort.save(new Game(null, "Geogrid", ScoringSystem.STANDARD))).thenReturn(saved);
+        //when
+        var result = gameService.createGame(new CreateGameCommand("Geogrid", null));
+        //then
+        assertThat(result).isEqualTo(saved);
+    }
 }

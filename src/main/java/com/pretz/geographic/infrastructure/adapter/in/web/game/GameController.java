@@ -7,9 +7,11 @@ import com.pretz.geographic.infrastructure.adapter.in.web.game.dto.CreateGameReq
 import com.pretz.geographic.infrastructure.adapter.in.web.game.dto.GameResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
+
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.fromMethodCall;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 @RestController
 public class GameController implements GameApi {
@@ -36,10 +38,7 @@ public class GameController implements GameApi {
     @Override
     public ResponseEntity<GameResponseDto> createGame(CreateGameRequestDto createGameRequestDto) {
         var game = createGameUseCase.createGame(createGameRequestDto.toCommand());
-        var location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/{gameId}")
-                .buildAndExpand(game.gameId().id())
-                .toUri();
+        var location = fromMethodCall(on(GameApi.class).getGame(game.gameId().id())).build().toUri();
         return ResponseEntity.created(location).body(new GameResponseDto(game));
     }
 }
