@@ -7,9 +7,11 @@ import com.pretz.geographic.infrastructure.adapter.in.web.player.dto.CreatePlaye
 import com.pretz.geographic.infrastructure.adapter.in.web.player.dto.PlayerResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
+
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.fromMethodCall;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 @RestController
 public class PlayerController implements PlayerApi {
@@ -36,10 +38,7 @@ public class PlayerController implements PlayerApi {
     @Override
     public ResponseEntity<PlayerResponseDto> createPlayer(CreatePlayerRequestDto createPlayerRequestDto) {
         var player = createPlayerUseCase.createPlayer(createPlayerRequestDto.toCommand());
-        var location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/{playerId}")
-                .buildAndExpand(player.playerId().id())
-                .toUri();
+        var location = fromMethodCall(on(PlayerApi.class).getPlayer(player.playerId().id())).build().toUri();
         return ResponseEntity.created(location).body(new PlayerResponseDto(player));
     }
 }

@@ -28,14 +28,14 @@ public interface GameApi {
     ResponseEntity<GameResponseDto> getGame(@PathVariable Long gameId);
 
     /**
-     * Creates a game. Admin only.
+     * Creates a game. Admin only. The scoring system defaults to {@code STANDARD} when omitted.
      *
      * <h2>Responses</h2>
      * <ul>
      *     <li><b>201 Created</b>: the created game, with its URI in the {@code Location} header.</li>
      *     <li><b>400 Bad Request</b> ({@code VALIDATION_ERROR}, {@code MALFORMED_REQUEST}): the name is blank, longer
      *     than 50 characters or contains characters other than letters, digits, spaces and {@code _ . ' -} (it must
-     *     start and end with a letter or digit), or the scoring system is missing or unknown.</li>
+     *     start and end with a letter or digit), or the scoring system is unknown.</li>
      *     <li><b>409 Conflict</b> ({@code RESOURCE_ALREADY_EXISTS}): a game with the same name already exists.</li>
      * </ul>
      */
