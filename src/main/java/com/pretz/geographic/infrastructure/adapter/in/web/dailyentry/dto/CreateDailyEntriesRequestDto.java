@@ -6,5 +6,5 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record CreateDailyEntriesRequestDto(@NotNull @NotEmpty List<@Valid CreateDailyEntryRequestDto> createDailyEntryRequestDtos) {
+public record CreateDailyEntriesRequestDto(@NotNull @NotEmpty List<@Valid CreateDailyEntryRequestDto> dailyEntries) {
 }

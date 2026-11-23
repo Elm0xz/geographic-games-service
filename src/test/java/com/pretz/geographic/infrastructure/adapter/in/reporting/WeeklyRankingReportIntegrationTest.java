@@ -91,25 +91,25 @@ public class WeeklyRankingReportIntegrationTest extends AbstractWebIntegrationTe
                           "to": { "year": 2025, "week": 3 },
                           "weeklyRankings": [
                             {
-                              "game": { "gameId": 1, "name": "Mapster" },
+                              "game": { "id": 1, "name": "Mapster" },
                               "week": { "year": 2024, "week": 52 },
                               "playerResults": [
-                                { "player": { "playerId": 1, "name": "Andrzej" }, "wins": 1, "points": 900.0 }
+                                { "player": { "id": 1, "name": "Andrzej" }, "wins": 1, "points": 900.0 }
                               ]
                             },
                             {
-                              "game": { "gameId": 1, "name": "Mapster" },
+                              "game": { "id": 1, "name": "Mapster" },
                               "week": { "year": 2025, "week": 2 },
                               "playerResults": [
-                                { "player": { "playerId": 1, "name": "Andrzej" },   "wins": 2, "points": 1820.0 },
-                                { "player": { "playerId": 2, "name": "Ferdynand" }, "wins": 0, "points": 1720.0 }
+                                { "player": { "id": 1, "name": "Andrzej" },   "wins": 2, "points": 1820.0 },
+                                { "player": { "id": 2, "name": "Ferdynand" }, "wins": 0, "points": 1720.0 }
                               ]
                             },
                             {
-                              "game": { "gameId": 2, "name": "WhenTaken" },
+                              "game": { "id": 2, "name": "WhenTaken" },
                               "week": { "year": 2025, "week": 2 },
                               "playerResults": [
-                                { "player": { "playerId": 1, "name": "Andrzej" }, "wins": 1, "points": 700.0 }
+                                { "player": { "id": 1, "name": "Andrzej" }, "wins": 1, "points": 700.0 }
                               ]
                             }
                           ]
@@ -132,10 +132,10 @@ public class WeeklyRankingReportIntegrationTest extends AbstractWebIntegrationTe
                           "to": { "year": 2025, "week": 3 },
                           "weeklyRankings": [
                             {
-                              "game": { "gameId": 2, "name": "WhenTaken" },
+                              "game": { "id": 2, "name": "WhenTaken" },
                               "week": { "year": 2025, "week": 2 },
                               "playerResults": [
-                                { "player": { "playerId": 1, "name": "Andrzej" }, "wins": 1, "points": 700.0 }
+                                { "player": { "id": 1, "name": "Andrzej" }, "wins": 1, "points": 700.0 }
                               ]
                             }
                           ]

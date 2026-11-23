@@ -10,8 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record CreateDailyEntriesResponseDto(
-        List<CreateDailyEntrySuccessResponseDto> createDailyEntrySuccessResponseDtoList,
-        List<CreateDailyEntryFailureResponseDto> createDailyEntryFailureResponseDtoList) {
+        List<CreateDailyEntrySuccessResponseDto> successes,
+        List<CreateDailyEntryFailureResponseDto> failures) {
 
     public CreateDailyEntriesResponseDto(AddDailyEntriesResult result) {
         this(
@@ -37,7 +37,7 @@ public record CreateDailyEntriesResponseDto(
     }
 
     record CreateDailyEntryFailureResponseDto(GameSummaryDto game, PlayerSummaryDto player, LocalDate date, int points,
-                                              Instant submittedAt, List<String> failureCode) {
+                                              Instant submittedAt, List<String> failureCodes) {
 
         CreateDailyEntryFailureResponseDto(AddDailyEntryFailure failure) {
             this(

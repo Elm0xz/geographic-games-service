@@ -77,25 +77,25 @@ public class DailyRankingReportIntegrationTest extends AbstractWebIntegrationTes
                           "to": "2026-04-06",
                           "dailyRankings": [
                             {
-                              "game": { "gameId": 1, "name": "Mapster" },
+                              "game": { "id": 1, "name": "Mapster" },
                               "date": "2026-04-04",
                               "entries": [
-                                { "id": 2, "player": { "playerId": 2, "name": "Ferdynand" }, "points": 911 },
-                                { "id": 1, "player": { "playerId": 1, "name": "Andrzej" },   "points": 836 }
+                                { "id": 2, "player": { "id": 2, "name": "Ferdynand" }, "points": 911 },
+                                { "id": 1, "player": { "id": 1, "name": "Andrzej" },   "points": 836 }
                               ]
                             },
                             {
-                              "game": { "gameId": 1, "name": "Mapster" },
+                              "game": { "id": 1, "name": "Mapster" },
                               "date": "2026-04-05",
                               "entries": [
-                                { "id": 3, "player": { "playerId": 1, "name": "Andrzej" }, "points": 900 }
+                                { "id": 3, "player": { "id": 1, "name": "Andrzej" }, "points": 900 }
                               ]
                             },
                             {
-                              "game": { "gameId": 2, "name": "WhenTaken" },
+                              "game": { "id": 2, "name": "WhenTaken" },
                               "date": "2026-04-04",
                               "entries": [
-                                { "id": 4, "player": { "playerId": 1, "name": "Andrzej" }, "points": 777 }
+                                { "id": 4, "player": { "id": 1, "name": "Andrzej" }, "points": 777 }
                               ]
                             }
                           ]
@@ -115,10 +115,10 @@ public class DailyRankingReportIntegrationTest extends AbstractWebIntegrationTes
                           "to": "2026-04-06",
                           "dailyRankings": [
                             {
-                              "game": { "gameId": 2, "name": "WhenTaken" },
+                              "game": { "id": 2, "name": "WhenTaken" },
                               "date": "2026-04-04",
                               "entries": [
-                                { "id": 4, "player": { "playerId": 1, "name": "Andrzej" }, "points": 777 }
+                                { "id": 4, "player": { "id": 1, "name": "Andrzej" }, "points": 777 }
                               ]
                             }
                           ]

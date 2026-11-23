@@ -109,9 +109,9 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchJson(entry)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(0)))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].failureCode", contains(failureCode)));
+                .andExpect(jsonPath("$.successes", hasSize(0)))
+                .andExpect(jsonPath("$.failures", hasSize(1)))
+                .andExpect(jsonPath("$.failures[0].failureCodes", contains(failureCode)));
 
         assertThat(dailyEntryJpaRepository.findAll()).isEmpty();
     }
@@ -125,13 +125,13 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"),
                                 entryJson(1, "Mapster", 2, "Player2", "2026-07-29", 950, "2026-07-29T11:00:00Z"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(2)))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].player.name", contains("Player1", "Player2")))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].points", contains(990, 950)))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].submittedAt",
+                .andExpect(jsonPath("$.successes", hasSize(2)))
+                .andExpect(jsonPath("$.successes[*].player.name", contains("Player1", "Player2")))
+                .andExpect(jsonPath("$.successes[*].points", contains(990, 950)))
+                .andExpect(jsonPath("$.successes[*].submittedAt",
                         contains("2026-07-29T10:00:00Z", "2026-07-29T11:00:00Z")))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[*].successCode", contains("NEW", "NEW")))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(0)));
+                .andExpect(jsonPath("$.successes[*].successCode", contains("NEW", "NEW")))
+                .andExpect(jsonPath("$.failures", hasSize(0)));
 
         assertThat(dailyEntryJpaRepository.findAll())
                 .extracting(DailyEntryJpaEntity::getPoints)
@@ -147,14 +147,14 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 900, "2026-07-29T18:00:00Z"),
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T08:00:00Z"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].points").value(990))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].submittedAt").value("2026-07-29T08:00:00Z"))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].successCode").value("NEW"))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].points").value(900))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].submittedAt").value("2026-07-29T18:00:00Z"))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].failureCode", contains("SUPERSEDED")));
+                .andExpect(jsonPath("$.successes", hasSize(1)))
+                .andExpect(jsonPath("$.successes[0].points").value(990))
+                .andExpect(jsonPath("$.successes[0].submittedAt").value("2026-07-29T08:00:00Z"))
+                .andExpect(jsonPath("$.successes[0].successCode").value("NEW"))
+                .andExpect(jsonPath("$.failures", hasSize(1)))
+                .andExpect(jsonPath("$.failures[0].points").value(900))
+                .andExpect(jsonPath("$.failures[0].submittedAt").value("2026-07-29T18:00:00Z"))
+                .andExpect(jsonPath("$.failures[0].failureCodes", contains("SUPERSEDED")));
 
         var entries = dailyEntryJpaRepository.findAll();
         assertThat(entries).hasSize(1);
@@ -174,12 +174,12 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T08:00:00Z"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].id").value(persisted.getId()))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].points").value(990))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].submittedAt").value("2026-07-29T08:00:00Z"))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].successCode").value("CORRECTED"))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(0)));
+                .andExpect(jsonPath("$.successes", hasSize(1)))
+                .andExpect(jsonPath("$.successes[0].id").value(persisted.getId()))
+                .andExpect(jsonPath("$.successes[0].points").value(990))
+                .andExpect(jsonPath("$.successes[0].submittedAt").value("2026-07-29T08:00:00Z"))
+                .andExpect(jsonPath("$.successes[0].successCode").value("CORRECTED"))
+                .andExpect(jsonPath("$.failures", hasSize(0)));
 
         var entries = dailyEntryJpaRepository.findAll();
         assertThat(entries).hasSize(1);
@@ -200,9 +200,9 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                         .content(batchJson(
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T12:00:00Z"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(0)))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].failureCode", contains("SUPERSEDED")));
+                .andExpect(jsonPath("$.successes", hasSize(0)))
+                .andExpect(jsonPath("$.failures", hasSize(1)))
+                .andExpect(jsonPath("$.failures[0].failureCodes", contains("SUPERSEDED")));
 
         var entries = dailyEntryJpaRepository.findAll();
         assertThat(entries).hasSize(1);
@@ -220,9 +220,9 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                                 entryJson(1, "Mapster", 999, "Unknown", "2026-07-29", 940, "2026-07-29T10:00:00Z"),
                                 entryJson(1, "Mapster", 2, "Player2", "2026-07-29", 930, "2026-07-28T10:00:00Z"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].points").value(990))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(3)))
+                .andExpect(jsonPath("$.successes", hasSize(1)))
+                .andExpect(jsonPath("$.successes[0].points").value(990))
+                .andExpect(jsonPath("$.failures", hasSize(3)))
                 // failures are matched by entry (points), not by position: request order is not part of the contract
                 .andExpect(jsonPath(failureCodesOfEntryWithPoints(950), contains(List.of("UNKNOWN_GAME"))))
                 .andExpect(jsonPath(failureCodesOfEntryWithPoints(940), contains(List.of("UNKNOWN_PLAYER"))))
@@ -248,11 +248,11 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
                                 entryJson(1, "Mapster", 1, "Player1", "2026-07-29", 990, "2026-07-29T10:00:00Z"),
                                 entryJson(1, "Mapster", 1, "Player1", "2026-08-05", 950, "2026-08-05T10:00:00Z"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntrySuccessResponseDtoList[0].date").value("2026-08-05"))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList", hasSize(1)))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].date").value("2026-07-29"))
-                .andExpect(jsonPath("$.createDailyEntryFailureResponseDtoList[0].failureCode", contains("WEEK_CLOSED")));
+                .andExpect(jsonPath("$.successes", hasSize(1)))
+                .andExpect(jsonPath("$.successes[0].date").value("2026-08-05"))
+                .andExpect(jsonPath("$.failures", hasSize(1)))
+                .andExpect(jsonPath("$.failures[0].date").value("2026-07-29"))
+                .andExpect(jsonPath("$.failures[0].failureCodes", contains("WEEK_CLOSED")));
 
         assertThat(dailyEntryJpaRepository.findAll())
                 .extracting(DailyEntryJpaEntity::getEntryDate)
@@ -260,13 +260,13 @@ class DailyEntriesIntegrationTest extends AbstractWebIntegrationTest {
     }
 
     private static String failureCodesOfEntryWithPoints(int points) {
-        return "$.createDailyEntryFailureResponseDtoList[?(@.points == %d)].failureCode".formatted(points);
+        return "$.failures[?(@.points == %d)].failureCodes".formatted(points);
     }
 
     private static String batchJson(String... entries) {
         return """
                 {
-                  "createDailyEntryRequestDtos": [%s]
+                  "dailyEntries": [%s]
                 }
                 """.formatted(String.join(",", entries));
     }

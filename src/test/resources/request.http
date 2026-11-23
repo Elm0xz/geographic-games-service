@@ -3,7 +3,7 @@ POST http://localhost:8080/api/daily-entries
 Content-Type: application/json
 
 {
-  "createDailyEntryRequestDtos": [
+  "dailyEntries": [
     {
       "game": {
         "id" : 1,

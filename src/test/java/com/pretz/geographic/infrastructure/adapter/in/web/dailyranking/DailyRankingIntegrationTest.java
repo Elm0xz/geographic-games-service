@@ -82,19 +82,19 @@ public class DailyRankingIntegrationTest extends AbstractWebIntegrationTest {
                 .isEqualTo("""
                         [
                           {
-                            "game": { "gameId": 1, "name": "Mapster" },
+                            "game": { "id": 1, "name": "Mapster" },
                             "date": "2026-04-04",
                             "entries": [
-                              { "id": 2, "player": "Ferdynand", "points": 911 },
-                              { "id": 1, "player": "Andrzej",   "points": 836 }
+                              { "id": 2, "player": { "id": 2, "name": "Ferdynand" }, "points": 911 },
+                              { "id": 1, "player": { "id": 1, "name": "Andrzej" },   "points": 836 }
                             ]
                           },
                           {
-                            "game": { "gameId": 2, "name": "WhenTaken" },
+                            "game": { "id": 2, "name": "WhenTaken" },
                             "date": "2026-04-04",
                             "entries": [
-                              { "id": 3, "player": "Andrzej",   "points": 777 },
-                              { "id": 4, "player": "Ferdynand", "points": 734 }
+                              { "id": 3, "player": { "id": 1, "name": "Andrzej" },   "points": 777 },
+                              { "id": 4, "player": { "id": 2, "name": "Ferdynand" }, "points": 734 }
                             ]
                           }
                         ]

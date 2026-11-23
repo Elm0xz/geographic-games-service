@@ -268,7 +268,7 @@ class DailyEntriesConcurrencyIntegrationTest extends AbstractWebIntegrationTest 
     private static String batch(String... entries) {
         return """
                 {
-                  "createDailyEntryRequestDtos": [%s]
+                  "dailyEntries": [%s]
                 }
                 """.formatted(String.join(",", entries));
     }
@@ -291,11 +291,11 @@ class DailyEntriesConcurrencyIntegrationTest extends AbstractWebIntegrationTest 
     private record Outcome(String requestBody, int status, String responseBody) {
 
         List<String> successCodes() {
-            return JsonPath.read(responseBody, "$.createDailyEntrySuccessResponseDtoList[*].successCode");
+            return JsonPath.read(responseBody, "$.successes[*].successCode");
         }
 
         List<List<String>> failureCodes() {
-            return JsonPath.read(responseBody, "$.createDailyEntryFailureResponseDtoList[*].failureCode");
+            return JsonPath.read(responseBody, "$.failures[*].failureCodes");
         }
 
         String errorCode() {
