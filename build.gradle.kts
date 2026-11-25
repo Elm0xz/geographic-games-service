@@ -48,6 +48,16 @@ tasks.named<Test>("test") {
     }
 }
 
+val installGitHooks by tasks.registering(Exec::class) {
+    description = "Points git at the versioned hooks in .githooks"
+    onlyIf { file(".git").exists() }
+    commandLine("git", "config", "core.hooksPath", ".githooks")
+}
+
+tasks.named("compileJava") {
+    dependsOn(installGitHooks)
+}
+
 tasks.register<Test>("integrationTest") {
     description = "Integration Tests"
     testClassesDirs = sourceSets["test"].output.classesDirs
